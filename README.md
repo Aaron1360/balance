@@ -1,4 +1,4 @@
-# 💸 Balance - Control de gastos y finanzas personales
+# 💸 Balance - Controla tus finanzas con facilidad
 
 Una aplicación simple y eficiente para gestionar tus finanzas personales. Registra tus ingresos y gastos, establece presupuestos y visualiza tu actividad financiera mediante estadísticas claras y útiles.
 
