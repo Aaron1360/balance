@@ -1,61 +1,61 @@
-# 💸 Financial Expense Tracker
+# 💸 Balance - Control de gastos y finanzas personales
 
-A simple and efficient application for managing your personal finances. Keep track of your income and expenses, set budgets, and visualize your financial activity through clear and insightful statistics.
-
----
-
-## 📌 Features
-
-- Record income and expenses
-- Categorize financial transactions
-- Set monthly or custom budgets
-- Visualize spending through charts and summaries
-- Track financial trends over time
+Una aplicación simple y eficiente para gestionar tus finanzas personales. Registra tus ingresos y gastos, establece presupuestos y visualiza tu actividad financiera mediante estadísticas claras y útiles.
 
 ---
 
-## 🎯 Purpose
+## 📌 Funcionalidades
 
-This application is designed to help users gain better control over their personal finances by organizing and analyzing financial data in an intuitive and user-friendly way.
-
----
-
-## 📈 Key Benefits
-
-- Know where your money goes
-- Identify spending patterns
-- Maintain budgets and avoid overspending
-- Make informed financial decisions
+- Registrar ingresos y gastos
+- Categorizar transacciones financieras
+- Establecer presupuestos mensuales o personalizados
+- Visualizar el gasto mediante gráficos y resúmenes
+- Seguir tendencias financieras a lo largo del tiempo
 
 ---
 
-## 🔧 Technologies Used
+## 🎯 Propósito
+
+Esta aplicación está diseñada para ayudar a los usuarios a tener un mejor control de sus finanzas personales, organizando y analizando sus datos financieros de manera intuitiva y fácil de usar.
+
+---
+
+## 📈 Beneficios Clave
+
+- Saber en qué se está gastando el dinero
+- Identificar patrones de gasto
+- Mantener presupuestos y evitar gastos excesivos
+- Tomar decisiones financieras informadas
+
+---
+
+## 🔧 Tecnologías Utilizadas
 
 ### Frontend
-- **React** with **Vite** for fast development and performance
-- **TypeScript** for type safety and scalability
-- **shadcn/ui** for accessible and customizable UI components
+- **React** con **Vite** para un desarrollo rápido y eficiente
+- **TypeScript** para mayor seguridad y escalabilidad
+- **shadcn/ui** para componentes accesibles y personalizables
 
 ### Backend
 - **Supabase**
-  - Database (PostgreSQL)
-  - Authentication
-  - API integration
+  - Base de datos (PostgreSQL)
+  - Autenticación
+  - Integración con API
 
 ---
 
-## 📂 Project Structure
+## 📂 Estructura del Proyecto
 
-> *(Add this later once development starts)*
-
----
-
-## 📝 License
-
-This project is licensed under the [MIT License](LICENSE).
+> *(Agregar esta sección una vez que inicie el desarrollo)*
 
 ---
 
-## 👤 Author
+## 📝 Licencia
 
-Built to help you take control of your finances with ease.
+Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).
+
+---
+
+## 👤 Autor
+
+Creado para ayudarte a tomar el control de tus finanzas con simplicidad.
