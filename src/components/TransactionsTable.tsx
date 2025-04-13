@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/supabase/client";
 import { Button } from "./ui/button";
 import {
   Table,
@@ -15,31 +14,12 @@ import AmountInput from "./expense-form/AmountInput";
 import DateInput from "./expense-form/DateInput";
 import CategorySelect from "./expense-form/CategorySelect";
 import DescriptionInput from "./expense-form/DescriptionInput";
-
-export interface Transactions {
-  id: string;
-  amount: string;
-  date: string;
-  category: string;
-  description: string;
-}
-
-// Function to fetch transactions
-export async function fetchTransactions() {
-  try {
-    const { data, error } = await supabase.from("transactions").select("*");
-
-    if (error) {
-      console.error("Error fetching data:", error);
-      return null; // Return null if there's an error
-    } else {
-      return data as Transactions[];
-    }
-  } catch (error) {
-    console.error("Error fetching transactions:", error);
-    return null; // Return null if there's an error
-  }
-}
+import { Transactions } from "@/App";
+import {
+  fetchTransactions,
+  deleteTransaction,
+  updateTransaction,
+} from "@/CRUD-operations";
 
 export default function TransactionsTable() {
   const [transactions, setTransactions] = useState<Transactions[]>([]);
@@ -57,12 +37,7 @@ export default function TransactionsTable() {
 
   const handleDelete = async (id: string) => {
     setTransactions((prev) => prev.filter((txn) => txn.id !== id));
-    const { error } = await supabase.from("transactions").delete().eq("id", id);
-    if (error) {
-      console.error("Error deleting transaction:", error);
-    } else {
-      console.log(`Successfully deleted transaction with id ${id}`);
-    }
+    await deleteTransaction(id);
   };
 
   const handleEditClick = (txn: Transactions) => {
@@ -85,21 +60,14 @@ export default function TransactionsTable() {
   const handleSaveEdit = async () => {
     if (!editingId) return;
 
-    const { error } = await supabase
-      .from("transactions")
-      .update(editValues)
-      .eq("id", editingId);
+    await updateTransaction(editingId, editValues);
 
-    if (error) {
-      console.error("Supabase UPDATE error", error);
-    } else {
-      setTransactions((prev) =>
-        prev.map((txn) =>
-          txn.id === editingId ? { ...txn, ...editValues } : txn
-        )
-      );
-      handleCancelEdit();
-    }
+    setTransactions((prev) =>
+      prev.map((txn) =>
+        txn.id === editingId ? { ...txn, ...editValues } : txn
+      )
+    );
+    handleCancelEdit();
   };
 
   return (

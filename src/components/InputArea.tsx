@@ -13,7 +13,7 @@ import AmountInput from "./expense-form/AmountInput";
 import CategorySelect from "./expense-form/CategorySelect";
 import DateInput from "./expense-form/DateInput";
 import DescriptionInput from "./expense-form/DescriptionInput";
-import { supabase } from "@/supabase/client";
+import { insertTransaction } from "@/CRUD-operations";
 
 function InputArea() {
   // Form state
@@ -32,18 +32,12 @@ function InputArea() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.from("transactions").insert([
-        {
-          amount: parseFloat(amount),
-          date,
-          category,
-          description,
-        },
-      ]);
-      if (error) {
-        throw error;
-      }
-      console.log("Expense added:", data);
+      await insertTransaction({
+        amount: parseFloat(amount),
+        date,
+        category,
+        description,
+      });
       alert("Expense added");
 
       // Reset form

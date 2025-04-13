@@ -1,7 +1,7 @@
 import { Input } from "../ui/input";
 
 interface AmountInputProps {
-  value: string;
+  value: string | number;
   onChange: (value: string) => void;
 }
 
