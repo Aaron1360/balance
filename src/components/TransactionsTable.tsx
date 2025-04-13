@@ -1,0 +1,215 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/supabase/client";
+import { Button } from "./ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import { LuPencil, LuTrash2, LuCheck, LuX } from "react-icons/lu";
+import AmountInput from "./expense-form/AmountInput";
+import DateInput from "./expense-form/DateInput";
+import CategorySelect from "./expense-form/CategorySelect";
+import DescriptionInput from "./expense-form/DescriptionInput";
+
+export interface Transactions {
+  id: string;
+  amount: string;
+  date: string;
+  category: string;
+  description: string;
+}
+
+// Function to fetch transactions
+export async function fetchTransactions() {
+  try {
+    const { data, error } = await supabase.from("transactions").select("*");
+
+    if (error) {
+      console.error("Error fetching data:", error);
+      return null; // Return null if there's an error
+    } else {
+      return data as Transactions[];
+    }
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    return null; // Return null if there's an error
+  }
+}
+
+export default function TransactionsTable() {
+  const [transactions, setTransactions] = useState<Transactions[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValues, setEditValues] = useState<Partial<Transactions>>({});
+
+  // Use the function in useEffect
+  useEffect(() => {
+    fetchTransactions().then((transactions) => {
+      if (transactions) {
+        setTransactions(transactions);
+      }
+    });
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    setTransactions((prev) => prev.filter((txn) => txn.id !== id));
+    const { error } = await supabase.from("transactions").delete().eq("id", id);
+    if (error) {
+      console.error("Error deleting transaction:", error);
+    } else {
+      console.log(`Successfully deleted transaction with id ${id}`);
+    }
+  };
+
+  const handleEditClick = (txn: Transactions) => {
+    setEditingId(txn.id);
+    setEditValues({ ...txn });
+  };
+
+  const handleEditChange = (
+    field: keyof Transactions,
+    value: string | number
+  ) => {
+    setEditValues((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditValues({});
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId) return;
+
+    const { error } = await supabase
+      .from("transactions")
+      .update(editValues)
+      .eq("id", editingId);
+
+    if (error) {
+      console.error("Supabase UPDATE error", error);
+    } else {
+      setTransactions((prev) =>
+        prev.map((txn) =>
+          txn.id === editingId ? { ...txn, ...editValues } : txn
+        )
+      );
+      handleCancelEdit();
+    }
+  };
+
+  return (
+    <Card>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead className="text-center">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {transactions.map((txn, index) => {
+              const isEditing = editingId === txn.id;
+
+              return (
+                <TableRow key={txn.id}>
+                  <TableCell>{index + 1}</TableCell>
+
+                  {isEditing ? (
+                    <>
+                      <TableCell>
+                        <AmountInput
+                          value={editValues.amount ?? ""}
+                          onChange={(v) =>
+                            handleEditChange("amount", parseFloat(v))
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <DateInput
+                          value={editValues.date ?? ""}
+                          onChange={(value) => handleEditChange("date", value)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <CategorySelect
+                          value={editValues.category ?? ""}
+                          onChange={(val) => handleEditChange("category", val)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <DescriptionInput
+                          value={editValues.description ?? ""}
+                          onChange={(val) =>
+                            handleEditChange("description", val)
+                          }
+                        />
+                      </TableCell>
+                    </>
+                  ) : (
+                    <>
+                      <TableCell>${txn.amount}</TableCell>
+                      <TableCell>{txn.date}</TableCell>
+                      <TableCell>{txn.category}</TableCell>
+                      <TableCell>{txn.description}</TableCell>
+                    </>
+                  )}
+
+                  <TableCell className="flex gap-2 justify-center">
+                    {isEditing ? (
+                      <>
+                        <Button
+                          size="sm"
+                          className="hover:bg-green-100 hover:text-green-600 transition-colors"
+                          onClick={handleSaveEdit}
+                        >
+                          <LuCheck />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="hover:bg-gray-100"
+                          onClick={handleCancelEdit}
+                        >
+                          <LuX />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                          onClick={() => handleEditClick(txn)}
+                        >
+                          <LuPencil />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="hover:bg-red-500 hover:text-white transition-colors"
+                          onClick={() => handleDelete(txn.id)}
+                        >
+                          <LuTrash2 />
+                        </Button>
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
