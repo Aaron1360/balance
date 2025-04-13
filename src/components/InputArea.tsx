@@ -14,8 +14,21 @@ import CategorySelect from "./expense-form/CategorySelect";
 import DateInput from "./expense-form/DateInput";
 import DescriptionInput from "./expense-form/DescriptionInput";
 import { insertTransaction } from "@/CRUD-operations";
+// import { tableContext } from "@/context/TableContext";
 
-function InputArea() {
+interface InputAreaProps {
+  onSubmitSuccess: () => void;
+}
+
+function InputArea({ onSubmitSuccess }: InputAreaProps) {
+  // const context = useContext(tableContext);
+
+  // if (!context) {
+  //   throw new Error("InputArea must be used within a TableContextProvider");
+  // }
+
+  // const { setShouldRefresh } = context;
+
   // Form state
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
@@ -45,6 +58,9 @@ function InputArea() {
       setDate("");
       setCategory("");
       setDescription("");
+
+      // 🔄 Notify parent to reload table
+      onSubmitSuccess();
     } catch (e: unknown) {
       if (e instanceof Error) {
         console.error("Submission error:", e.message || e);

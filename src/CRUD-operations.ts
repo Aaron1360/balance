@@ -1,10 +1,10 @@
 import { supabase } from "@/supabase/client";
-import { Transactions } from "@/App";
+import { Transactions } from "@/context/TableContext";
 
 // Function to fetch transactions
 export async function fetchTransactions(): Promise<Transactions[] | null> {
   try {
-    const { data, error } = await supabase.from("transactions").select("*");
+    const { data, error } = await supabase.from("transactions").select("*").order("date", { ascending: false });;
 
     if (error) {
       console.error("Error fetching data:", error);
