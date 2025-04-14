@@ -73,7 +73,7 @@ export default function TransactionsTable({
   };
 
   return (
-    <Card>
+    <Card className="w-full mx-5">
       <CardContent>
         <Table>
           <TableHeader>
@@ -100,7 +100,7 @@ export default function TransactionsTable({
                         <AmountInput
                           value={editValues.amount ?? ""}
                           onChange={(v) =>
-                            handleEditChange("amount", parseFloat(v))
+                            handleEditChange("amount", v? parseFloat(v) : 0)
                           }
                         />
                       </TableCell>
