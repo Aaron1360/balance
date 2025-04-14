@@ -1,5 +1,4 @@
 import { useState } from "react";
-// import { tableContext } from "@/context/TableContext";
 import { Button } from "./ui/button";
 import {
   Table,
@@ -15,31 +14,16 @@ import AmountInput from "./expense-form/AmountInput";
 import DateInput from "./expense-form/DateInput";
 import CategorySelect from "./expense-form/CategorySelect";
 import DescriptionInput from "./expense-form/DescriptionInput";
-// import { Transactions } from "@/context/TableContext";
 import { deleteTransaction, updateTransaction } from "@/CRUD-operations";
-import { Transactions } from "@/App";
+import { Transactions } from "@/context/TableContext";
+import { useTableContext } from "@/context/TableContext";
 
-interface TransactionsTableProps {
-  data: Transactions[];
-  onUpdate: () => void;
-}
-
-export default function TransactionsTable({
-  data,
-  onUpdate,
-}: TransactionsTableProps) {
-  // const context = useContext(tableContext);
-  // const data = context?.data || [];
+export default function TransactionsTable() {
+  const {transactions, loadTransactions } = useTableContext();
 
   // Local state for table manipulation
-  // const [transactions, setTransactions] = useState<Transactions[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<Transactions>>({});
-
-  // const handleDelete = async (id: string) => {
-  //   setTransactions((prev) => prev.filter((txn) => txn.id !== id));
-  //   await deleteTransaction(id);
-  // };
 
   const handleEditClick = (txn: Transactions) => {
     setEditingId(txn.id);
@@ -64,12 +48,12 @@ export default function TransactionsTable({
     await updateTransaction(editingId, editValues);
     setEditingId(null);
     setEditValues({});
-    onUpdate(); // Refresh table data from DB
+    loadTransactions(); // Refresh table data from DB
   };
 
   const handleDelete = async (id: string) => {
     await deleteTransaction(id);
-    onUpdate(); // Refresh table data after delete
+    loadTransactions(); // Refresh table data after delete
   };
 
   return (
@@ -87,7 +71,7 @@ export default function TransactionsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((txn, index) => {
+            {transactions ? transactions.map((txn, index) => {
               const isEditing = editingId === txn.id;
 
               return (
@@ -176,7 +160,7 @@ export default function TransactionsTable({
                   </TableCell>
                 </TableRow>
               );
-            })}
+            }) : <></>}
           </TableBody>
         </Table>
       </CardContent>

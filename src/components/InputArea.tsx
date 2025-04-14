@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import {
@@ -13,21 +12,12 @@ import AmountInput from "./expense-form/AmountInput";
 import CategorySelect from "./expense-form/CategorySelect";
 import DateInput from "./expense-form/DateInput";
 import DescriptionInput from "./expense-form/DescriptionInput";
+import { useState } from "react";
 import { insertTransaction } from "@/CRUD-operations";
-// import { tableContext } from "@/context/TableContext";
+import { useTableContext } from "@/context/TableContext";
 
-interface InputAreaProps {
-  onSubmitSuccess: () => void;
-}
-
-function InputArea({ onSubmitSuccess }: InputAreaProps) {
-  // const context = useContext(tableContext);
-
-  // if (!context) {
-  //   throw new Error("InputArea must be used within a TableContextProvider");
-  // }
-
-  // const { setShouldRefresh } = context;
+function InputArea() {
+  const { loadTransactions } = useTableContext();
 
   // Form state
   const [amount, setAmount] = useState("");
@@ -59,8 +49,9 @@ function InputArea({ onSubmitSuccess }: InputAreaProps) {
       setCategory("");
       setDescription("");
 
-      // 🔄 Notify parent to reload table
-      onSubmitSuccess();
+      // Reload table data
+      await loadTransactions();
+
     } catch (e: unknown) {
       if (e instanceof Error) {
         console.error("Submission error:", e.message || e);

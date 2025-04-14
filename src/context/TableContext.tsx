@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect } from "react";
-import { fetchTransactions } from "@/CRUD-operations";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { fetchTransactions } from "../CRUD-operations";
 
 export interface Transactions {
   id: string;
@@ -9,33 +9,37 @@ export interface Transactions {
   description: string;
 }
 
-interface TableContextValue {
-  data: Transactions[] | undefined;
-  shouldRefresh: boolean;
-  setShouldRefresh: (val: boolean) => void;
+interface TableContextType {
+  transactions: Transactions[] | undefined;
+  loadTransactions: () => Promise<void>;
+  setTransactions: React.Dispatch<React.SetStateAction<Transactions[] | undefined>>;
 }
 
-export const tableContext = createContext<TableContextValue | undefined>(undefined);
+const TableContext = createContext<TableContextType | undefined>(undefined);
 
-export function TableContextProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<Transactions[] | undefined>(undefined);
-  const [shouldRefresh, setShouldRefresh] = useState<boolean>(false);
+export const TableContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [transactions, setTransactions] = useState<Transactions[] | undefined>(undefined);
+
+  const loadTransactions = async () => {
+    const data = await fetchTransactions();
+    if (data) setTransactions(data);
+  };
 
   useEffect(() => {
-    const refresh = async () => {
-      const fetched = await fetchTransactions();
-      if (fetched) {
-        setData(fetched);
-        setShouldRefresh(false); // reset flag
-      }
-    };
-
-    if (shouldRefresh) refresh();
-  }, [shouldRefresh]);
+    loadTransactions();
+  }, []);
 
   return (
-    <tableContext.Provider value={{ data, shouldRefresh, setShouldRefresh }}>
+    <TableContext.Provider value={{ transactions, loadTransactions, setTransactions }}>
       {children}
-    </tableContext.Provider>
+    </TableContext.Provider>
   );
-}
+};
+
+export const useTableContext = (): TableContextType => {
+  const context = useContext(TableContext);
+  if (!context) {
+    throw new Error("useTableContext must be used within a TableContextProvider");
+  }
+  return context;
+};
