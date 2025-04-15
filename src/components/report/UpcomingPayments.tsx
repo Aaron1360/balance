@@ -46,7 +46,7 @@ export default function UpcomingPayments() {
             <Receipt />
             Por Pagar
           </CardTitle>
-          <Link to={"/dashboard/deudas"}>Ver todos</Link>
+          <Link to={"/dashboard/deudas"} className="underline">Ver todos</Link>
         </CardHeader>
       </Card>
       {paymentsData.map((payment) => (
