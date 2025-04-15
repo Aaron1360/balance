@@ -14,7 +14,7 @@ import rebootImage from "@/assets/reboot1.png";
 import NewTransaction from "./NewTransaction";
 
 // This is sample data.
-const data = {
+export const data = {
   user: {
     name: "Aaron Moreno",
     email: "aaronmvilleda@gmail.com",

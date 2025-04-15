@@ -1,4 +1,4 @@
-import Header from "./components/Header";
+import Header from "./components/report/Header";
 import InputArea from "./components/InputArea";
 import Total from "./components/Total";
 import TransactionsTable from "./components/TransactionsTable";
