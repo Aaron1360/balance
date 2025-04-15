@@ -5,7 +5,7 @@ function Report() {
   return (
     <div className="flex flex-col w-full h-full">
       <Summary/>
-      <div className="flex">
+      <div className="flex my-5 gap-5">
         <SpendingSummary/>  
         <UpcomingPayments></UpcomingPayments>        
       </div>

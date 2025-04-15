@@ -1,11 +1,8 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge"; // Assuming you have a badge component
-import { Label } from "../ui/label";
+import { Receipt } from "lucide-react";
+import { Link } from "react-router-dom";
+
 // Example payment data
 const paymentsData = [
   {
@@ -34,23 +31,39 @@ const paymentsData = [
   },
 ];
 
+// Create a formatter for Spanish abbreviated month and day (no year)
+const dateFormatter = new Intl.DateTimeFormat("es-ES", {
+  month: "short",
+  day: "numeric",
+});
+
 export default function UpcomingPayments() {
   return (
-    <div className="space-y-4">
-        <div>
-            <Label>Pagos Pendientes</Label>
-        </div>
+    <div className="flex flex-col min-w-xs bg-accent rounded-xl">
+      <Card className="bg-transparent shadow-none border-none">
+        <CardHeader className="flex w-full justify-between items-center">
+          <CardTitle className="flex justify-center items-center gap-2">
+            <Receipt />
+            Por Pagar
+          </CardTitle>
+          <Link to={"/dashboard/deudas"}>Ver todos</Link>
+        </CardHeader>
+      </Card>
       {paymentsData.map((payment) => (
         <Card key={payment.name} className="flex flex-col">
           <CardHeader className="flex justify-between items-center">
-            <div>
-              <CardTitle className="text-lg font-semibold">{payment.date}</CardTitle>
+            <div className="flex w-full justify-between items-center">
+              <CardTitle className="text-lg font-semibold">
+                {dateFormatter.format(new Date(payment.date))}
+              </CardTitle>
               <Badge className="mt-1">{payment.category}</Badge>
             </div>
           </CardHeader>
-          <CardContent className="flex flex-col mt-2">
+          <CardContent className="flex w-full justify-between items-center">
             <p className="text-md font-medium">{payment.name}</p>
-            <p className="text-lg font-bold">${payment.amount.toLocaleString()}</p>
+            <p className="text-lg font-bold">
+              ${payment.amount.toLocaleString()}
+            </p>
           </CardContent>
         </Card>
       ))}
