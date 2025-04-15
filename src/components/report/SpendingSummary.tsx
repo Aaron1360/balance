@@ -3,6 +3,7 @@ import SelectPeriod from "./SelectPeriod";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "../ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartPie } from "lucide-react";
 
 const categories = [
   "Alimentos",
@@ -35,7 +36,7 @@ export default function SpendingSummary() {
   return (
     <Card className="w-full">
       <CardHeader className="flex w-full justify-between items-center">
-        <CardTitle>Resumen de Gastos</CardTitle>
+        <CardTitle className="flex justify-center items-center gap-2"><ChartPie/>Resumen de Gastos</CardTitle>
         <SelectPeriod
           value={selectedPeriod}
           onValueChange={setSelectedPeriod}
