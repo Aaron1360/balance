@@ -1,8 +1,9 @@
 import {
     Folder,
     Forward,
-    MoreHorizontal,
     Trash2,
+    Plus,
+    MoreHorizontal,
     type LucideIcon,
   } from "lucide-react"
   
@@ -54,22 +55,22 @@ import {
                   </SidebarMenuAction>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  className="w-48 rounded-lg"
+                  className="w-25 rounded-lg"
                   side={isMobile ? "bottom" : "right"}
                   align={isMobile ? "end" : "start"}
                 >
                   <DropdownMenuItem>
                     <Folder className="text-muted-foreground" />
-                    <span>View Project</span>
+                    <span>Abrir</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
                     <Forward className="text-muted-foreground" />
-                    <span>Share Project</span>
+                    <span>Compartir</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
                     <Trash2 className="text-muted-foreground" />
-                    <span>Delete Project</span>
+                    <span>Borrar</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -77,8 +78,8 @@ import {
           ))}
           <SidebarMenuItem>
             <SidebarMenuButton className="text-sidebar-foreground/70">
-              <MoreHorizontal className="text-sidebar-foreground/70" />
-              <span>More</span>
+              <Plus className="text-sidebar-foreground/70" />
+              <span>Nuevo Proyecto</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

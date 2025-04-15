@@ -11,6 +11,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import rebootImage from "@/assets/reboot1.png";
+import NewTransaction from "./NewTransaction";
 
 // This is sample data.
 const data = {
@@ -75,6 +76,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
+        <NewTransaction />
       </SidebarContent>
       <SidebarFooter></SidebarFooter>
       <SidebarRail />
