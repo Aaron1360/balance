@@ -21,7 +21,7 @@ export default function Layout() {
           </div>
         </header>
         {/* Page-specific content will be rendered here */}
-        <div className="flex flex-1 flex-col justify-center gap-4 m-4">
+        <div className="flex flex-1 flex-col justify-center gap-4 m-4 ">
           <Outlet />
         </div>
       </SidebarInset>

@@ -1,5 +1,16 @@
 import * as React from "react";
-import { FileText, Repeat, Receipt, Wrench, Calendar, ShieldAlert, Luggage, CreditCard} from "lucide-react";
+import {
+  FileText,
+  Repeat,
+  Receipt,
+  Wrench,
+  Calendar,
+  ShieldAlert,
+  Luggage,
+  CreditCard,
+  CircleDollarSign,
+  HandCoins,
+} from "lucide-react";
 import { NavMain } from "./NavDashboard";
 import { NavProjects } from "./NavGoals";
 import { NavUser } from "./NavUser";
@@ -28,9 +39,19 @@ export const data = {
       isActive: true,
     },
     {
+      title: "Ingresos",
+      url: "/dashboard/ingresos",
+      icon: CircleDollarSign,
+    },
+    {
       title: "Transacciones",
       url: "/dashboard/transacciones",
       icon: Repeat,
+    },
+    {
+      title: "Ahorros",
+      url: "/dashboard/ahorros",
+      icon: HandCoins,
     },
     {
       title: "Deudas",
