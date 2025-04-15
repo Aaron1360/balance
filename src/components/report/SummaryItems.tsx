@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEffect, useState } from "react";
 
 type SummaryItem = {
   icon: LucideIcon;
@@ -17,26 +18,21 @@ type SummaryItem = {
   growthPercentage: number;
 };
 
-export default function SummaryItems({ items }: { items: SummaryItem[] }) {
-  const year = new Date().getFullYear();
-
-  const months = [
-    "Ene",  
-    "Feb",  
-    "Mar",  
-    "Abr",  
-    "May",  
-    "Jun",  
-    "Jul",  
-    "Ago",  
-    "Sep",  
-    "Oct",  
-    "Nov",  
-    "Dic",  
-  ];
+export default function SummaryItems({
+  items,
+  periods,
+  globalPeriod,
+}: {
+  items: SummaryItem[];
+  periods: string[];
+  globalPeriod: string;
+}) {
+  const [localSelectedPeriod, setLocalSelectedPeriod] = useState(globalPeriod); // Default to global period
+  // Sync local state with globalPeriod whenever it changes
+  useEffect(() => {
+    setLocalSelectedPeriod(globalPeriod);
+  }, [globalPeriod]);
   
-  const periods = months.map((month) => `${month} ${year}`);
-
   return (
     <div className="flex justify-evenly items-stretch w-full">
       {items.map(({ icon: Icon, title, amount, growthPercentage }) => (
@@ -46,19 +42,23 @@ export default function SummaryItems({ items }: { items: SummaryItem[] }) {
               <Icon className="w-5 h-5" />
               <Label className="text-md">{title}</Label>
             </div>
-            <Select defaultValue={periods[3]}>
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Months" />
+            {/* Individual Select synchronized with global state */}
+            <Select
+              value={localSelectedPeriod}
+              onValueChange={setLocalSelectedPeriod}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Periodo" />
               </SelectTrigger>
               <SelectContent>
-          <SelectGroup>
-            {periods.map((period) => (
-              <SelectItem key={period} value={period}>
-                {period}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
+                <SelectGroup>
+                  {periods.map((period) => (
+                    <SelectItem key={period} value={period}>
+                      {period}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
             </Select>
           </CardHeader>
           <CardContent className="flex flex-col mt-0 pt-0">
