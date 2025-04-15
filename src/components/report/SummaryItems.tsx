@@ -1,14 +1,7 @@
 import { LucideIcon } from "lucide-react";
 import { Card, CardHeader, CardContent } from "../ui/card";
 import { Label } from "@radix-ui/react-dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import SelectPeriod from "./SelectPeriod";
 import { useEffect, useState } from "react";
 
 type SummaryItem = {
@@ -20,11 +13,9 @@ type SummaryItem = {
 
 export default function SummaryItems({
   items,
-  periods,
   globalPeriod,
 }: {
   items: SummaryItem[];
-  periods: string[];
   globalPeriod: string;
 }) {
   const [localSelectedPeriod, setLocalSelectedPeriod] = useState(globalPeriod); // Default to global period
@@ -43,23 +34,10 @@ export default function SummaryItems({
               <Label className="text-md">{title}</Label>
             </div>
             {/* Individual Select synchronized with global state */}
-            <Select
+            <SelectPeriod
               value={localSelectedPeriod}
               onValueChange={setLocalSelectedPeriod}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Periodo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {periods.map((period) => (
-                    <SelectItem key={period} value={period}>
-                      {period}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            />
           </CardHeader>
           <CardContent className="flex flex-col mt-0 pt-0">
             <Label className="text-2xl font-semibold">
