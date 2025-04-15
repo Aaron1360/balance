@@ -1,4 +1,5 @@
-import { JSX } from "react";
+// src/pages/NotFoundPage.tsx
+import React, { JSX } from "react";
 import { Link } from "react-router-dom"; // Optional: Use Link to allow navigation
 import { Button } from "@/components/ui/button";
 
@@ -7,12 +8,12 @@ const NotFoundPage = (): JSX.Element => {
     <div className="flex h-screen items-center justify-center bg-gray-100">
       <div className="text-center">
         <h1 className="text-6xl font-bold text-gray-800">404</h1>
-        <p className="text-lg text-gray-600 mb-6">Oops! The page you're looking for does not exist.</p>
+        <p className="text-lg text-gray-600 mb-6">Oops! La pagina que buscas no existe.</p>
         <Button className="text-white bg-gray-800 hover:bg-gray-600 py-2 px-6 rounded-lg text-xl">
         <Link
-          to="/dashboard/reporte-general"
+          to="/dashboard/estado-de-cuenta"
         >
-          Regresar al panel principal.
+          Regresa a tu estado de cuenta.
         </Link>
         </Button>
       </div>

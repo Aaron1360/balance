@@ -1,5 +1,5 @@
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
 import {
   Card,
   CardContent,
@@ -8,10 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import AmountInput from "./expense-form/AmountInput";
-import CategorySelect from "./expense-form/CategorySelect";
-import DateInput from "./expense-form/DateInput";
-import DescriptionInput from "./expense-form/DescriptionInput";
+import AmountInput from "./AmountInput";
+import CategorySelect from "./CategorySelect";
+import DateInput from "./DateInput";
+import DescriptionInput from "./DescriptionInput";
 import { useState } from "react";
 import { insertTransaction } from "@/CRUD-operations";
 import { useTableContext } from "@/context/TableContext";

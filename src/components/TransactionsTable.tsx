@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { LuPencil, LuTrash2, LuCheck, LuX } from "react-icons/lu";
-import AmountInput from "./expense-form/AmountInput";
-import DateInput from "./expense-form/DateInput";
-import CategorySelect from "./expense-form/CategorySelect";
-import DescriptionInput from "./expense-form/DescriptionInput";
+import AmountInput from "./input-area/AmountInput";
+import DateInput from "./input-area/DateInput";
+import CategorySelect from "./input-area/CategorySelect";
+import DescriptionInput from "./input-area/DescriptionInput";
 import { deleteTransaction, updateTransaction } from "@/CRUD-operations";
 import { Transactions } from "@/context/TableContext";
 import { useTableContext } from "@/context/TableContext";
