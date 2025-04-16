@@ -39,7 +39,7 @@ const dateFormatter = new Intl.DateTimeFormat("es-ES", {
 
 export default function UpcomingPayments() {
   return (
-    <div className="flex flex-col min-w-xs bg-accent rounded-xl">
+    <div className="flex flex-col flex-1 bg-accent rounded-xl">
       <Card className="bg-transparent shadow-none border-none">
         <CardHeader className="flex w-full justify-between items-center">
           <CardTitle className="flex justify-center items-center gap-2">

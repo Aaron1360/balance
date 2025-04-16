@@ -70,7 +70,7 @@ function Summary() {
         onValueChange={setSelectedPeriod}
       />
       {/* Render summary items, passing selectedPeriod as prop */}
-      <div className="flex w-full justify-between items-center">
+      <div className="flex w-full justify-between items-center min-w-0">
         {summaryData.map(({ key, items }) => (
           <section key={key}>
             <SummaryItems

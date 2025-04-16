@@ -27,7 +27,7 @@ export default function SummaryItems({
   return (
     <div className="flex justify-evenly items-stretch w-full">
       {items.map(({ icon: Icon, title, amount, growthPercentage }) => (
-        <Card key={title} className="flex flex-col flex-1 min-w-[250px]">
+        <Card key={title} className="flex flex-col flex-1 min-w-[240px]">
           <CardHeader className="flex justify-between items-center border-b max-h-5 pr-2 ">
             <div className="flex flex-row gap-2 items-center">
               <Icon className="w-5 h-5" />
