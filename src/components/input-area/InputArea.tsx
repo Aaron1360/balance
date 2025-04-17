@@ -14,7 +14,7 @@ import DateInput from "./DateInput";
 import DescriptionInput from "./DescriptionInput";
 import { useState } from "react";
 import { insertTransaction } from "@/CRUD-operations";
-import { useTableContext } from "@/context/TableContext";
+import { useTableContext } from "@/context/AppContext";
 
 function InputArea() {
   const { loadTransactions } = useTableContext();

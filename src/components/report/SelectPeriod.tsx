@@ -1,3 +1,4 @@
+import { useAppContext } from "@/context/AppContext";
 import {
   Select,
   SelectContent,
@@ -10,24 +11,7 @@ import {
 export default function SelectPeriod({
   ...props
 }: React.ComponentProps<typeof Select>) {
-  const year = new Date().getFullYear();
-
-  const months = [
-    "Ene",
-    "Feb",
-    "Mar",
-    "Abr",
-    "May",
-    "Jun",
-    "Jul",
-    "Ago",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dic",
-  ];
-
-  const periods = months.map((month) => `${month} ${year}`);
+  const { periods } = useAppContext();
 
   return (
     <Select {...props}>

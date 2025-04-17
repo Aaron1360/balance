@@ -3,6 +3,7 @@ import { Card, CardHeader, CardContent } from "../ui/card";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import SelectPeriod from "./SelectPeriod";
 import { useEffect, useState } from "react";
+import { useAppContext } from "@/context/AppContext";
 
 type SummaryItem = {
   icon: LucideIcon;
@@ -13,16 +14,16 @@ type SummaryItem = {
 
 export default function SummaryItems({
   items,
-  globalPeriod,
 }: {
   items: SummaryItem[];
-  globalPeriod: string;
 }) {
-  const [localSelectedPeriod, setLocalSelectedPeriod] = useState(globalPeriod); // Default to global period
+  const { SummaryDate ,currentSummaryDate } = useAppContext();
+
+  const [localSelectedPeriod, setLocalSelectedPeriod] = useState(currentSummaryDate); // Default to global period
   // Sync local state with globalPeriod whenever it changes
   useEffect(() => {
-    setLocalSelectedPeriod(globalPeriod);
-  }, [globalPeriod]);
+    setLocalSelectedPeriod(SummaryDate);
+  }, [SummaryDate]);
   
   return (
     <div className="flex justify-evenly items-stretch w-full">

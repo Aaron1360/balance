@@ -15,8 +15,8 @@ import DateInput from "./input-area/DateInput";
 import CategorySelect from "./input-area/CategorySelect";
 import DescriptionInput from "./input-area/DescriptionInput";
 import { deleteTransaction, updateTransaction } from "@/CRUD-operations";
-import { Transactions } from "@/context/TableContext";
-import { useTableContext } from "@/context/TableContext";
+import { Transactions } from "@/context/AppContext";
+import { useTableContext } from "@/context/AppContext";
 
 export default function TransactionsTable() {
   const {transactions, loadTransactions } = useTableContext();

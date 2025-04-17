@@ -1,4 +1,4 @@
-import { useTableContext } from "@/context/TableContext";
+import { useTableContext } from "@/context/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "./ui/label";
 

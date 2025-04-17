@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useAppContext } from "@/context/AppContext";
 import SelectPeriod from "./SelectPeriod";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "../ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartPie } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const categories = [
   "Alimentos",
@@ -31,15 +32,22 @@ const spendingData: Record<string, number> = {
 };
 
 export default function SpendingSummary() {
-  const [selectedPeriod, setSelectedPeriod] = useState("Abr 2025");
+  const { SummaryDate ,currentSummaryDate } = useAppContext();
+  
+    const [localSelectedPeriod, setLocalSelectedPeriod] = useState(currentSummaryDate); // Default to global period
+    
+    // Sync local state with globalPeriod whenever it changes
+    useEffect(() => {
+      setLocalSelectedPeriod(SummaryDate);
+    }, [SummaryDate]);
 
   return (
     <Card className="w-full">
       <CardHeader className="flex w-full justify-between items-center">
         <CardTitle className="flex justify-center items-center gap-2"><ChartPie/>Resumen de Gastos</CardTitle>
         <SelectPeriod
-          value={selectedPeriod}
-          onValueChange={setSelectedPeriod}
+          value={localSelectedPeriod}
+          onValueChange={setLocalSelectedPeriod}
         ></SelectPeriod>
       </CardHeader>
       <CardContent className="space-y-6">
