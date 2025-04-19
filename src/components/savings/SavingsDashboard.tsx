@@ -1,7 +1,4 @@
-"use client"
-
 import type React from "react"
-
 import { useState } from "react"
 import { differenceInDays, format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -22,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { SavingsProject } from "@/types/savings"
+import type { SavingsProject } from "@/types/savings"
 import {
   projectsData,
   categoriesData,
@@ -135,7 +132,7 @@ export default function SavingsDashboard() {
               <CardDescription>Por categoría</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[250px]">
+              <div className="h-[300px]">
                 <SavingsPieChart data={categoriesData} />
               </div>
             </CardContent>
@@ -148,7 +145,7 @@ export default function SavingsDashboard() {
               <CardDescription>Últimos 6 meses</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[250px]">
+              <div className="h-[300px]">
                 <SavingsLineChart data={monthlyData} />
               </div>
             </CardContent>
@@ -226,105 +223,41 @@ export default function SavingsDashboard() {
         </div>
       </div>
 
-      {/* Main Content - Projects on left (wider), Activity on right (narrower) */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Proyectos de ahorro - Left column (wider) */}
-        <div className="lg:col-span-3">
-          <h2 className="text-2xl font-bold mb-4">Proyectos de Ahorro</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
-            {projectsData.map((project) => {
-              const percentage = calculateCompletionPercentage(project.currentAmount, project.targetAmount)
-              const daysRemaining = calculateDaysRemaining(project.deadline)
-              const estimatedDate = estimateCompletionDate(project)
+      {/* Actividad Reciente Section - In a row with specified order */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-4">Actividad Reciente</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Resumen de Actividad */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Resumen de Actividad</CardTitle>
+              <CardDescription>Últimos 30 días</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Depósitos</p>
+                    <p className="text-xl font-bold text-green-600">+$8,250.00</p>
+                    <p className="text-xs text-muted-foreground mt-1">5 transacciones</p>
+                  </div>
+                  <div className="bg-red-50 dark:bg-red-950 p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">Retiros</p>
+                    <p className="text-xl font-bold text-red-600">-$700.00</p>
+                    <p className="text-xs text-muted-foreground mt-1">2 transacciones</p>
+                  </div>
+                </div>
+                <div className="pt-2">
+                  <p className="text-sm text-muted-foreground">Crecimiento neto</p>
+                  <p className="text-lg font-bold text-green-600">+$7,550.00</p>
+                  <p className="text-xs text-muted-foreground">+15% desde el mes pasado</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-              return (
-                <Card key={project.id} className="overflow-hidden hover:shadow-md transition-shadow duration-300">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{project.name}</CardTitle>
-                      <Badge
-                        variant="outline"
-                        className="font-normal"
-                        style={{ borderColor: project.color, color: project.color }}
-                      >
-                        {project.category}
-                      </Badge>
-                    </div>
-                    <CardDescription>
-                      Meta: {project.targetAmount.toLocaleString("es-MX", { style: "currency", currency: "MXN" })}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="space-y-4">
-                      <div className="flex justify-between text-sm">
-                        <span>
-                          Actual:{" "}
-                          {project.currentAmount.toLocaleString("es-MX", { style: "currency", currency: "MXN" })}
-                        </span>
-                        <span className="font-medium">{percentage}%</span>
-                      </div>
-                      <Progress
-                        value={percentage}
-                        className="h-2"
-                        style={
-                          {
-                            "--progress-indicator-color": project.color,
-                          } as React.CSSProperties
-                        }
-                      />
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <p className="text-muted-foreground">Días Restantes</p>
-                          <p className="font-medium">{daysRemaining}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Fecha Estimada</p>
-                          <p className="font-medium">{estimatedDate}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between pt-2">
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-2"
-                        onClick={() => handleEditProject(project)}
-                      >
-                        <Edit className="h-3.5 w-3.5 mr-1" />
-                        Editar
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-2 text-destructive border-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteProject(project)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 mr-1" />
-                        Eliminar
-                      </Button>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 px-2"
-                      onClick={() => handleViewProjectDetails(project)}
-                    >
-                      Detalles
-                      <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Actividad reciente - Right column (narrower) */}
-        <div className="lg:col-span-1">
-          <h2 className="text-2xl font-bold mb-4">Actividad Reciente</h2>
-          <Card className="mb-6">
+          {/* Últimas Transacciones - Spans 2 columns */}
+          <Card className="md:col-span-2">
             <CardHeader>
               <CardTitle>Últimas Transacciones</CardTitle>
             </CardHeader>
@@ -364,34 +297,93 @@ export default function SavingsDashboard() {
               </Button>
             </CardFooter>
           </Card>
+        </div>
+      </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Resumen de Actividad</CardTitle>
-              <CardDescription>Últimos 30 días</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Depósitos</p>
-                    <p className="text-xl font-bold text-green-600">+$8,250.00</p>
-                    <p className="text-xs text-muted-foreground mt-1">5 transacciones</p>
+      {/* Proyectos de Ahorro Section */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-4">Proyectos de Ahorro</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
+          {projectsData.map((project) => {
+            const percentage = calculateCompletionPercentage(project.currentAmount, project.targetAmount)
+            const daysRemaining = calculateDaysRemaining(project.deadline)
+            const estimatedDate = estimateCompletionDate(project)
+
+            return (
+              <Card key={project.id} className="overflow-hidden hover:shadow-md transition-shadow duration-300">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{project.name}</CardTitle>
+                    <Badge
+                      variant="outline"
+                      className="font-normal"
+                      style={{ borderColor: project.color, color: project.color }}
+                    >
+                      {project.category}
+                    </Badge>
                   </div>
-                  <div className="bg-red-50 dark:bg-red-950 p-4 rounded-lg">
-                    <p className="text-sm text-muted-foreground">Retiros</p>
-                    <p className="text-xl font-bold text-red-600">-$700.00</p>
-                    <p className="text-xs text-muted-foreground mt-1">2 transacciones</p>
+                  <CardDescription>
+                    Meta: {project.targetAmount.toLocaleString("es-MX", { style: "currency", currency: "MXN" })}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm">
+                      <span>
+                        Actual: {project.currentAmount.toLocaleString("es-MX", { style: "currency", currency: "MXN" })}
+                      </span>
+                      <span className="font-medium">{percentage}%</span>
+                    </div>
+                    <Progress
+                      value={percentage}
+                      className="h-2"
+                      style={
+                        {
+                          "--progress-indicator-color": project.color,
+                        } as React.CSSProperties
+                      }
+                    />
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Días Restantes</p>
+                        <p className="font-medium">{daysRemaining}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Fecha Estimada</p>
+                        <p className="font-medium">{estimatedDate}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="pt-2">
-                  <p className="text-sm text-muted-foreground">Crecimiento neto</p>
-                  <p className="text-lg font-bold text-green-600">+$7,550.00</p>
-                  <p className="text-xs text-muted-foreground">+15% desde el mes pasado</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+                <CardFooter className="flex justify-between pt-2">
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => handleEditProject(project)}>
+                      <Edit className="h-3.5 w-3.5 mr-1" />
+                      Editar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 px-2 text-destructive border-destructive hover:bg-destructive/10"
+                      onClick={() => handleDeleteProject(project)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1" />
+                      Eliminar
+                    </Button>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2"
+                    onClick={() => handleViewProjectDetails(project)}
+                  >
+                    Detalles
+                    <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                </CardFooter>
+              </Card>
+            )
+          })}
         </div>
       </div>
 
