@@ -39,11 +39,6 @@ export const data = {
       isActive: true,
     },
     {
-      title: "Ingresos",
-      url: "/dashboard/ingresos",
-      icon: CircleDollarSign,
-    },
-    {
       title: "Transacciones",
       url: "/dashboard/transacciones",
       icon: Repeat,
