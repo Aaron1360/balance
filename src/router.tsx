@@ -3,6 +3,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import Layout from "./components/Layout";
 import Report from "./pages/Report";
 import Transactions from "./pages/Transactions";
+import SavingsPage from "./pages/Savings";
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,12 @@ const router = createBrowserRouter([
         path: "/dashboard/transacciones",
         element: (
             <Transactions />
+        ),
+      },
+      {
+        path: "/dashboard/ahorros",
+        element: (
+            <SavingsPage />
         ),
       },
     ],
