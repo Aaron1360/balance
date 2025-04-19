@@ -8,7 +8,6 @@ import {
   ShieldAlert,
   Luggage,
   CreditCard,
-  CircleDollarSign,
   HandCoins,
 } from "lucide-react";
 import { NavMain } from "./NavDashboard";

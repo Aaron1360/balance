@@ -8,12 +8,12 @@ import {
 // This is sample data.
 const summaryData = [
   {
-    key: "Balance",
-    title: "Balance",
+    key: "Corte",
+    title: "Corte",
     items: [
       {
         icon: Landmark,
-        title: "Balance",
+        title: "Corte",
         amount: 27000,
         growthPercentage: 15,
       },
