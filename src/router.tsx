@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import Report from "./pages/Report";
 import Transactions from "./pages/Transactions";
 import SavingsPage from "./pages/Savings";
+import DebtPage from "./pages/Debts";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,12 @@ const router = createBrowserRouter([
         path: "/dashboard/ahorros",
         element: (
             <SavingsPage />
+        ),
+      },
+      {
+        path: "/dashboard/deudas",
+        element: (
+            <DebtPage />
         ),
       },
     ],
