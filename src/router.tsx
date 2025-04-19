@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import NotFoundPage from "./pages/NotFoundPage";
 import Layout from "./components/Layout";
 import Report from "./pages/Report";
+import Transactions from "./pages/Transactions";
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,12 @@ const router = createBrowserRouter([
         path: "/dashboard/estado-de-cuenta",
         element: (
             <Report />
+        ),
+      },
+      {
+        path: "/dashboard/transacciones",
+        element: (
+            <Transactions />
         ),
       },
     ],
