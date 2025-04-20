@@ -15,7 +15,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "Netflix",
-    notes: "Suscripción al plan premium familiar", // Added notes
+    note: "Suscripción al plan premium familiar",
+    paymentDay: 12, // Added paymentDay
     description: "Plan Premium",
     logo: "netflix",
     color: "#E50914",
@@ -35,7 +36,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "Amazon",
-    notes: "Incluye Prime Video, Prime Music y envíos gratis", // Added notes
+    note: "Incluye Prime Video, Prime Music y envíos gratis",
+    paymentDay: 5, // Added paymentDay
     description: "Incluye Prime Video, Prime Music y envíos gratis",
     logo: "amazon-prime",
     color: "#00A8E1",
@@ -54,7 +56,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "Google",
-    notes: "Suscripción al plan familiar", // Added notes
+    note: "Suscripción al plan familiar",
+    paymentDay: 18, // Added paymentDay
     description: "Plan Familiar",
     logo: "youtube",
     color: "#FF0000",
@@ -74,7 +77,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "OpenAI",
-    notes: "Suscripción mensual a ChatGPT Plus", // Added notes
+    note: "Suscripción mensual a ChatGPT Plus",
+    paymentDay: 3, // Added paymentDay
     description: "Suscripción premium a ChatGPT",
     logo: "chatgpt",
     color: "#10A37F",
@@ -93,7 +97,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "Comisión Federal de Electricidad",
-    notes: "Pago del servicio de electricidad", // Added notes
+    note: "Pago del servicio de electricidad",
+    paymentDay: 8, // Added paymentDay
     description: "Comisión Federal de Electricidad",
     logo: "electricity",
     color: "#FFC107",
@@ -113,7 +118,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "Servicio Municipal de Agua",
-    notes: "Pago del servicio de agua potable", // Added notes
+    note: "Pago del servicio de agua potable",
+    paymentDay: 15, // Added paymentDay
     description: "Servicio Municipal de Agua",
     logo: "water",
     color: "#2196F3",
@@ -133,7 +139,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "Propietario",
-    notes: "Pago mensual de la renta del apartamento", // Added notes
+    note: "Pago mensual de la renta del apartamento",
+    paymentDay: 1, // Added paymentDay
     description: "Apartamento",
     logo: "rent",
     color: "#4CAF50",
@@ -153,7 +160,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "Spotify",
-    notes: "Suscripción al plan individual de Spotify", // Added notes
+    note: "Suscripción al plan individual de Spotify",
+    paymentDay: 22, // Added paymentDay
     description: "Plan Individual",
     logo: "spotify",
     color: "#1DB954",
@@ -172,7 +180,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "Telmex",
-    notes: "Servicio de internet de fibra óptica", // Added notes
+    note: "Servicio de internet de fibra óptica",
+    paymentDay: 7, // Added paymentDay
     description: "Fibra óptica 200 Mbps",
     logo: "internet",
     color: "#673AB7",
@@ -192,7 +201,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "AXA",
-    notes: "Póliza de seguro de auto con cobertura amplia", // Added notes
+    note: "Póliza de seguro de auto con cobertura amplia",
+    paymentDay: 10, // Added paymentDay
     description: "Cobertura amplia",
     logo: "car-insurance",
     color: "#F44336",
@@ -212,7 +222,8 @@ export const servicesData: Service[] = [
     status: "active",
     paymentStatus: "pendiente",
     creditor: "Smart Fit",
-    notes: "Membresía mensual al gimnasio", // Added notes
+    note: "Membresía mensual al gimnasio",
+    paymentDay: 4, // Added paymentDay
     description: "Membresía completa",
     logo: "gym",
     color: "#FF9800",
@@ -231,7 +242,8 @@ export const servicesData: Service[] = [
     status: "paused",
     paymentStatus: "pendiente",
     creditor: "Disney",
-    notes: "Suscripción al plan estándar de Disney+", // Added notes
+    note: "Suscripción al plan estándar de Disney+",
+    paymentDay: 9, // Added paymentDay
     description: "Plan Estándar",
     logo: "disney",
     color: "#0063E5",
@@ -239,8 +251,6 @@ export const servicesData: Service[] = [
     tags: ["entretenimiento", "streaming"],
   },
 ]
-
-
 
 
 // Sample payment history
@@ -352,7 +362,7 @@ export const paymentsData: ServicePayment[] = [
     status: "completed",
     paymentMethod: "tarjeta de crédito",
     reference: "DIS-2023-08-01",
-    notess: "Último pago antes de pausar",
+    notes: "Último pago antes de pausar",
   },
   // Previous payments
   {

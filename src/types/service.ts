@@ -38,7 +38,8 @@ export type Service = {
   status: ServiceStatus;
   paymentStatus: "pagado" | "próximo" | "vencido" | "pendiente";
   creditor?: string;
-  notes?: string; // Added note property
+  note?: string;
+  paymentDay: number; // Added paymentDay property
   description?: string;
   logo?: string;
   color?: string;

@@ -6,6 +6,7 @@ import Transactions from "./pages/Transactions";
 import SavingsPage from "./pages/Savings";
 import DebtPage from "./pages/Debts";
 import ServiciosRoute from "./pages/Services";
+import CalendarPage from "./pages/Calendar";
 
 const router = createBrowserRouter([
   {
@@ -46,6 +47,12 @@ const router = createBrowserRouter([
         path: "/dashboard/servicios",
         element: (
             <ServiciosRoute />
+        ),
+      },
+      {
+        path: "/dashboard/calendario",
+        element: (
+            <CalendarPage />
         ),
       },
     ],
