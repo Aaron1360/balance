@@ -5,6 +5,7 @@ import Report from "./pages/Report";
 import Transactions from "./pages/Transactions";
 import SavingsPage from "./pages/Savings";
 import DebtPage from "./pages/Debts";
+import ServiciosRoute from "./pages/Services";
 
 const router = createBrowserRouter([
   {
@@ -39,6 +40,12 @@ const router = createBrowserRouter([
         path: "/dashboard/deudas",
         element: (
             <DebtPage />
+        ),
+      },
+      {
+        path: "/dashboard/servicios",
+        element: (
+            <ServiciosRoute />
         ),
       },
     ],
