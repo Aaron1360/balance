@@ -1,9 +1,9 @@
 import {
-    Folder,
-    Forward,
     Trash2,
     Plus,
     MoreHorizontal,
+    ArrowRight,
+    Edit,
     type LucideIcon,
   } from "lucide-react"
   
@@ -60,17 +60,17 @@ import {
                   align={isMobile ? "end" : "start"}
                 >
                   <DropdownMenuItem>
-                    <Folder className="text-muted-foreground" />
-                    <span>Abrir</span>
+                    <ArrowRight className="text-muted-foreground" />
+                    <span>Detalles</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Forward className="text-muted-foreground" />
-                    <span>Compartir</span>
+                    <Edit className="text-muted-foreground" />
+                    <span>Editar</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <Trash2 className="text-muted-foreground" />
-                    <span>Borrar</span>
+                    <Trash2 className="text-destructive border-destructive hover:bg-destructive/10" />
+                    <span className="text-destructive border-destructive hover:bg-destructive/10" >Eliminar</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

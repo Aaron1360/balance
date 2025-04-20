@@ -7,8 +7,9 @@ import {
   Calendar,
   ShieldAlert,
   Luggage,
-  CreditCard,
   HandCoins,
+  Car,
+  Book,
 } from "lucide-react";
 import { NavMain } from "./NavDashboard";
 import { NavProjects } from "./NavGoals";
@@ -65,19 +66,24 @@ export const data = {
   ],
   projects: [
     {
-      name: "Fondo de Emergencia",
-      url: "#",
-      icon: ShieldAlert,
-    },
-    {
       name: "Vacaciones",
       url: "#",
       icon: Luggage,
     },
     {
-      name: "Prestamo personal",
+      name: "Fondo de Emergencia",
       url: "#",
-      icon: CreditCard,
+      icon: ShieldAlert,
+    },
+    {
+      name: "Nuevo Coche",
+      url: "#",
+      icon: Car,
+    },
+    {
+      name: "Educación",
+      url: "#",
+      icon: Book,
     },
   ],
 };
