@@ -60,7 +60,7 @@ export function FilterPanel({
   filteredCount,
   resetFilters,
 }: FilterPanelProps) {
-  // Función para manejar el cambio en las categorías seleccionadas
+  // Function to handle changes in selected categories
   const handleCategoryChange = (value: string) => {
     if (value === "all") {
       setSelectedCategories([])
@@ -69,12 +69,12 @@ export function FilterPanel({
     }
   }
 
-  // Función para manejar el cambio en los métodos de pago seleccionados
+  // Function to handle changes in selected payment methods
   const handlePaymentMethodChange = (method: string) => {
     setSelectedPaymentMethods((prev) => (prev.includes(method) ? prev.filter((m) => m !== method) : [...prev, method]))
   }
 
-  // Función para manejar el cambio en los tipos seleccionados
+  // Function to handle changes in selected types
   const handleTypeChange = (type: string) => {
     setSelectedTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]))
   }
@@ -91,7 +91,7 @@ export function FilterPanel({
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Búsqueda */}
+              {/* Search */}
               <div className="space-y-2">
                 <Label htmlFor="search">Buscar</Label>
                 <div className="relative">
@@ -107,7 +107,7 @@ export function FilterPanel({
                 </div>
               </div>
 
-              {/* Rango de fechas */}
+              {/* Date range */}
               <div className="space-y-2">
                 <Label>Rango de fechas</Label>
                 <div className="flex flex-col gap-2">
@@ -143,7 +143,7 @@ export function FilterPanel({
                 </div>
               </div>
 
-              {/* Tipo de transacción */}
+              {/* Transaction type */}
               <div className="space-y-2">
                 <Label>Tipo</Label>
                 <div className="space-y-2">
@@ -153,12 +153,12 @@ export function FilterPanel({
                       checked={selectedTypes.includes("income")}
                       onCheckedChange={() => handleTypeChange("income")}
                     />
-                    <label
+                    <Label
                       htmlFor="type-income"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
                       Ingresos
-                    </label>
+                    </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -166,17 +166,17 @@ export function FilterPanel({
                       checked={selectedTypes.includes("expense")}
                       onCheckedChange={() => handleTypeChange("expense")}
                     />
-                    <label
+                    <Label
                       htmlFor="type-expense"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                     >
                       Gastos
-                    </label>
+                    </Label>
                   </div>
                 </div>
               </div>
 
-              {/* Categorías */}
+              {/* Categories */}
               <div className="space-y-2">
                 <Label>Categorías</Label>
                 <Select
@@ -197,7 +197,7 @@ export function FilterPanel({
                 </Select>
               </div>
 
-              {/* Tipo de pago (condicional) */}
+              {/* Payment type (conditional) */}
               {showPaymentTypeFilter && (
                 <div className="space-y-2">
                   <Label>Tipo de pago</Label>
@@ -227,7 +227,7 @@ export function FilterPanel({
                 </div>
               )}
 
-              {/* Métodos de pago */}
+              {/* Payment methods */}
               <div className="space-y-2">
                 <Label>Método de pago</Label>
                 <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
@@ -238,18 +238,18 @@ export function FilterPanel({
                         checked={selectedPaymentMethods.includes(method)}
                         onCheckedChange={() => handlePaymentMethodChange(method)}
                       />
-                      <label
+                      <Label
                         htmlFor={`method-${method}`}
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
                         {method}
-                      </label>
+                      </Label>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Botones de acción */}
+              {/* Action buttons */}
               <div className="flex flex-col gap-2 pt-2">
                 <Button variant="outline" onClick={resetFilters}>
                   Limpiar filtros
@@ -258,7 +258,7 @@ export function FilterPanel({
             </CardContent>
           </>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center gap-2">
             <Button variant="outline" size="icon" className="h-10 w-10" onClick={onToggle} title="Mostrar filtros">
               <Filter className="h-4 w-4" />
             </Button>

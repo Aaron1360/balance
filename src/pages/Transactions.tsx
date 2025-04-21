@@ -141,8 +141,8 @@ export default function TransactionsPage() {
 //   }
 
   return (
-    <div className="flex flex-col p-4 md:p-6">
-      <div className="flex flex-row gap-4">
+    // <div className="flex flex-col p-4 md:p-6">
+      <div className="flex flex-row w-full h-full gap-4 p-4 md:p-6">
         {/* Filter Panel */}
         <FilterPanel
           isOpen={isFilterOpen}
@@ -181,6 +181,6 @@ export default function TransactionsPage() {
         {/* Transaction Details */}
         <TransactionDetails transaction={selectedTransaction} isOpen={isSheetOpen} onOpenChange={setIsSheetOpen} />
       </div>
-    </div>
+    // </div>
   )
 }
