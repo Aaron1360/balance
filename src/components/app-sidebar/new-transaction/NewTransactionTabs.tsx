@@ -13,12 +13,12 @@ function NewTransactionTabs() {
         <TabsTrigger value="expense">Gasto</TabsTrigger>
       </TabsList>
 
-      {/* Pestaña de Ingresos */}
+      {/* Income Tab */}
       <TabsContent value="income">
         <IncomeTab/>
       </TabsContent>
 
-      {/* Pestaña de Gastos */}
+      {/* Outcome Tab */}
       <TabsContent value="expense">
         <OutcomeTab date={date} setDate={setDate}/>
       </TabsContent>

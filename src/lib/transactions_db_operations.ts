@@ -1,8 +1,8 @@
 import { supabase } from "@/supabase/client";
-import { Transactions } from "@/context/DateContext";
+import { Transaction } from "../types/transactions";
 
 // Function to fetch transactions
-export async function fetchTransactions(): Promise<Transactions[] | null> {
+export async function fetchTransactions(): Promise<Transaction[] | null> {
   try {
     const { data, error } = await supabase.from("transactions").select("*").order("date", { ascending: false });;
 
@@ -10,7 +10,7 @@ export async function fetchTransactions(): Promise<Transactions[] | null> {
       console.error("Error fetching data:", error);
       return null; // Return null if there's an error
     } else {
-      return data as Transactions[];
+      return data as Transaction[];
     }
   } catch (error) {
     console.error("Error fetching transactions:", error);
@@ -20,7 +20,7 @@ export async function fetchTransactions(): Promise<Transactions[] | null> {
 
 // Function to insert a new transaction
 export async function insertTransaction(
-    transaction: Omit<Transactions, "id">
+    transaction: Omit<Transaction, "id">
   ): Promise<void> {
     try {
       const { data, error } = await supabase.from("transactions").insert([transaction]);
@@ -53,7 +53,7 @@ export async function deleteTransaction(id: string): Promise<void> {
 // Function to update a transaction
 export async function updateTransaction(
   id: string,
-  updatedTransaction: Partial<Transactions>
+  updatedTransaction: Partial<Transaction>
 ): Promise<void> {
   try {
     const { error } = await supabase

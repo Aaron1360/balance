@@ -14,7 +14,7 @@ import AmountInput from "./input-area/AmountInput";
 import DateInput from "./input-area/DateInput";
 import CategorySelect from "./input-area/CategorySelect";
 import DescriptionInput from "./input-area/DescriptionInput";
-import { deleteTransaction, updateTransaction } from "@/CRUD-operations";
+import { deleteTransaction, updateTransaction } from "@/lib/transactions_db_operations";
 import { Transactions } from "@/context/DateContext";
 import { useDateContext } from "@/context/DateContext";
 

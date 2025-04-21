@@ -19,7 +19,7 @@ const year = new Date().getFullYear();
 const periods = months.map((month) => `${month} ${year}`);
 const currentSummaryDate = periods[new Date().getMonth()];
 
-export interface AppContextType {
+interface AppContextType {
   SummaryDate: string;
   setSummaryDate: React.Dispatch<React.SetStateAction<string>>;
   periods: string[];

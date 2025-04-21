@@ -13,8 +13,8 @@ import CategorySelect from "./CategorySelect";
 import DateInput from "./DateInput";
 import DescriptionInput from "./DescriptionInput";
 import { useState } from "react";
-import { insertTransaction } from "@/CRUD-operations";
-import { useTableContext } from "@/context/DateContext";
+import { insertTransaction } from "@/lib/transactions_db_operations";
+import { useTableContext } from "@/context/AppContext";
 
 function InputArea() {
   const { loadTransactions } = useTableContext();
