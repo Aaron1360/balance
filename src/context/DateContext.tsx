@@ -26,9 +26,9 @@ export interface AppContextType {
   currentSummaryDate: string;
 }
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const DateContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
+export const DateProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [SummaryDate, setSummaryDate] = useState<string>(currentSummaryDate);
@@ -41,12 +41,12 @@ export const AppContextProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
+    <DateContext.Provider value={contextValue}>{children}</DateContext.Provider>
   );
 };
 
-export const useAppContext = (): AppContextType => {
-  const context = useContext(AppContext);
+export const useDateContext = (): AppContextType => {
+  const context = useContext(DateContext);
   if (!context) {
     throw new Error("useAppContext must be used within an AppContextProvider");
   }

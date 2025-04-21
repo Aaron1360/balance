@@ -1,4 +1,4 @@
-import { useAppContext } from "@/context/AppContext";
+import { useDateContext } from "@/context/DateContext";
 import {
   Select,
   SelectContent,
@@ -11,7 +11,7 @@ import {
 export default function SelectPeriod({
   ...props
 }: React.ComponentProps<typeof Select>) {
-  const { periods } = useAppContext();
+  const { periods } = useDateContext();
 
   return (
     <Select {...props}>

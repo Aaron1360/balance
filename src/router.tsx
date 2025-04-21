@@ -7,7 +7,7 @@ import SavingsPage from "./pages/Savings";
 import DebtPage from "./pages/Debts";
 import ServiciosRoute from "./pages/Services";
 import CalendarPage from "./pages/Calendar";
-import { AppContextProvider } from "./context/AppContext";
+import { DateProvider } from "./context/DateContext";
 
 const router = createBrowserRouter([
   {
@@ -21,9 +21,9 @@ const router = createBrowserRouter([
       {
         path: "/dashboard/estado-de-cuenta",
         element: (
-          <AppContextProvider>
+          <DateProvider>
             <Report />
-          </AppContextProvider>
+          </DateProvider>
         ),
       },
       {

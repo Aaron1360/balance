@@ -1,5 +1,5 @@
 import { supabase } from "@/supabase/client";
-import { Transactions } from "@/context/AppContext";
+import { Transactions } from "@/context/DateContext";
 
 // Function to fetch transactions
 export async function fetchTransactions(): Promise<Transactions[] | null> {

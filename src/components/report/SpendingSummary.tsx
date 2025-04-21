@@ -1,4 +1,4 @@
-import { useAppContext } from "@/context/AppContext";
+import { useDateContext } from "@/context/DateContext";
 import SelectPeriod from "./SelectPeriod";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "../ui/label";
@@ -32,7 +32,7 @@ const spendingData: Record<string, number> = {
 };
 
 export default function SpendingSummary() {
-  const { SummaryDate ,currentSummaryDate } = useAppContext();
+  const { SummaryDate ,currentSummaryDate } = useDateContext();
   
     const [localSelectedPeriod, setLocalSelectedPeriod] = useState(currentSummaryDate); // Default to global period
     
