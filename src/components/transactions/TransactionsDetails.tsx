@@ -34,7 +34,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
-          {/* Información principal */}
+          {/* Main information */}
           <div>
             <h3 className="text-lg font-semibold mb-2">{transaction.description}</h3>
             <p className={cn("text-2xl font-bold", transaction.type === "income" ? "text-green-600" : "text-red-600")}>
@@ -47,7 +47,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
 
           <Separator />
 
-          {/* Detalles básicos */}
+          {/* Basic details */}
           <div className="space-y-3">
             <div className="flex items-start">
               <Calendar className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
@@ -98,7 +98,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
 
           <Separator />
 
-          {/* Detalles de pago */}
+          {/* Payment details */}
           <div className="space-y-3">
             <h4 className="font-semibold">Detalles de pago</h4>
 
@@ -139,7 +139,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
             )}
           </div>
 
-          {/* Pagos diferidos (si aplica) */}
+          {/* Deferred payments (if applicable) */}
           {transaction.type === "income" && transaction.paymentType === "diferido" && transaction.msi && (
             <>
               <Separator />
@@ -185,7 +185,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
             </>
           )}
 
-          {/* Notas */}
+          {/* Notes */}
           {transaction.notes && (
             <>
               <Separator />
@@ -196,7 +196,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
             </>
           )}
 
-          {/* Etiquetas */}
+          {/* Tags */}
           {transaction.tags && transaction.tags.length > 0 && (
             <>
               <Separator />
@@ -213,7 +213,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
             </>
           )}
 
-          {/* Botones de acción */}
+          {/* Action buttons */}
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cerrar
