@@ -8,29 +8,52 @@ interface AmountInputProps {
   onChange: (value: number) => void;
 }
 
-export default function AmountInput({ id, placeholder, value, onChange }: AmountInputProps) {
-  const [stringValue, setStringValue] = useState(formatValue(value));
-
-  useEffect(() => {
-    setStringValue(formatValue(value));
-  }, [value]);
-
-  function formatValue(num: number): string {
-    return `$${num.toFixed(0)}`; // Format to whole numbers
-  }
+export default function AmountInput({
+  id,
+  placeholder,
+  value,
+  onChange,
+}: AmountInputProps) {
+  const [stringValue, setStringValue] = useState("");
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const rawValue = e.target.value.replace(/[^0-9]/g, ""); // Allow only numbers
-    const parsedValue = parseInt(rawValue, 10);
+    let rawValue = e.target.value;
 
-    if (!isNaN(parsedValue)) {
-      onChange(parsedValue);
-      setStringValue(formatValue(parsedValue)); // Update string value
+    if (id === "amount") {
+      // Allow only one dot
+      if ((rawValue.match(/\./g) || []).length > 1) {
+        rawValue = rawValue.slice(0, -1);
+      }
+
+      rawValue = rawValue.replace(/[^0-9.]/g, "");
+
+      if (rawValue !== "") {
+        const parsedValue = rawValue === "" ? 0 : parseFloat(rawValue);
+        setStringValue(`$${rawValue}`);
+        onChange(parsedValue);
+      } else {
+        const parsedValue = rawValue === "" ? 0 : parseFloat(rawValue);
+        setStringValue("");
+        onChange(parsedValue);
+      }
     } else {
-      onChange(0);
-      setStringValue("$0");
+      // Allow only numbers
+      rawValue = rawValue.replace(/[^0-9]/g, "");
+      if (rawValue !== "") {
+        const parsedValue = rawValue === "" ? 0 : parseFloat(rawValue);
+        setStringValue(rawValue);
+        onChange(parsedValue);
+      } else {
+        const parsedValue = rawValue === "" ? 0 : parseFloat(rawValue);
+        setStringValue("");
+        onChange(parsedValue);
+      }
     }
   }
+
+  // useEffect(() => {
+  //   console.log("Value Changed:", value);
+  // }, [value]);
 
   return (
     <div className="grid items-center gap-1.5">

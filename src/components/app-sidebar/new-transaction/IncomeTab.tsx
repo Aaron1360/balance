@@ -167,7 +167,7 @@ function IncomeTab() {
           <div className="w-3/4">
             <AmountInput
               id="amount"
-              placeholder="0.00"
+              placeholder="$0.00"
               value={amount}
               onChange={setAmount}
             />
