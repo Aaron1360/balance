@@ -13,7 +13,7 @@ export default function AddTags({ value, onChange, newTag }: TagsProps) {
     <div className="col-span-7 flex items-center gap-2">
       <Input
         id="etiquetas"
-        placeholder="Añadir etiqueta"
+        placeholder="Añadir etiqueta (Opcional)"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
