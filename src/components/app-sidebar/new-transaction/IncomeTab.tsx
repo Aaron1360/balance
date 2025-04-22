@@ -112,7 +112,13 @@ function IncomeTab() {
   };
 
   // Function to handle form submission
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault()
+    if (!amount || !date || !category) {
+      alert("Fill your data.");
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -290,7 +296,7 @@ function IncomeTab() {
       </div>
 
       <DialogFooter>
-        <Button type="submit" onClick={handleSubmit} disabled={loading}>
+        <Button type="submit" onClick={(e) => handleSubmit(e)} disabled={loading}>
           {loading ? "Guardando..." : "Guardar"}
         </Button>
       </DialogFooter>
