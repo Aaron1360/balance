@@ -7,6 +7,9 @@ export type Income = {
     paymentType: string;
     amount: number;
     reference?: string;
+    numberOfPayments?: number;
+    paymentFrequency?: string[];
+    installments?: string[];
     state?: string;
     notes?: string; 
     tags?: string[];

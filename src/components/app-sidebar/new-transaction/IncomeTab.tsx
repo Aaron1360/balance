@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, TagIcon, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,55 +22,114 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import DatePicker from "./DatePicker";
 import { DialogFooter } from "../../ui/dialog";
-import { addDays, addMonths, addWeeks, format} from "date-fns";
+import { addDays, addMonths, addWeeks, format } from "date-fns";
 import { useEffect, useState } from "react";
+import { Income } from "@/types/income";
+import { Badge } from "@/components/ui/badge";
 
 function IncomeTab() {
-    const [incomeDate, setIncomeDate] = useState<Date>();
-    const [paymentType, setPaymentType] = useState("unica");
-    const [numPayments, setNumPayments] = useState(3);
-    const [paymentFrequency, setPaymentFrequency] = useState("mensual");
-    const [incomeAmount, setIncomeAmount] = useState(0);
-    const [installments, setInstallments] = useState<
-      Array<{ date: Date; amount: number; paid: boolean }>
-    >([]);
-  
-    // Calcular las cuotas cuando cambian los parámetros relevantes
-    useEffect(() => {
-      if (
-        paymentType === "diferido" &&
-        incomeDate &&
-        numPayments > 0 &&
-        incomeAmount > 0
-      ) {
-        const newInstallments = [];
-        const amountPerInstallment = incomeAmount / numPayments;
-  
-        for (let i = 0; i < numPayments; i++) {
-          let installmentDate = new Date(incomeDate);
-  
-          if (paymentFrequency === "mensual") {
-            installmentDate = addMonths(installmentDate, i);
-          } else if (paymentFrequency === "quincenal") {
-            installmentDate = addDays(installmentDate, i * 15);
-          } else if (paymentFrequency === "semanal") {
-            installmentDate = addWeeks(installmentDate, i);
-          }
-  
-          newInstallments.push({
-            date: installmentDate,
-            amount: amountPerInstallment,
-            paid: i === 0, // Primera cuota se considera pagada
-          });
+  // Form States
+  const [date, setDate] = useState<Date>();
+  const [description, setDescription] = useState<string>("");
+  const [category, setCategory] = useState<string>("");
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const [paymentType, setPaymentType] = useState("unico");
+  const [amount, setAmount] = useState(0);
+  const [reference, setReference] = useState<string | undefined>(undefined);
+  const [state, setState] = useState<string | undefined>(undefined);
+  const [notes, setNotes] = useState<string | undefined>(undefined);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+
+  // States for deferred payments
+  const [numPayments, setNumPayments] = useState(3);
+  const [paymentFrequency, setPaymentFrequency] = useState("mensual");
+  const [installments, setInstallments] = useState<
+    Array<{ date: Date; amount: number; paid: boolean }>
+  >([]);
+
+  // Function to add tags
+  const handleAddTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput("");
+    }
+  };
+
+  // Tag removal function
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  // Calculate odds when relevant parameters change
+  useEffect(() => {
+    if (paymentType === "diferido" && date && numPayments > 0 && amount > 0) {
+      const newInstallments = [];
+      const amountPerInstallment = amount / numPayments;
+
+      for (let i = 0; i < numPayments; i++) {
+        let installmentDate = new Date(date);
+
+        if (paymentFrequency === "mensual") {
+          installmentDate = addMonths(installmentDate, i);
+        } else if (paymentFrequency === "quincenal") {
+          installmentDate = addDays(installmentDate, i * 15);
+        } else if (paymentFrequency === "semanal") {
+          installmentDate = addWeeks(installmentDate, i);
         }
-  
-        setInstallments(newInstallments);
+
+        newInstallments.push({
+          date: installmentDate,
+          amount: amountPerInstallment,
+          paid: i === 0, // First installment is considered paid
+        });
       }
-    }, [paymentType, incomeDate, numPayments, paymentFrequency, incomeAmount]);
-    
+
+      setInstallments(newInstallments);
+    }
+  }, [paymentType, date, numPayments, paymentFrequency, amount]);
+
+  // Function to create a new entry
+  const createIncome = (): Income => {
+    return {
+      id: Date.now().toString(), // Generamos un ID temporal basado en la fecha
+      date: date || new Date(),
+      description,
+      amount: Math.abs(amount), // Aseguramos que sea positivo
+      category,
+      paymentMethod,
+      paymentType,
+      reference,
+      state,
+      notes,
+      tags,
+    };
+  };
+  // Function to handle form submission
+  const handleSubmit = () => {
+    const newIncome = createIncome();
+    console.log("Nuevo ingreso:", newIncome);
+    // Aquí iría la lógica para guardar el ingreso
+
+    // Clear Form
+    setDate(undefined);
+    setDescription("");
+    setAmount(0);
+    setCategory("");
+    setPaymentMethod("");
+    setPaymentType("unica");
+    setNumPayments(3);
+    setPaymentFrequency("mensual");
+    setReference("");
+    setState("completado");
+    setNotes("");
+    setTags([]);
+    setTagInput("");
+  };
+
   return (
     <form className="grid gap-4 py-2">
-      {/* Primera fila: Cantidad y Fecha */}
+      {/* First row: Quantity and Date */}
       <div className="grid grid-cols-2 gap-4">
         <div className="grid grid-cols-4 items-center gap-2">
           <Label htmlFor="income-cantidad" className="text-right">
@@ -83,21 +142,19 @@ function IncomeTab() {
             className="col-span-3"
             step="0.01"
             min="0"
-            value={incomeAmount || ""}
-            onChange={(e) =>
-              setIncomeAmount(Number.parseFloat(e.target.value) || 0)
-            }
+            value={amount || ""}
+            onChange={(e) => setAmount(Number.parseFloat(e.target.value) || 0)}
           />
         </div>
         <div className="grid grid-cols-4 items-center gap-2">
           <Label htmlFor="income-fecha" className="text-right">
             Fecha
           </Label>
-          <DatePicker date={incomeDate} setDate={setIncomeDate} />
+          <DatePicker date={date} setDate={setDate} />
         </div>
       </div>
 
-      {/* Segunda fila: Forma de pago y Tipo */}
+      {/* Second row: Payment method and type */}
       <div className="grid grid-cols-2 gap-4">
         <div className="grid grid-cols-4 items-center gap-2">
           <Label htmlFor="income-forma-pago" className="text-right">
@@ -143,10 +200,10 @@ function IncomeTab() {
         </div>
       </div>
 
-      {/* Campos adicionales para pago diferido */}
+      {/* Additional fields for deferred payment */}
       {paymentType === "diferido" && (
         <>
-          {/* Fila: Número de pagos y Frecuencia */}
+          {/* Row: Number of payments and Frequency */}
           <div className="grid grid-cols-2 gap-4">
             <div className="grid grid-cols-4 items-center gap-2">
               <Label htmlFor="num-pagos" className="text-right">
@@ -160,7 +217,7 @@ function IncomeTab() {
                 max="36"
                 value={numPayments}
                 onChange={(e) =>
-                setNumPayments(Number.parseInt(e.target.value) || 3)
+                  setNumPayments(Number.parseInt(e.target.value) || 3)
                 }
               />
             </div>
@@ -184,7 +241,7 @@ function IncomeTab() {
             </div>
           </div>
 
-          {/* Pagos pendientes */}
+          {/* Pending payments */}
           {installments.length > 0 && (
             <Card className="col-span-2">
               <CardContent className="p-4">
@@ -234,22 +291,124 @@ function IncomeTab() {
         </>
       )}
 
-      {/* Tercera fila: Descripción */}
-      <div className="grid grid-cols-8 items-start gap-2">
-        <Label
-          htmlFor="income-descripcion"
-          className="text-right col-span-1 mt-2"
-        >
-          Descripción
-        </Label>
-        <Input
-          id="income-descripcion"
-          placeholder="Breve concepto del ingreso"
-          className="col-span-7"
-        />
+      {/* Third row: Description and category */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-8 items-start gap-2">
+          <Label
+            htmlFor="income-descripcion"
+            className="text-right col-span-1 mt-2"
+          >
+            Descripción
+          </Label>
+          <Input
+            id="income-descripcion"
+            placeholder="Breve concepto del ingreso"
+            className="col-span-7"
+          />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-2">
+          <Label htmlFor="categoria" className="text-right">
+            Categoría
+          </Label>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger id="categoria" className="col-span-3">
+              <SelectValue placeholder="Seleccionar categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Salario">Salario</SelectItem>
+              <SelectItem value="Freelance">Freelance</SelectItem>
+              <SelectItem value="Inversiones">Inversiones</SelectItem>
+              <SelectItem value="Reembolso">Reembolso</SelectItem>
+              <SelectItem value="Regalo">Regalo</SelectItem>
+              <SelectItem value="Otro">Otro</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Cuarta fila: Notas */}
+      {/* Fourth row: Reference and Status */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-4 items-center gap-2">
+          <Label htmlFor="referencia" className="text-right">
+            Referencia
+          </Label>
+          <Input
+            id="referencia"
+            placeholder="Número de referencia"
+            className="col-span-3"
+            value={reference}
+            onChange={(e) => setReference(e.target.value)}
+          />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-2">
+          <Label htmlFor="estado" className="text-right">
+            Estado
+          </Label>
+          <Select value={state} onValueChange={setState}>
+            <SelectTrigger id="estado" className="col-span-3">
+              <SelectValue placeholder="Seleccionar estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="completado">Completado</SelectItem>
+              <SelectItem value="pendiente">Pendiente</SelectItem>
+              <SelectItem value="cancelado">Cancelado</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Fifth row: Labels */}
+      <div className="grid grid-cols-8 items-center gap-2">
+        <Label htmlFor="etiquetas" className="text-right col-span-1">
+          Etiquetas
+        </Label>
+        <div className="col-span-7 flex items-center gap-2">
+          <Input
+            id="etiquetas"
+            placeholder="Añadir etiqueta"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAddTag();
+              }
+            }}
+          />
+          <Button type="button" size="sm" onClick={handleAddTag}>
+            <TagIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Display Tags */}
+      {tags.length > 0 && (
+        <div className="grid grid-cols-8 items-start gap-2">
+          <div className="col-span-1"></div>
+          <div className="col-span-7 flex flex-wrap gap-2">
+            {tags.map((tag, index) => (
+              <Badge
+                key={index}
+                variant="secondary"
+                className="flex items-center gap-1"
+              >
+                {tag}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 w-4 p-0 hover:bg-transparent"
+                  onClick={() => handleRemoveTag(tag)}
+                >
+                  <XCircle className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Sixth row: Notes */}
       <div className="grid grid-cols-8 items-start gap-2">
         <Label htmlFor="income-notas" className="text-right col-span-1 mt-2">
           Notas
@@ -263,7 +422,7 @@ function IncomeTab() {
       </div>
 
       <DialogFooter>
-        <Button type="submit">Guardar</Button>
+        <Button type="submit" onClick={handleSubmit}>Guardar</Button>
       </DialogFooter>
     </form>
   );

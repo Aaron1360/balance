@@ -1,3 +1,5 @@
+"use client";
+
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
@@ -19,7 +21,7 @@ interface DatePickerProps {
 // DatePicker Component
 export default function DatePicker({ date, setDate }: DatePickerProps) {
   return (
-    <Popover>
+    <Popover modal={true}>
       <PopoverTrigger asChild>
         <Button
           id="income-fecha"
