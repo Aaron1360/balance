@@ -7,7 +7,7 @@ import DatePicker from "./DatePicker";
 import { useState } from "react";
 import { Income } from "@/types/income";
 import AmountInput from "./input-components/AmountInput";
-import CategorySelect from "@/components/input-area/CategorySelect";
+import CategorySelect from "./input-components/CategorySelect";
 import PaymentType from "./input-components/PaymentType";
 // import PendingPayments from "./input-components/PendingPayments";
 import TextInput from "./input-components/TextInput";
@@ -98,7 +98,7 @@ function IncomeTab() {
   // Function to create a new entry
   const createIncome = (): Income => {
     return {
-      id: Date.now().toString(), // Generamos un ID temporal basado en la fecha
+      // id: Date.now().toString(), // Generamos un ID temporal basado en la fecha
       date: date || new Date(),
       description,
       category,
@@ -108,6 +108,7 @@ function IncomeTab() {
       reference,
       numberOfPayments,
       paymentFrequency,
+      installments: [],
       state,
       notes,
       tags,
