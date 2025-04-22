@@ -42,6 +42,7 @@ export default function DatePicker({ date, setDate }: DatePickerProps) {
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
           mode="single"
+          initialFocus
           selected={date}
           onSelect={setDate}
           locale={es}

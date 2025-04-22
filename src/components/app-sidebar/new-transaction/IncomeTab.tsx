@@ -20,12 +20,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { DialogFooter } from "@/components/ui/dialog";
 import DatePicker from "./DatePicker";
-import { DialogFooter } from "../../ui/dialog";
 import { addDays, addMonths, addWeeks, format } from "date-fns";
 import { useEffect, useState } from "react";
 import { Income } from "@/types/income";
-import { Badge } from "@/components/ui/badge";
 
 function IncomeTab() {
   // Form States
@@ -40,6 +40,7 @@ function IncomeTab() {
   const [notes, setNotes] = useState<string | undefined>(undefined);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // States for deferred payments
   const [numPayments, setNumPayments] = useState(3);
@@ -105,31 +106,45 @@ function IncomeTab() {
       tags,
     };
   };
+
   // Function to handle form submission
   const handleSubmit = () => {
-    const newIncome = createIncome();
-    console.log("Nuevo ingreso:", newIncome);
-    // Aquí iría la lógica para guardar el ingreso
+    setLoading(true);
 
-    // Clear Form
-    setDate(undefined);
-    setDescription("");
-    setAmount(0);
-    setCategory("");
-    setPaymentMethod("");
-    setPaymentType("unica");
-    setNumPayments(3);
-    setPaymentFrequency("mensual");
-    setReference("");
-    setState("completado");
-    setNotes("");
-    setTags([]);
-    setTagInput("");
+    try {
+      const newIncome = createIncome();
+      console.log("Nuevo ingreso:", newIncome);
+      // Aquí iría la lógica para guardar el ingreso
+
+      // Reset form
+      setDate(undefined);
+      setDescription("");
+      setAmount(0);
+      setCategory("");
+      setPaymentMethod("");
+      setPaymentType("unica");
+      setNumPayments(3);
+      setPaymentFrequency("mensual");
+      setReference("");
+      setState("completado");
+      setNotes("");
+      setTags([]);
+      setTagInput("");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        console.error("Submission error:", e.message || e);
+      } else {
+        console.error("Unknown error:", e);
+      }
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form className="grid gap-4 py-2">
-      {/* First row: Quantity and Date */}
+      {/* First row: Amount and Date */}
       <div className="grid grid-cols-2 gap-4">
         <div className="grid grid-cols-4 items-center gap-2">
           <Label htmlFor="income-cantidad" className="text-right">
@@ -357,7 +372,7 @@ function IncomeTab() {
         </div>
       </div>
 
-      {/* Fifth row: Labels */}
+      {/* Fifth row: Tags */}
       <div className="grid grid-cols-8 items-center gap-2">
         <Label htmlFor="etiquetas" className="text-right col-span-1">
           Etiquetas
@@ -422,7 +437,9 @@ function IncomeTab() {
       </div>
 
       <DialogFooter>
-        <Button type="submit" onClick={handleSubmit}>Guardar</Button>
+        <Button type="submit" onClick={handleSubmit} disabled={loading}>
+          {loading ? "Guardando..." : "Guardar"}
+        </Button>
       </DialogFooter>
     </form>
   );
