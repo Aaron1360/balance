@@ -10,24 +10,28 @@ import {
 interface CategorySelectProps {
   value: string;
   onChange: (value: string) => void;
+  categories: string[];
 }
 
-const categories = [
-  "Food",
-  "Services",
-  "Bills",
-  "Transportation",
-  "Entretainment",
-  "Shopping",
-  "Healt & Wellness",
-  "Debt Repayment",
-  "Savings",
-  "Miscellaneous",
-];
+// const categories = [
+//   "Food",
+//   "Services",
+//   "Bills",
+//   "Transportation",
+//   "Entretainment",
+//   "Shopping",
+//   "Healt & Wellness",
+//   "Debt Repayment",
+//   "Savings",
+//   "Miscellaneous",
+// ];
+
+
 
 export default function CategorySelect({
   value,
   onChange,
+  categories
 }: CategorySelectProps) {
   
   return (

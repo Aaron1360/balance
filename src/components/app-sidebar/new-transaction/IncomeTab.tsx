@@ -1,31 +1,17 @@
-import { CheckCircle2, TagIcon, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { DialogFooter } from "@/components/ui/dialog";
 import DatePicker from "./DatePicker";
-import { addDays, addMonths, addWeeks, format } from "date-fns";
+import { addDays, addMonths, addWeeks } from "date-fns";
 import { useEffect, useState } from "react";
 import { Income } from "@/types/income";
+import AmountInput from "./input-components/AmountInput";
+import CategorySelect from "@/components/input-area/CategorySelect";
+import PaymentType from "./input-components/PaymentType";
+import PendingPayments from "./input-components/PendingPayments";
+import TextInput from "./input-components/TextInput";
+import AddTags from "./input-components/TagsInput";
+import DisplayTags from "./input-components/DisplayTags";
 
 function IncomeTab() {
   // Form States
@@ -48,6 +34,24 @@ function IncomeTab() {
   const [installments, setInstallments] = useState<
     Array<{ date: Date; amount: number; paid: boolean }>
   >([]);
+
+  // Lists of categories
+  const paymentMethodsCategories = [
+    "Efectivo",
+    "Transferencia",
+    "Tarjeta",
+    "Otro",
+  ];
+  const paymentFrequencyCategories = ["Mensual", "Quincenal", "Semanal"];
+  const incomeCategories = [
+    "Salario",
+    "Freelance",
+    "Inversiones",
+    "Reembolso",
+    "Regalo",
+    "Otro",
+  ];
+  const stateCategories = ["Completado", "Pendiente", "Cancelado"];
 
   // Function to add tags
   const handleAddTag = () => {
@@ -146,19 +150,15 @@ function IncomeTab() {
     <form className="grid gap-4 py-2">
       {/* First row: Amount and Date */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="grid grid-cols-4 items-center gap-2">
+        <div className="grid grid-cols-4 items-center gap-2 w-full">
           <Label htmlFor="income-cantidad" className="text-right">
             Cantidad
           </Label>
-          <Input
-            id="income-cantidad"
-            type="number"
+          <AmountInput
+            id="amount"
             placeholder="0.00"
-            className="col-span-3"
-            step="0.01"
-            min="0"
-            value={amount || ""}
-            onChange={(e) => setAmount(Number.parseFloat(e.target.value) || 0)}
+            value={amount}
+            onChange={setAmount}
           />
         </div>
         <div className="grid grid-cols-4 items-center gap-2">
@@ -175,43 +175,17 @@ function IncomeTab() {
           <Label htmlFor="income-forma-pago" className="text-right">
             Forma de pago
           </Label>
-          <Select>
-            <SelectTrigger id="income-forma-pago" className="col-span-3">
-              <SelectValue placeholder="Seleccionar forma" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="efectivo">Efectivo</SelectItem>
-              <SelectItem value="transferencia">
-                Transferencia bancaria
-              </SelectItem>
-              <SelectItem value="tarjeta">Tarjeta</SelectItem>
-              <SelectItem value="otro">Otro</SelectItem>
-            </SelectContent>
-          </Select>
+          <CategorySelect
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+            categories={paymentMethodsCategories}
+          />
         </div>
         <div className="grid grid-cols-4 items-center gap-2">
           <Label htmlFor="income-tipo" className="text-right">
             Tipo
           </Label>
-          <RadioGroup
-            defaultValue="unica"
-            className="col-span-3 flex gap-4"
-            value={paymentType}
-            onValueChange={setPaymentType}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="unica" id="unica" />
-              <Label htmlFor="unica" className="font-normal">
-                Única exhibición
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="diferido" id="diferido" />
-              <Label htmlFor="diferido" className="font-normal">
-                Diferido
-              </Label>
-            </div>
-          </RadioGroup>
+          <PaymentType value={paymentType} onChange={setPaymentType} />
         </div>
       </div>
 
@@ -224,85 +198,27 @@ function IncomeTab() {
               <Label htmlFor="num-pagos" className="text-right">
                 Número de pagos
               </Label>
-              <Input
-                id="num-pagos"
-                type="number"
-                className="col-span-3"
-                min="2"
-                max="36"
+              <AmountInput
+                id="num-payments"
+                placeholder="0"
                 value={numPayments}
-                onChange={(e) =>
-                  setNumPayments(Number.parseInt(e.target.value) || 3)
-                }
+                onChange={setNumPayments}
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-2">
               <Label htmlFor="frecuencia" className="text-right">
                 Frecuencia
               </Label>
-              <Select
+              <CategorySelect
                 value={paymentFrequency}
-                onValueChange={setPaymentFrequency}
-              >
-                <SelectTrigger id="frecuencia" className="col-span-3">
-                  <SelectValue placeholder="Seleccionar frecuencia" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mensual">Mensual</SelectItem>
-                  <SelectItem value="quincenal">Quincenal</SelectItem>
-                  <SelectItem value="semanal">Semanal</SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={setPaymentFrequency}
+                categories={paymentFrequencyCategories}
+              />
             </div>
           </div>
 
           {/* Pending payments */}
-          {installments.length > 0 && (
-            <Card className="col-span-2">
-              <CardContent className="p-4">
-                <Label className="text-sm font-medium mb-2 block">
-                  Pagos pendientes
-                </Label>
-                <div className="max-h-[200px] overflow-y-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[100px]">Fecha</TableHead>
-                        <TableHead>Monto</TableHead>
-                        <TableHead className="text-right">Estado</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {installments.map((installment, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">
-                            {format(installment.date, "dd/MM/yyyy")}
-                          </TableCell>
-                          <TableCell>
-                            {installment.amount.toLocaleString("es-MX", {
-                              style: "currency",
-                              currency: "MXN",
-                            })}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {installment.paid ? (
-                              <span className="flex items-center justify-end text-green-600">
-                                <CheckCircle2 className="h-4 w-4 mr-1" /> Pagado
-                              </span>
-                            ) : (
-                              <span className="flex items-center justify-end text-amber-600">
-                                <XCircle className="h-4 w-4 mr-1" /> Pendiente
-                              </span>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <PendingPayments installments={installments} />
         </>
       )}
 
@@ -315,29 +231,22 @@ function IncomeTab() {
           >
             Descripción
           </Label>
-          <Input
-            id="income-descripcion"
-            placeholder="Breve concepto del ingreso"
-            className="col-span-7"
+          <TextInput
+            id="input-description"
+            placeholder="Breve descripción del ingreso"
+            value={description}
+            onChange={setDescription}
           />
         </div>
         <div className="grid grid-cols-4 items-center gap-2">
           <Label htmlFor="categoria" className="text-right">
             Categoría
           </Label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger id="categoria" className="col-span-3">
-              <SelectValue placeholder="Seleccionar categoría" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Salario">Salario</SelectItem>
-              <SelectItem value="Freelance">Freelance</SelectItem>
-              <SelectItem value="Inversiones">Inversiones</SelectItem>
-              <SelectItem value="Reembolso">Reembolso</SelectItem>
-              <SelectItem value="Regalo">Regalo</SelectItem>
-              <SelectItem value="Otro">Otro</SelectItem>
-            </SelectContent>
-          </Select>
+          <CategorySelect
+            value={category}
+            onChange={setCategory}
+            categories={incomeCategories}
+          />
         </div>
       </div>
 
@@ -347,28 +256,17 @@ function IncomeTab() {
           <Label htmlFor="referencia" className="text-right">
             Referencia
           </Label>
-          <Input
-            id="referencia"
-            placeholder="Número de referencia"
-            className="col-span-3"
-            value={reference}
-            onChange={(e) => setReference(e.target.value)}
-          />
+          <TextInput id="reference" placeholder="Número de referencia (opcional)" value={reference? reference: ""} onChange={setReference} />
         </div>
         <div className="grid grid-cols-4 items-center gap-2">
           <Label htmlFor="estado" className="text-right">
             Estado
           </Label>
-          <Select value={state} onValueChange={setState}>
-            <SelectTrigger id="estado" className="col-span-3">
-              <SelectValue placeholder="Seleccionar estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="completado">Completado</SelectItem>
-              <SelectItem value="pendiente">Pendiente</SelectItem>
-              <SelectItem value="cancelado">Cancelado</SelectItem>
-            </SelectContent>
-          </Select>
+          <CategorySelect
+            value={state? state: ""}
+            onChange={setState}
+            categories={stateCategories}
+          />
         </div>
       </div>
 
@@ -377,63 +275,18 @@ function IncomeTab() {
         <Label htmlFor="etiquetas" className="text-right col-span-1">
           Etiquetas
         </Label>
-        <div className="col-span-7 flex items-center gap-2">
-          <Input
-            id="etiquetas"
-            placeholder="Añadir etiqueta"
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleAddTag();
-              }
-            }}
-          />
-          <Button type="button" size="sm" onClick={handleAddTag}>
-            <TagIcon className="h-4 w-4" />
-          </Button>
-        </div>
+        <AddTags value={tagInput} onChange={setTagInput} newTag={handleAddTag}/>
       </div>
 
       {/* Display Tags */}
-      {tags.length > 0 && (
-        <div className="grid grid-cols-8 items-start gap-2">
-          <div className="col-span-1"></div>
-          <div className="col-span-7 flex flex-wrap gap-2">
-            {tags.map((tag, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {tag}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => handleRemoveTag(tag)}
-                >
-                  <XCircle className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
+      <DisplayTags value={tags} onChange={handleRemoveTag}/>
 
       {/* Sixth row: Notes */}
       <div className="grid grid-cols-8 items-start gap-2">
         <Label htmlFor="income-notas" className="text-right col-span-1 mt-2">
           Notas
         </Label>
-        <Textarea
-          id="income-notas"
-          placeholder="Observaciones relevantes"
-          className="col-span-7"
-          rows={2}
-        />
+        <TextInput id="income-notes" placeholder="Observaciones relevantes (opcional)" value={notes? notes: ""} onChange={setNotes}/>
       </div>
 
       <DialogFooter>
