@@ -56,5 +56,12 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0"
+  },
+  "overrides": {
+    "react-is": "^19.0.0-rc-69d4b800-20241021",
+    "react-day-picker": {
+      "react": "^16.8 || ^17.0 || ^18.0 || ^19.0",
+      "react-dom": "^16.8 || ^17.0 || ^18.0 || ^19.0"
+    }
   }
 }
