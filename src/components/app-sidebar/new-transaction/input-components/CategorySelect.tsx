@@ -8,27 +8,14 @@ import {
   } from "@/components/ui/select";
   
   interface CategorySelectProps {
+    id: string,
     value: string;
     onChange: (value: string) => void;
     categories: string[];
   }
   
-  // const categories = [
-  //   "Food",
-  //   "Services",
-  //   "Bills",
-  //   "Transportation",
-  //   "Entretainment",
-  //   "Shopping",
-  //   "Healt & Wellness",
-  //   "Debt Repayment",
-  //   "Savings",
-  //   "Miscellaneous",
-  // ];
-  
-  
-  
   export default function CategorySelect({
+    id,
     value,
     onChange,
     categories
@@ -37,7 +24,7 @@ import {
     return (
       <div className="grid items-center gap-1.5">
         <Select value={value} onValueChange={(value) => onChange(value)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger id={id} className="w-[180px]">
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>

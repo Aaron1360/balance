@@ -2,13 +2,15 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface PaymentTypeProps {
-    value: string;
-    onChange: (value: string) => void;
-  }
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+}
 
-function PaymentType({ value, onChange }: PaymentTypeProps) {
+function PaymentType({ id, value, onChange }: PaymentTypeProps) {
   return (
     <RadioGroup
+      aria-labelledby={id}
       defaultValue="unica"
       className="col-span-3 flex gap-4"
       value={value}

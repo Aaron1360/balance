@@ -1,22 +1,22 @@
+// import { addDays, addMonths, addWeeks } from "date-fns";
+// import { useEffect, useState } from "react";
+// import PendingPayments from "./input-components/PendingPayments";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DialogFooter } from "@/components/ui/dialog";
 import DatePicker from "./DatePicker";
-// import { addDays, addMonths, addWeeks } from "date-fns";
-// import { useEffect, useState } from "react";
-import { useState } from "react";
-import { Income } from "@/types/income";
 import AmountInput from "./input-components/AmountInput";
 import NumPaymentsInput from "./input-components/NumPaymentsInput";
 import CategorySelect from "./input-components/CategorySelect";
 import PaymentType from "./input-components/PaymentType";
-// import PendingPayments from "./input-components/PendingPayments";
 import TextInput from "./input-components/TextInput";
 import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
 import { useInsertTableData } from "@/hooks/useInsertTableData";
+import { Income } from "@/types/income";
 
-function IncomeTab() {
+export default function IncomeTab() {
   // Supabase custom hooks
   const { insertData, isLoading, error } = useInsertTableData<Income>("income");
 
@@ -169,7 +169,7 @@ function IncomeTab() {
       {/* First row: Amount and Date */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
-          <Label htmlFor="income-cantidad" className="w-1/4 text-right">
+          <Label htmlFor="amount" className="w-1/4 text-right">
             Cantidad
           </Label>
           <div className="w-3/4">
@@ -182,11 +182,11 @@ function IncomeTab() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="income-fecha" className="w-1/4 text-right">
+          <Label htmlFor="date" className="w-1/4 text-right">
             Fecha
           </Label>
           <div className="w-3/4">
-            <DatePicker date={date} setDate={setDate} />
+            <DatePicker id="date" date={date} setDate={setDate} />
           </div>
         </div>
       </div>
@@ -194,11 +194,12 @@ function IncomeTab() {
       {/* Second row: Payment method and type */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
-          <Label htmlFor="paymentMethod" className="w-1/4 text-right">
+          <Label htmlFor="payment_method" className="w-1/4 text-right">
             Forma de pago
           </Label>
           <div className="w-3/4">
             <CategorySelect
+              id="payment_method"
               value={paymentMethod}
               onChange={setPaymentMethod}
               categories={paymentMethodsCategories}
@@ -206,11 +207,15 @@ function IncomeTab() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="paymentType" className="w-1/4 text-right">
+          <Label htmlFor="payment_type" className="w-1/4 text-right">
             Tipo
           </Label>
           <div className="w-3/4">
-            <PaymentType value={paymentType} onChange={setPaymentType} />
+            <PaymentType
+              id="payment_type"
+              value={paymentType}
+              onChange={setPaymentType}
+            />
           </div>
         </div>
       </div>
@@ -221,7 +226,7 @@ function IncomeTab() {
           {/* Row: Number of payments and Frequency */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
-              <Label htmlFor="num-pagos" className="w-1/4 text-right">
+              <Label htmlFor="number_of_payments" className="w-1/4 text-right">
                 Número de pagos
               </Label>
               <div className="w-3/4">
@@ -234,11 +239,12 @@ function IncomeTab() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Label htmlFor="frecuencia" className="w-1/4 text-right">
+              <Label htmlFor="payment_frequency" className="w-1/4 text-right">
                 Frecuencia
               </Label>
               <div className="w-3/4">
                 <CategorySelect
+                  id="payment_frequency"
                   value={paymentFrequency}
                   onChange={setPaymentFrequency}
                   categories={paymentFrequencyCategories}
@@ -255,12 +261,12 @@ function IncomeTab() {
       {/* Third row: Description and category */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-start gap-2">
-          <Label htmlFor="income-descripcion" className="w-1/4 text-right mt-2">
+          <Label htmlFor="description" className="w-1/4 text-right mt-2">
             Descripción
           </Label>
           <div className="w-3/4">
             <TextInput
-              id="input-description"
+              id="description"
               placeholder="Describe tu ingreso"
               value={description}
               onChange={setDescription}
@@ -268,11 +274,12 @@ function IncomeTab() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="categoria" className="w-1/4 text-right">
+          <Label htmlFor="category" className="w-1/4 text-right">
             Categoría
           </Label>
           <div className="w-3/4">
             <CategorySelect
+              id="category"
               value={category}
               onChange={setCategory}
               categories={incomeCategories}
@@ -284,7 +291,7 @@ function IncomeTab() {
       {/* Fourth row: Reference and Status */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
-          <Label htmlFor="referencia" className="w-1/4 text-right">
+          <Label htmlFor="reference" className="w-1/4 text-right">
             Referencia
           </Label>
           <div className="w-3/4">
@@ -297,11 +304,12 @@ function IncomeTab() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="estado" className="w-1/4 text-right">
+          <Label htmlFor="state" className="w-1/4 text-right">
             Estado
           </Label>
           <div className="w-3/4">
             <CategorySelect
+              id="state"
               value={state ? state : ""}
               onChange={setState}
               categories={stateCategories}
@@ -312,11 +320,12 @@ function IncomeTab() {
 
       {/* Fifth row: Tags */}
       <div className="flex items-center gap-2">
-        <Label htmlFor="etiquetas" className="w-1/8 text-right">
+        <Label htmlFor="tags" className="w-1/8 text-right">
           Etiquetas
         </Label>
         <div className="w-7/8">
           <AddTags
+            id="tags"
             value={tagInput}
             onChange={setTagInput}
             newTag={handleAddTag}
@@ -329,12 +338,12 @@ function IncomeTab() {
 
       {/* Sixth row: Notes */}
       <div className="flex items-start gap-2">
-        <Label htmlFor="income-notas" className="w-1/8 text-right mt-2">
+        <Label htmlFor="notes" className="w-1/8 text-right mt-2">
           Notas
         </Label>
         <div className="w-7/8">
           <TextInput
-            id="income-notes"
+            id="notes"
             placeholder="Observaciones relevantes (opcional)"
             value={notes ? notes : ""}
             onChange={setNotes}
@@ -357,5 +366,3 @@ function IncomeTab() {
     </form>
   );
 }
-
-export default IncomeTab;

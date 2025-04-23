@@ -12,17 +12,18 @@ import { CalendarIcon } from "lucide-react";
 
 // Define the arguments type for the DatePicker component
 interface DatePickerProps {
+  id: string,
   date: Date | undefined;
   setDate: (date: Date | undefined) => void;
 }
 
 // DatePicker Component
-export default function DatePicker({ date, setDate }: DatePickerProps) {
+export default function DatePicker({ id, date, setDate }: DatePickerProps) {
   return (
     <Popover modal={true}>
       <PopoverTrigger asChild>
         <Button
-          id="income-fecha"
+          id={id}
           variant={"outline"}
           className={cn(
             "col-span-3 justify-start text-left font-normal",

@@ -8,8 +8,8 @@ export type Income = {
   reference?: string;
   number_of_payments?: number;
   payment_frequency?: string;
-  installments?: string[];  // Optional: Only if your DB supports arrays
-  state?: string;
+  installments?: string[];  
+  state?: string; // TODO: remove state value
   notes?: string;
-  tags?: string[];          // Optional: Only if your DB supports arrays
+  tags?: string[];          
 };

@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import IncomeTab from "./IncomeTab";
 import OutcomeTab from "./OutcomeTab";
 
 function NewTransactionTabs() {
-    const [date, setDate] = useState<Date>();
 
   return (
     <Tabs defaultValue="income" className="w-full">
@@ -20,7 +18,7 @@ function NewTransactionTabs() {
 
       {/* Outcome Tab */}
       <TabsContent value="expense">
-        <OutcomeTab date={date} setDate={setDate}/>
+        <OutcomeTab />
       </TabsContent>
     </Tabs>
   );

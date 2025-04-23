@@ -4,15 +4,16 @@ import { TagIcon } from "lucide-react";
 import React from "react";
 
 interface TagsProps {
+  id: string;
   value: string;
   onChange: (value: React.SetStateAction<string>) => void;
   newTag: () => void;
 }
-export default function AddTags({ value, onChange, newTag }: TagsProps) {
+export default function AddTags({ id, value, onChange, newTag }: TagsProps) {
   return (
     <div className="col-span-7 flex items-center gap-2">
       <Input
-        id="etiquetas"
+        id={id}
         placeholder="Añadir etiqueta (Opcional)"
         value={value}
         onChange={(e) => onChange(e.target.value)}
