@@ -7,6 +7,7 @@ import DatePicker from "./DatePicker";
 import { useState } from "react";
 import { Income } from "@/types/income";
 import AmountInput from "./input-components/AmountInput";
+import NumPaymentsInput from "./input-components/NumPaymentsInput";
 import CategorySelect from "./input-components/CategorySelect";
 import PaymentType from "./input-components/PaymentType";
 // import PendingPayments from "./input-components/PendingPayments";
@@ -16,7 +17,7 @@ import DisplayTags from "./input-components/DisplayTags";
 
 function IncomeTab() {
   // Form States
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("Salario");
   const [paymentMethod, setPaymentMethod] = useState<string>("Efectivo");
@@ -67,7 +68,7 @@ function IncomeTab() {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  // Calculate odds when relevant parameters change
+  // Define Installments
   // useEffect(() => {
   //   if (paymentType === "diferido" && date && numberOfPayments > 0 && amount > 0) {
   //     const newInstallments = [];
@@ -97,27 +98,30 @@ function IncomeTab() {
 
   // Function to create a new entry
   const createIncome = (): Income => {
+    if (!date) {
+      throw new Error("Date is required to create an income entry.");
+    }
     return {
-      // id: Date.now().toString(), // Generamos un ID temporal basado en la fecha
-      date: date || new Date(),
-      description,
-      category,
-      paymentMethod,
-      paymentType,
-      amount: Math.abs(amount), // Aseguramos que sea positivo
-      reference,
-      numberOfPayments,
-      paymentFrequency,
-      installments: [],
-      state,
-      notes,
-      tags,
+      date: date,
+      description: description,
+      category: category,
+      paymentMethod: paymentMethod,
+      paymentType: paymentType,
+      amount: amount,
+      reference: reference || undefined,
+      numberOfPayments: numberOfPayments || undefined,
+      paymentFrequency: paymentFrequency || undefined,
+      installments: [], // You can populate this later based on your payment logic
+      state: state || undefined,
+      notes: notes || undefined,
+      tags: tags.length ? tags : undefined,
     };
   };
 
   // Function to handle form submission
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
+
     if (!amount || !date || !category) {
       alert("Fill your data.");
       return;
@@ -128,17 +132,17 @@ function IncomeTab() {
     try {
       const newIncome = createIncome();
       console.log("Nuevo ingreso:", newIncome);
-      // Aquí iría la lógica para guardar el ingreso
+      // Logic to store newIncome will go here
 
       // Reset form
-      setDate(undefined);
+      setDate(new Date());
       setDescription("");
       setAmount(0);
       setCategory("");
       setPaymentMethod("");
       setPaymentType("unica");
-      setNumberOfPayments(3);
-      setPaymentFrequency("mensual");
+      setNumberOfPayments(0);
+      setPaymentFrequency("Mensual");
       setReference("");
       setState("completado");
       setNotes("");
@@ -217,7 +221,7 @@ function IncomeTab() {
                 Número de pagos
               </Label>
               <div className="w-3/4">
-                <AmountInput
+                <NumPaymentsInput
                   id="num-payments"
                   placeholder="0"
                   value={numberOfPayments}

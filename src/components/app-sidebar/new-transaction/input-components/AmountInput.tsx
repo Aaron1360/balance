@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface AmountInputProps {
   id: string;
@@ -8,52 +8,54 @@ interface AmountInputProps {
   onChange: (value: number) => void;
 }
 
+function formatCurrencyInput(rawValue: string | number): string {
+  let valueStr = typeof rawValue === "number" ? rawValue.toString() : rawValue;
+  valueStr = valueStr.replace(/[^0-9.]/g, "");
+
+  const dotCount = (valueStr.match(/\./g) || []).length;
+  if (dotCount > 1) {
+    const firstDotIndex = valueStr.indexOf(".");
+    valueStr =
+      valueStr.slice(0, firstDotIndex + 1) +
+      valueStr.slice(firstDotIndex + 1).replace(/\./g, "");
+  }
+
+  return valueStr ? `$${valueStr}` : "";
+}
+
 export default function AmountInput({
   id,
   placeholder,
   value,
   onChange,
 }: AmountInputProps) {
-  const [stringValue, setStringValue] = useState("");
+  const [stringValue, setStringValue] = useState(formatCurrencyInput(value));
+
+  if(stringValue === "$0"){setStringValue("")}
+
+  useEffect(() => {
+    setStringValue(formatCurrencyInput(value));
+  }, [value]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     let rawValue = e.target.value;
 
-    if (id === "amount") {
-      // Allow only one dot
-      if ((rawValue.match(/\./g) || []).length > 1) {
-        rawValue = rawValue.slice(0, -1);
-      }
+    // Allow only one dot
+    if ((rawValue.match(/\./g) || []).length > 1) {
+      rawValue = rawValue.slice(0, -1);
+    }
 
-      rawValue = rawValue.replace(/[^0-9.]/g, "");
+    rawValue = rawValue.replace(/[^0-9.]/g, "");
 
-      if (rawValue !== "") {
-        const parsedValue = rawValue === "" ? 0 : parseFloat(rawValue);
-        setStringValue(`$${rawValue}`);
-        onChange(parsedValue);
-      } else {
-        const parsedValue = rawValue === "" ? 0 : parseFloat(rawValue);
-        setStringValue("");
-        onChange(parsedValue);
-      }
+    if (rawValue !== "") {
+      const parsedValue = parseFloat(rawValue);
+      onChange(parsedValue);
+      setStringValue(`$${rawValue}`);
     } else {
-      // Allow only numbers
-      rawValue = rawValue.replace(/[^0-9]/g, "");
-      if (rawValue !== "") {
-        const parsedValue = rawValue === "" ? 0 : parseFloat(rawValue);
-        setStringValue(rawValue);
-        onChange(parsedValue);
-      } else {
-        const parsedValue = rawValue === "" ? 0 : parseFloat(rawValue);
-        setStringValue("");
-        onChange(parsedValue);
-      }
+      onChange(0);
+      setStringValue(formatCurrencyInput(0));
     }
   }
-
-  // useEffect(() => {
-  //   console.log("Value Changed:", value);
-  // }, [value]);
 
   return (
     <div className="grid items-center gap-1.5">
