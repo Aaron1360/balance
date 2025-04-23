@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface AmountInputProps {
   id: string;
@@ -16,22 +16,20 @@ export default function NumPaymentsInput({
 }: AmountInputProps) {
   const [stringValue, setStringValue] = useState(value.toString());
 
+  if (stringValue === "0") {setStringValue("")}
+
+  useEffect(() => {
+    setStringValue(value.toString());
+  }, [value]);
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    let rawValue = e.target.value;
+    const cleanedValue = e.target.value.replace(/[^0-9]/g, "");
+    setStringValue(cleanedValue);
 
-    // Allow only numbers
-    rawValue = rawValue.replace(/[^0-9]/g, "");
-
-    if (rawValue !== "") {
-      const parsedValue = rawValue === "" ? 0 : parseFloat(rawValue);
-      setStringValue(rawValue);
-      onChange(parsedValue);
-    } else {
-      const parsedValue = rawValue === "" ? 0 : parseFloat(rawValue);
-      setStringValue("");
-      onChange(parsedValue);
-    }
+    const parsedValue = cleanedValue ? parseInt(cleanedValue) : 0;
+    onChange(parsedValue);
   }
+
   return (
     <div className="grid items-center gap-1.5">
       <Input

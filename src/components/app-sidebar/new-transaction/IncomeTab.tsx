@@ -34,7 +34,7 @@ function IncomeTab() {
   const [tagInput, setTagInput] = useState("");
 
   // States for deferred payments
-  const [numberOfPayments, setNumberOfPayments] = useState(3);
+  const [numberOfPayments, setNumberOfPayments] = useState(1);
   const [paymentFrequency, setPaymentFrequency] = useState("");
   // const [installments, setInstallments] = useState<
   //   Array<{ date: Date; amount: number; paid: boolean }>
