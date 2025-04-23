@@ -14,8 +14,12 @@ import PaymentType from "./input-components/PaymentType";
 import TextInput from "./input-components/TextInput";
 import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
+import { useInsertTableData } from "@/hooks/useInsertTableData";
 
 function IncomeTab() {
+  // Supabase custom hooks
+  const { insertData, isLoading, error } = useInsertTableData<Income>("income");
+
   // Form States
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [description, setDescription] = useState<string>("");
@@ -28,11 +32,10 @@ function IncomeTab() {
   const [notes, setNotes] = useState<string | undefined>(undefined);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-  const [loading, setLoading] = useState(false);
 
   // States for deferred payments
   const [numberOfPayments, setNumberOfPayments] = useState(3);
-  const [paymentFrequency, setPaymentFrequency] = useState("Mensual");
+  const [paymentFrequency, setPaymentFrequency] = useState("");
   // const [installments, setInstallments] = useState<
   //   Array<{ date: Date; amount: number; paid: boolean }>
   // >([]);
@@ -105,12 +108,12 @@ function IncomeTab() {
       date: date,
       description: description,
       category: category,
-      paymentMethod: paymentMethod,
-      paymentType: paymentType,
+      payment_method: paymentMethod,
+      payment_type: paymentType,
       amount: amount,
       reference: reference || undefined,
-      numberOfPayments: numberOfPayments || undefined,
-      paymentFrequency: paymentFrequency || undefined,
+      number_of_payments: numberOfPayments || undefined,
+      payment_frequency: paymentFrequency || undefined,
       installments: [], // You can populate this later based on your payment logic
       state: state || undefined,
       notes: notes || undefined,
@@ -119,7 +122,9 @@ function IncomeTab() {
   };
 
   // Function to handle form submission
-  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleSubmit = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     e.preventDefault();
 
     if (!amount || !date || !category) {
@@ -127,12 +132,13 @@ function IncomeTab() {
       return;
     }
 
-    setLoading(true);
-
     try {
       const newIncome = createIncome();
-      console.log("Nuevo ingreso:", newIncome);
-      // Logic to store newIncome will go here
+      if (!newIncome) return;
+
+      console.log(newIncome);
+      // Save new record
+      await insertData(newIncome);
 
       // Reset form
       setDate(new Date());
@@ -142,7 +148,7 @@ function IncomeTab() {
       setPaymentMethod("");
       setPaymentType("unica");
       setNumberOfPayments(0);
-      setPaymentFrequency("Mensual");
+      setPaymentFrequency("");
       setReference("");
       setState("completado");
       setNotes("");
@@ -155,8 +161,6 @@ function IncomeTab() {
         console.error("Unknown error:", e);
       }
       alert("Something went wrong");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -342,10 +346,13 @@ function IncomeTab() {
         <Button
           type="submit"
           onClick={(e) => handleSubmit(e)}
-          disabled={loading}
+          disabled={isLoading}
         >
-          {loading ? "Guardando..." : "Guardar"}
+          {isLoading ? "Guardando..." : "Guardar"}
         </Button>
+        {error && (
+          <p className="text-red-500 text-sm mt-2">Error: {error.message}</p>
+        )}
       </DialogFooter>
     </form>
   );

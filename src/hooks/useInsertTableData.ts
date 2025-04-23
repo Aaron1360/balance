@@ -10,8 +10,8 @@ export function useInsertTableData<T>(tableName: string) {
     setError(null);
     try {
       await insertTableData<T>(tableName, record);
-    } catch (error: any) {
-      setError(error);
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error : new Error("An unknown error occurred"));
     } finally {
       setIsLoading(false);
     }

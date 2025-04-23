@@ -1,17 +1,15 @@
 export type Income = {
-    // id: string;
-    date: Date;
-    description: string;
-    category: string;
-    paymentMethod: string;
-    paymentType: string;
-    amount: number;
-    reference?: string;
-    numberOfPayments?: number;
-    paymentFrequency?: string;
-    installments?: string[];
-    state?: string;
-    notes?: string; 
-    tags?: string[];
-  };
-  
+  date: Date;
+  description: string;
+  category: string;
+  payment_method: string;
+  payment_type: string;
+  amount: number;
+  reference?: string;
+  number_of_payments?: number;
+  payment_frequency?: string;
+  installments?: string[];  // Optional: Only if your DB supports arrays
+  state?: string;
+  notes?: string;
+  tags?: string[];          // Optional: Only if your DB supports arrays
+};
