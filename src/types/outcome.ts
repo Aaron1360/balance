@@ -1,4 +1,4 @@
-export type outcome = {
+export type Outcome = {
     date: Date,
     description: string,
     category: string,

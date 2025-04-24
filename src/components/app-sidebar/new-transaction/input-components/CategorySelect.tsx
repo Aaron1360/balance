@@ -25,7 +25,7 @@ import {
       <div className="grid items-center gap-1.5">
         <Select value={value} onValueChange={(value) => onChange(value)}>
           <SelectTrigger id={id} className="w-[180px]">
-            <SelectValue placeholder="Select a category" />
+            <SelectValue placeholder="Selecciona una categoría" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>

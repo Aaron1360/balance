@@ -1,297 +1,329 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { DialogFooter } from "@/components/ui/dialog";
 import DatePicker from "./DatePicker";
-import { DialogFooter } from "../../ui/dialog";
+import AmountInput from "./input-components/AmountInput";
+import NumPaymentsInput from "./input-components/NumPaymentsInput";
+import CategorySelect from "./input-components/CategorySelect";
+import PaymentType from "./input-components/PaymentType";
+import TextInput from "./input-components/TextInput";
+import AddTags from "./input-components/TagsInput";
+import DisplayTags from "./input-components/DisplayTags";
+import { useInsertTableData } from "@/hooks/useInsertTableData";
+import { Outcome } from "@/types/outcome";
 
-function OutcomeTab() {
+export default function OutcomeTab() {
+  // Supabase custom hooks
+  const { insertData, isLoading, error } = useInsertTableData<Outcome>("outcome");
+
+  // Form States
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [description, setDescription] = useState<string>("");
+  const [category, setCategory] = useState<string>("Varios");
+  const [paymentMethod, setPaymentMethod] = useState<string>("Tarjeta");
+  const [paymentType, setPaymentType] = useState("unica");
+  const [amount, setAmount] = useState(0);
+  const [merchant, setMerchant] = useState<string>("");
+  const [status, setStatus] = useState<string>("Completado");
+  const [reference, setReference] = useState<string | undefined>(undefined);
+  const [notes, setNotes] = useState<string | undefined>(undefined);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+
+  // State for deferred payments
+  const [msi, setMsi] = useState(0);
+
+  // Lists of categories
+  const outcomeCategories = [
+    "Comida",
+    "Servicios",
+    "Facturas",
+    "Transporte",
+    "Entretenimiento",
+    "Compras",
+    "Salud y Bienestar",
+    "Pago de Deudas",
+    "Ahorros",
+    "Varios",
+  ];
+
+  const paymentMethodsCategories = [
+    "Efectivo",
+    "Transferencia",
+    "Tarjeta",
+    "Otro",
+  ];
+
+  const stateCategories = ["Completado", "Pendiente", "Cancelado"];
+
+  // Function to add tags
+  const handleAddTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput("");
+    }
+  };
+
+  // Tag removal function
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
+  // Function to create a new outcome object
+  const createOutcome = (): Outcome=> {
+    if (!date) {
+      throw new Error("Date is required");
+    }
+    return {
+      date: date,
+      description: description,
+      category: category,
+      payment_method: paymentMethod,
+      payment_type: paymentType,
+      amount: amount,
+      merchant: merchant,
+      status: status,
+      reference: reference || undefined,
+      msi: msi || undefined,
+      notes: notes || undefined,
+      tags: tags.length ? tags : undefined,
+    };
+  }
+  
+  // Function to handle form submission
+  const handleSubmit = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+
+    if (!amount || !date || !category) {
+      alert("Fill your data.");
+      return;
+    }
+
+    try {
+      const newOutcome = createOutcome();
+      if (!newOutcome) return;
+
+      console.log(newOutcome);
+      // Save new record
+      await insertData(newOutcome);
+
+      // Reset form
+      setDate(new Date());
+      setDescription("");
+      setAmount(0);
+      setCategory("");
+      setPaymentMethod("");
+      setPaymentType("unica");
+      setMsi(0);
+      setReference("");
+      setStatus("completado");
+      setNotes("");
+      setTags([]);
+      setTagInput("");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        console.error("Submission error:", e.message || e);
+      } else {
+        console.error("Unknown error:", e);
+      }
+      alert("Something went wrong");
+    }
+  };
+
   return (
     <form className="grid gap-4 py-2">
-      {/* Primera fila: Cantidad y Fecha */}
+      {/* First row: Amount and Date */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="grid grid-cols-4 items-center gap-2">
-          <Label htmlFor="expense-cantidad" className="text-right">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="amount" className="w-1/4 text-right">
             Cantidad
           </Label>
-          <Input
-            id="expense-cantidad"
-            type="number"
-            placeholder="0.00"
-            className="col-span-3"
-            step="0.01"
-            min="0"
-            value={expenseAmount || ""}
-            onChange={(e) =>
-              setExpenseAmount(Number.parseFloat(e.target.value) || 0)
-            }
-          />
+          <div className="w-3/4">
+            <AmountInput
+              id="amount"
+              placeholder="$0.00"
+              value={amount}
+              onChange={setAmount}
+            />
+          </div>
         </div>
-        <div className="grid grid-cols-4 items-center gap-2">
-          <Label htmlFor="expense-fecha" className="text-right">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="date" className="w-1/4 text-right">
             Fecha
           </Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id="expense-fecha"
-                variant={"outline"}
-                className={cn(
-                  "col-span-3 justify-start text-left font-normal",
-                  !expenseDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {expenseDate ? format(expenseDate, "dd/MM/yyyy") : "DD/MM/AAAA"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start" side="bottom">
-              <Calendar
-                mode="single"
-                selected={expenseDate}
-                onSelect={setExpenseDate}
-                locale={es}
-              />
-            </PopoverContent>
-          </Popover>
+          <div className="w-3/4">
+            <DatePicker id="date" date={date} setDate={setDate} />
+          </div>
         </div>
       </div>
 
-      {/* Segunda fila: Descripción y Comerciante */}
+      {/* Second row: Description and Merchant */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="grid grid-cols-4 items-center gap-2">
-          <Label htmlFor="expense-descripcion" className="text-right">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="description" className="w-1/4 text-right">
             Descripción
           </Label>
-          <Input
-            id="expense-descripcion"
-            placeholder="Breve concepto del gasto"
-            className="col-span-3"
-            value={expenseDescription}
-            onChange={(e) => setExpenseDescription(e.target.value)}
-          />
+          <div className="w-3/4">
+            <TextInput
+              id="description"
+              placeholder="Describe tu ingreso"
+              value={description}
+              onChange={setDescription}
+            />
+          </div>
         </div>
-        <div className="grid grid-cols-4 items-center gap-2">
-          <Label htmlFor="expense-merchant" className="text-right">
-            Comerciante
+        <div className="flex items-center gap-2">
+          <Label htmlFor="merchant" className="w-1/4 text-right">
+            Comercio
           </Label>
-          <Input
-            id="expense-merchant"
-            placeholder="Nombre del comercio"
-            className="col-span-3"
-            value={expenseMerchant}
-            onChange={(e) => setExpenseMerchant(e.target.value)}
-          />
+          <div className="w-3/4">
+            <TextInput
+              id="merchant"
+              placeholder="Donde realizaste tu compra"
+              value={merchant}
+              onChange={setMerchant}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Tercera fila: Categoría y Estado */}
+      {/* Third row: Category and Status */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="grid grid-cols-4 items-center gap-2">
-          <Label htmlFor="expense-categoria" className="text-right">
-            Categoría
+        <div className="flex items-start gap-2">
+          <Label htmlFor="category" className="w-1/4 text-right mt-2">
+            Categoria
           </Label>
-          <Select value={expenseCategory} onValueChange={setExpenseCategory}>
-            <SelectTrigger id="expense-categoria" className="col-span-3">
-              <SelectValue placeholder="Seleccionar categoría" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Alimentación">Alimentación</SelectItem>
-              <SelectItem value="Servicios">Servicios</SelectItem>
-              <SelectItem value="Facturas">Facturas</SelectItem>
-              <SelectItem value="Transporte">Transporte</SelectItem>
-              <SelectItem value="Entretenimiento">Entretenimiento</SelectItem>
-              <SelectItem value="Compras">Compras</SelectItem>
-              <SelectItem value="Salud">Salud</SelectItem>
-              <SelectItem value="Deudas">Deudas</SelectItem>
-              <SelectItem value="Ahorros">Ahorros</SelectItem>
-              <SelectItem value="Varios">Varios</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="w-3/4">
+            <CategorySelect
+              id="category"
+              value={category}
+              onChange={setCategory}
+              categories={outcomeCategories}
+            />
+          </div>
         </div>
-        <div className="grid grid-cols-4 items-center gap-2">
-          <Label htmlFor="expense-status" className="text-right">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="status" className="w-1/4 text-right">
             Estado
           </Label>
-          <Select value={expenseStatus} onValueChange={setExpenseStatus}>
-            <SelectTrigger id="expense-status" className="col-span-3">
-              <SelectValue placeholder="Seleccionar estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="completado">Completado</SelectItem>
-              <SelectItem value="pendiente">Pendiente</SelectItem>
-              <SelectItem value="cancelado">Cancelado</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="w-3/4">
+            <CategorySelect
+              id="state"
+              value={status}
+              onChange={setStatus}
+              categories={stateCategories}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Cuarta fila: Método de pago y Tipo de pago */}
+      {/* Fourth row: Payment method and Payment type */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="grid grid-cols-4 items-center gap-2">
-          <Label htmlFor="expense-metodo-pago" className="text-right">
-            Método
+        <div className="flex items-center gap-2">
+          <Label htmlFor="payment_method" className="w-1/4 text-right">
+            Forma de pago
           </Label>
-          <Select
-            value={expensePaymentMethod}
-            onValueChange={setExpensePaymentMethod}
-          >
-            <SelectTrigger id="expense-metodo-pago" className="col-span-3">
-              <SelectValue placeholder="Seleccionar método" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Efectivo">Efectivo</SelectItem>
-              <SelectItem value="Tarjeta">Tarjeta</SelectItem>
-              <SelectItem value="Transferencia bancaria">
-                Transferencia bancaria
-              </SelectItem>
-              <SelectItem value="Otro">Otro</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="w-3/4">
+            <CategorySelect
+              id="payment_method"
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+              categories={paymentMethodsCategories}
+            />
+          </div>
         </div>
-        <div className="grid grid-cols-4 items-center gap-2">
-          <Label htmlFor="expense-tipo-pago" className="text-right">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="payment_type" className="w-1/4 text-right">
             Tipo
           </Label>
-          <RadioGroup
-            defaultValue="unica"
-            className="col-span-3 flex gap-4"
-            value={expensePaymentType}
-            onValueChange={setExpensePaymentType}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="unica" id="expense-unica" />
-              <Label htmlFor="expense-unica" className="font-normal">
-                Única exhibición
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="diferido" id="expense-diferido" />
-              <Label htmlFor="expense-diferido" className="font-normal">
-                Diferido
-              </Label>
-            </div>
-          </RadioGroup>
+          <div className="w-3/4">
+            <PaymentType
+              id="payment_type"
+              value={paymentType}
+              onChange={setPaymentType}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Quinta fila: Referencia y MSI (condicional) */}
+      {/* Fifth row: Reference and MSI */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="grid grid-cols-4 items-center gap-2">
-          <Label htmlFor="expense-referencia" className="text-right">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="reference" className="w-1/4 text-right">
             Referencia
           </Label>
-          <Input
-            id="expense-referencia"
-            placeholder="Número de referencia"
-            className="col-span-3"
-            value={expenseReference}
-            onChange={(e) => setExpenseReference(e.target.value)}
-          />
+          <div className="w-3/4">
+            <TextInput
+              id="reference"
+              placeholder="Referencia (opcional)"
+              value={reference ? reference : ""}
+              onChange={setReference}
+            />
+          </div>
         </div>
-        {expensePaymentType === "diferido" && (
+        {paymentType === "diferido" && (
           <div className="grid grid-cols-4 items-center gap-2">
-            <Label htmlFor="expense-msi" className="text-right">
+            <Label htmlFor="msi" className="text-right">
               MSI
             </Label>
-            <Input
-              id="expense-msi"
-              type="number"
+            <NumPaymentsInput
+              id="msi"
               placeholder="0"
-              className="col-span-3"
-              min="0"
-              step="1"
-              value={expenseMsi || ""}
-              onChange={(e) =>
-                setExpenseMsi(
-                  e.target.value ? Number.parseInt(e.target.value) : null
-                )
-              }
+              value={msi}
+              onChange={setMsi}
             />
           </div>
         )}
       </div>
 
-      {/* Sexta fila: Etiquetas */}
-      <div className="grid grid-cols-8 items-center gap-2">
-        <Label htmlFor="expense-etiquetas" className="text-right col-span-1">
+      {/* Sixth row: Tags */}
+      <div className="flex items-center gap-2">
+        <Label htmlFor="tags" className="w-1/8 text-right">
           Etiquetas
         </Label>
-        <div className="col-span-7 flex items-center gap-2">
-          <Input
-            id="expense-etiquetas"
-            placeholder="Añadir etiqueta"
-            value={expenseTagInput}
-            onChange={(e) => setExpenseTagInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleAddExpenseTag();
-              }
-            }}
+        <div className="w-7/8">
+          <AddTags
+            id="tags"
+            value={tagInput}
+            onChange={setTagInput}
+            newTag={handleAddTag}
           />
-          <Button type="button" size="sm" onClick={handleAddExpenseTag}>
-            <TagIcon className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
-      {/* Mostrar etiquetas */}
-      {expenseTags.length > 0 && (
-        <div className="grid grid-cols-8 items-start gap-2">
-          <div className="col-span-1"></div>
-          <div className="col-span-7 flex flex-wrap gap-2">
-            {expenseTags.map((tag, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {tag}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-transparent"
-                  onClick={() => handleRemoveExpenseTag(tag)}
-                >
-                  <XCircle className="h-3 w-3" />
-                </Button>
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Display Tags */}
+      <DisplayTags value={tags} onChange={handleRemoveTag} />
 
-      {/* Séptima fila: Notas */}
-      <div className="grid grid-cols-8 items-start gap-2">
-        <Label htmlFor="expense-notas" className="text-right col-span-1 mt-2">
+      {/* Seventh row: Notes */}
+      <div className="flex items-start gap-2">
+        <Label htmlFor="notes" className="w-1/8 text-right mt-2">
           Notas
         </Label>
-        <Textarea
-          id="expense-notas"
-          placeholder="Detalles adicionales..."
-          className="col-span-7"
-          rows={2}
-          value={expenseNotes}
-          onChange={(e) => setExpenseNotes(e.target.value)}
-        />
+        <div className="w-7/8">
+          <TextInput
+            id="notes"
+            placeholder="Observaciones relevantes (opcional)"
+            value={notes ? notes : ""}
+            onChange={setNotes}
+          />
+        </div>
       </div>
 
       <DialogFooter>
-        <Button type="button" onClick={handleExpenseSubmit}>
-          Guardar
+        <Button
+          type="submit"
+          onClick={(e) => handleSubmit(e)}
+          disabled={isLoading}
+        >
+          {isLoading ? "Guardando..." : "Guardar"}
         </Button>
+        {error && (
+          <p className="text-red-500 text-sm mt-2">Error: {error.message}</p>
+        )}
       </DialogFooter>
     </form>
   );
 }
-
-export default OutcomeTab;
