@@ -1,28 +1,32 @@
 import { format } from "date-fns"
-import { ArrowDown, ArrowUp, ArrowUpDown, Download } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, RefreshCw } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { Transaction } from "@/types/transactions"
+import { Transactions, useTransactionsContext } from "@/context/TransactionsContext"
 
 interface TransactionsTableProps {
-  transactions: Transaction[]
-  onRowClick: (transaction: Transaction) => void
+  transactions: Transactions[]
+  onRowClick: (transaction: Transactions) => void
   sortConfig: { key: string; direction: "asc" | "desc" } | null
   requestSort: (key: string) => void
 }
 
 export function TransactionsTable({ transactions, onRowClick, requestSort }: TransactionsTableProps) {
+  // this function is used to update the transactions when the button is clicked
+  const { handleRefresh } = useTransactionsContext();
+ 
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
           <CardTitle>Transacciones</CardTitle>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Download className="h-4 w-4" />
-            Exportar
+          {/* fix: The table doesnt update when i click the button */}
+          <Button variant="outline" size="sm" className="gap-2" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4" />
+            Actualizar
           </Button>
         </div>
       </CardHeader>
@@ -50,7 +54,7 @@ export function TransactionsTable({ transactions, onRowClick, requestSort }: Tra
                   </Button>
                 </TableHead>
                 <TableHead>
-                  <Button variant="ghost" className="p-0 font-medium" onClick={() => requestSort("paymentMethod")}>
+                  <Button variant="ghost" className="p-0 font-medium" onClick={() => requestSort("payment_method")}>
                     Método
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
@@ -62,7 +66,7 @@ export function TransactionsTable({ transactions, onRowClick, requestSort }: Tra
                   </Button>
                 </TableHead>
                 <TableHead>
-                  <Button variant="ghost" className="p-0 font-medium" onClick={() => requestSort("paymentType")}>
+                  <Button variant="ghost" className="p-0 font-medium" onClick={() => requestSort("payment_type")}>
                     Modalidad
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
@@ -89,9 +93,9 @@ export function TransactionsTable({ transactions, onRowClick, requestSort }: Tra
                   </TableCell>
                 </TableRow>
               ) : (
-                transactions.map((transaction) => (
+                transactions.map((transaction, index) => (
                   <TableRow
-                    key={transaction.id}
+                    key={index}
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => onRowClick(transaction)}
                   >
@@ -100,7 +104,7 @@ export function TransactionsTable({ transactions, onRowClick, requestSort }: Tra
                     <TableCell>
                       <Badge variant="outline">{transaction.category}</Badge>
                     </TableCell>
-                    <TableCell>{transaction.paymentMethod}</TableCell>
+                    <TableCell>{transaction.payment_method}</TableCell>
                     <TableCell>
                       {transaction.type === "income" ? (
                         <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
@@ -115,17 +119,17 @@ export function TransactionsTable({ transactions, onRowClick, requestSort }: Tra
                       )}
                     </TableCell>
                     <TableCell>
-                      {transaction.paymentType === "unica" && <span className="text-sm">Única exhibición</span>}
-                      {transaction.paymentType === "diferido" && <span className="text-sm">Pago diferido</span>}
+                      {transaction.payment_type === "unica" && <span className="text-sm">Única exhibición</span>}
+                      {transaction.payment_type === "diferido" && <span className="text-sm">Pago diferido</span>}
                     </TableCell>
                     <TableCell>
-                      {transaction.msi ? (
+                        {"msi" in transaction && transaction.msi ? (
                         <Badge variant="outline" className="font-mono">
                           {transaction.msi}
                         </Badge>
-                      ) : (
+                        ) : (
                         <span className="text-muted-foreground">-</span>
-                      )}
+                        )}
                     </TableCell>
                     <TableCell
                       className={cn(

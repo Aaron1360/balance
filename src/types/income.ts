@@ -1,4 +1,5 @@
 export type Income = {
+  type: string;
   date: Date;
   description: string;
   category: string;

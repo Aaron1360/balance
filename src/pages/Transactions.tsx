@@ -2,12 +2,17 @@ import { useState, useEffect } from "react";
 import { FilterPanel } from "@/components/transactions/FilterPanel";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { TransactionDetails } from "@/components/transactions/TransactionsDetails";
-import { transactionsData } from "@/data/transactions-data";
-import { Transaction } from "@/types/transactions";
+import {
+  Transactions,
+  useTransactionsContext,
+} from "@/context/TransactionsContext";
 
 export default function TransactionsPage() {
+  // Load transactions data from the context
+  const { transactions: transactionsData } = useTransactionsContext();
+
   // FilterPanel props
-  const [isFilterOpen, setIsFilterOpen] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
@@ -29,7 +34,7 @@ export default function TransactionsPage() {
 
   // TransactionsDetails props
   const [selectedTransaction, setSelectedTransaction] =
-    useState<Transaction | null>(null);
+    useState<Transactions | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Extract unique categories
@@ -39,7 +44,7 @@ export default function TransactionsPage() {
 
   // Extract unique payment methods
   const paymentMethods = Array.from(
-    new Set(transactionsData.map((t) => t.paymentMethod))
+    new Set(transactionsData.map((t) => t.payment_method))
   );
 
   // Effect to show/hide the payment type filter
@@ -66,7 +71,7 @@ export default function TransactionsPage() {
   };
 
   // Function to open the Sheet with the transaction details
-  const handleRowClick = (transaction: Transaction) => {
+  const handleRowClick = (transaction: Transactions) => {
     setSelectedTransaction(transaction);
     setIsSheetOpen(true);
   };
@@ -116,7 +121,7 @@ export default function TransactionsPage() {
   // Filter by payment methods
   if (selectedPaymentMethods.length > 0) {
     filteredTransactions = filteredTransactions.filter((transaction) =>
-      selectedPaymentMethods.includes(transaction.paymentMethod)
+      selectedPaymentMethods.includes(transaction.payment_method)
     );
   }
 
@@ -130,7 +135,7 @@ export default function TransactionsPage() {
   // Filter by payment type (one-time/deferred)
   if (selectedPaymentType) {
     filteredTransactions = filteredTransactions.filter(
-      (transaction) => transaction.paymentType === selectedPaymentType
+      (transaction) => transaction.payment_type === selectedPaymentType
     );
   }
 

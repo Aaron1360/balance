@@ -8,6 +8,7 @@ import DebtPage from "./pages/Debts";
 import ServiciosRoute from "./pages/Services";
 import CalendarPage from "./pages/Calendar";
 import { DateProvider } from "./context/DateContext";
+import { TransactionsProvider } from "./context/TransactionsContext";
 
 const router = createBrowserRouter([
   {
@@ -28,7 +29,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/dashboard/transacciones",
-        element: <Transactions />,
+        element: (
+          <TransactionsProvider>
+            <Transactions />
+          </TransactionsProvider>
+        ),
       },
       {
         path: "/dashboard/ahorros",

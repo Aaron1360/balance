@@ -77,6 +77,7 @@ export default function OutcomeTab() {
       throw new Error("Date is required");
     }
     return {
+      type: "outcome",
       date: date,
       description: description,
       category: category,

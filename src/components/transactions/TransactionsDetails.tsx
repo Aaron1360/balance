@@ -7,10 +7,10 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { Transaction } from "@/types/transactions"
+import { Transactions } from "@/context/TransactionsContext"
 
 interface TransactionDetailsProps {
-  transaction: Transaction | null
+  transaction: Transactions | null
   isOpen: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -30,7 +30,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
               {transaction.type === "income" ? "Ingreso" : "Gasto"}
             </Badge>
           </SheetTitle>
-          <SheetDescription>ID: {transaction.id}</SheetDescription>
+          <SheetDescription>Descripción: {transaction.description}</SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
@@ -71,11 +71,11 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
               <Wallet className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">Método de pago</p>
-                <p className="text-sm text-muted-foreground">{transaction.paymentMethod}</p>
+                <p className="text-sm text-muted-foreground">{transaction.payment_method}</p>
               </div>
             </div>
 
-            {transaction.merchant && (
+            {"merchant" in transaction && transaction.merchant && (
               <div className="flex items-start">
                 <CreditCard className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <div>
@@ -102,19 +102,19 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
           <div className="space-y-3">
             <h4 className="font-semibold">Detalles de pago</h4>
 
-            {transaction.type === "income" && transaction.paymentType && (
+            {transaction.type === "income" && transaction.payment_type && (
               <div className="flex items-start">
                 <Clock className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium">Tipo de pago</p>
                   <p className="text-sm text-muted-foreground">
-                    {transaction.paymentType === "unica" ? "Única exhibición" : "Pago diferido"}
+                    {transaction.payment_type === "unica" ? "Única exhibición" : "Pago diferido"}
                   </p>
                 </div>
               </div>
             )}
 
-            {transaction.msi && (
+            {"msi" in transaction && transaction.msi && (
               <div className="flex items-start">
                 <Clock className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <div>
@@ -124,7 +124,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
               </div>
             )}
 
-            {transaction.status && (
+            {"status" in transaction && (
               <div className="flex items-start">
                 <Info className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <div>
@@ -140,7 +140,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
           </div>
 
           {/* Deferred payments (if applicable) */}
-          {transaction.type === "income" && transaction.paymentType === "diferido" && transaction.msi && (
+          {transaction.type === "income" && transaction.payment_type === "diferido" && "msi" in transaction && (
             <>
               <Separator />
               <div className="space-y-3">
@@ -155,7 +155,7 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {Array.from({ length: transaction.msi }).map((_, index) => {
+                      {Array.from({ length: transaction.msi || 0 }).map((_, index) => {
                         const paymentDate = new Date(transaction.date)
                         paymentDate.setMonth(paymentDate.getMonth() + index)
                         

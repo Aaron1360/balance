@@ -105,6 +105,7 @@ export default function IncomeTab() {
       throw new Error("Date is required to create an income entry.");
     }
     return {
+      type: "income",
       date: date,
       description: description,
       category: category,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { fetchTableData } from "@/lib/transactions_db_operations";
 
 export function useFetchTableData<T>(tableName: string) {
@@ -6,21 +6,22 @@ export function useFetchTableData<T>(tableName: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const result = await fetchTableData<T>(tableName);
-        setData(result);
-      } catch (error: any) {
-        setError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const result = await fetchTableData<T>(tableName);
+      setData(result);
+      setError(null);
+    } catch (error: unknown) {
+      setError(error as Error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [tableName]);
 
-  return { data, isLoading, error };
+  useEffect(() => {
+    fetchData(); // fetch on first render
+  }, [fetchData]);
+
+  return { data, isLoading, error, refetch: fetchData };
 }
