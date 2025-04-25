@@ -15,7 +15,8 @@ import { Outcome } from "@/types/outcome";
 
 export default function OutcomeTab() {
   // Supabase custom hooks
-  const { insertData, isLoading, error } = useInsertTableData<Outcome>("outcome");
+  const { insertData, isLoading, error } =
+    useInsertTableData<Outcome>("outcome");
 
   // Form States
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -25,7 +26,7 @@ export default function OutcomeTab() {
   const [paymentType, setPaymentType] = useState("unica");
   const [amount, setAmount] = useState(0);
   const [merchant, setMerchant] = useState<string>("");
-  const [status, setStatus] = useState<string>("Completado");
+  // const [status, setStatus] = useState<string>("Completado");
   const [reference, setReference] = useState<string | undefined>(undefined);
   const [notes, setNotes] = useState<string | undefined>(undefined);
   const [tags, setTags] = useState<string[]>([]);
@@ -55,7 +56,7 @@ export default function OutcomeTab() {
     "Otro",
   ];
 
-  const stateCategories = ["Completado", "Pendiente", "Cancelado"];
+  // const stateCategories = ["Completado", "Pendiente", "Cancelado"];
 
   // Function to add tags
   const handleAddTag = () => {
@@ -71,7 +72,7 @@ export default function OutcomeTab() {
   };
 
   // Function to create a new outcome object
-  const createOutcome = (): Outcome=> {
+  const createOutcome = (): Outcome => {
     if (!date) {
       throw new Error("Date is required");
     }
@@ -83,14 +84,14 @@ export default function OutcomeTab() {
       payment_type: paymentType,
       amount: amount,
       merchant: merchant,
-      status: status,
+      // status: status,
       reference: reference || undefined,
       msi: msi || undefined,
       notes: notes || undefined,
       tags: tags.length ? tags : undefined,
     };
-  }
-  
+  };
+
   // Function to handle form submission
   const handleSubmit = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -119,7 +120,7 @@ export default function OutcomeTab() {
       setPaymentType("unica");
       setMsi(0);
       setReference("");
-      setStatus("completado");
+      // setStatus("completado");
       setNotes("");
       setTags([]);
       setTagInput("");
@@ -206,15 +207,14 @@ export default function OutcomeTab() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="status" className="w-1/4 text-right">
-            Estado
+          <Label htmlFor="payment_type" className="w-1/4 text-right">
+            Tipo
           </Label>
           <div className="w-3/4">
-            <CategorySelect
-              id="state"
-              value={status}
-              onChange={setStatus}
-              categories={stateCategories}
+            <PaymentType
+              id="payment_type"
+              value={paymentType}
+              onChange={setPaymentType}
             />
           </div>
         </div>
@@ -235,35 +235,6 @@ export default function OutcomeTab() {
             />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Label htmlFor="payment_type" className="w-1/4 text-right">
-            Tipo
-          </Label>
-          <div className="w-3/4">
-            <PaymentType
-              id="payment_type"
-              value={paymentType}
-              onChange={setPaymentType}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Fifth row: Reference and MSI */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="reference" className="w-1/4 text-right">
-            Referencia
-          </Label>
-          <div className="w-3/4">
-            <TextInput
-              id="reference"
-              placeholder="Referencia (opcional)"
-              value={reference ? reference : ""}
-              onChange={setReference}
-            />
-          </div>
-        </div>
         {paymentType === "diferido" && (
           <div className="grid grid-cols-4 items-center gap-2">
             <Label htmlFor="msi" className="text-right">
@@ -277,6 +248,21 @@ export default function OutcomeTab() {
             />
           </div>
         )}
+      </div>
+
+      {/* Fifth row: Reference */}
+      <div className="flex items-start gap-2">
+        <Label htmlFor="reference" className="w-1/8 text-right mt-2">
+          Referencia
+        </Label>
+        <div className="w-7/8">
+          <TextInput
+            id="reference"
+            placeholder="Referencia (opcional)"
+            value={reference ? reference : ""}
+            onChange={setReference}
+          />
+        </div>
       </div>
 
       {/* Sixth row: Tags */}

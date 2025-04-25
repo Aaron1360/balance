@@ -6,7 +6,7 @@ export type Outcome = {
     payment_type: string,
     amount: number,
     merchant: string,
-    status: string,
+    // status: string,
     reference?: string,
     msi?: number,
     notes?: string,
