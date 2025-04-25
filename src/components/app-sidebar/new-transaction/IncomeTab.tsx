@@ -18,7 +18,7 @@ import { Income } from "@/types/income";
 
 export default function IncomeTab() {
   // Supabase custom hooks
-  const { insertData, isLoading, error } = useInsertTableData<Income>("income");
+  const { insertData, isLoading, error } = useInsertTableData<Income>("incomes");
 
   // Form States
   const [date, setDate] = useState<Date | undefined>(undefined);

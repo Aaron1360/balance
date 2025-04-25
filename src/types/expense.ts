@@ -1,4 +1,4 @@
-export type Outcome = {
+export type Expense = {
     type: string,
     date: Date,
     description: string,

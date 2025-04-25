@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import IncomeTab from "./IncomeTab";
-import OutcomeTab from "./OutcomeTab";
+import ExpenseTab from "./ExpenseTab";
 
 function NewTransactionTabs() {
 
@@ -18,7 +18,7 @@ function NewTransactionTabs() {
 
       {/* Outcome Tab */}
       <TabsContent value="expense">
-        <OutcomeTab />
+        <ExpenseTab />
       </TabsContent>
     </Tabs>
   );

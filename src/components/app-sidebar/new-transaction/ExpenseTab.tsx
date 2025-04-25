@@ -11,12 +11,12 @@ import TextInput from "./input-components/TextInput";
 import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
 import { useInsertTableData } from "@/hooks/useInsertTableData";
-import { Outcome } from "@/types/outcome";
+import { Expense } from "@/types/expense";
 
-export default function OutcomeTab() {
+export default function ExpenseTab() {
   // Supabase custom hooks
   const { insertData, isLoading, error } =
-    useInsertTableData<Outcome>("outcome");
+    useInsertTableData<Expense>("expenses");
 
   // Form States
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -71,13 +71,13 @@ export default function OutcomeTab() {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  // Function to create a new outcome object
-  const createOutcome = (): Outcome => {
+  // Function to create a new expense object
+  const createExpense = (): Expense => {
     if (!date) {
       throw new Error("Date is required");
     }
     return {
-      type: "outcome",
+      type: "expense",
       date: date,
       description: description,
       category: category,
@@ -105,12 +105,12 @@ export default function OutcomeTab() {
     }
 
     try {
-      const newOutcome = createOutcome();
-      if (!newOutcome) return;
+      const newExpense = createExpense();
+      if (!newExpense) return;
 
-      console.log(newOutcome);
+      console.log(newExpense);
       // Save new record
-      await insertData(newOutcome);
+      await insertData(newExpense);
 
       // Reset form
       setDate(new Date());

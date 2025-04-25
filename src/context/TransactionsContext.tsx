@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useFetchTableData } from "@/hooks/useFetchTableData";
 import { Income } from "@/types/income";
-import { Outcome } from "@/types/outcome";
+import { Expense } from "@/types/expense";
 
-export type Transactions = Income | Outcome;
+export type Transactions = Income | Expense;
 
 interface TransactionsContextType {
   transactions: Transactions[];
@@ -18,26 +18,26 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { data: income, refetch: refetchIncome } =
-    useFetchTableData<Income>("income");
-  const { data: outcome, refetch: refetchOutcome } =
-    useFetchTableData<Outcome>("outcome");
+    useFetchTableData<Income>("incomes");
+  const { data: expense, refetch: refetchExpense } =
+    useFetchTableData<Expense>("expenses");
   const [transactions, setTransactions] = useState<Transactions[]>([]);
   
-  // Combine income and outcome data into transactions
+  // Combine income and expense data into transactions
   const loadTransactions = () => {
-    setTransactions([...(income || []), ...(outcome || [])]);
+    setTransactions([...(income || []), ...(expense || [])]);
   };  
   
   // Fetch data for the first time
   useEffect(() => {
     loadTransactions();
   }
-  , [income, outcome]);
+  , [income, expense]);
   
   // This function is used to update the transactions when the button is clicked
   const handleRefresh = () => {
     refetchIncome();
-    refetchOutcome();
+    refetchExpense();
   };
 
   const contextValue: TransactionsContextType = {
