@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FilterPanel } from "@/components/transactions/FilterPanel";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { TransactionDetails } from "@/components/transactions/TransactionsDetails";
@@ -24,7 +24,6 @@ export default function TransactionsPage() {
   const [selectedPaymentType, setSelectedPaymentType] = useState<string | null>(
     null
   );
-  const [showPaymentTypeFilter, setShowPaymentTypeFilter] = useState(false);
 
   // TransactionsTable props
   const [sortConfig, setSortConfig] = useState<{
@@ -47,15 +46,6 @@ export default function TransactionsPage() {
     new Set(transactionsData.map((t) => t.payment_method))
   );
 
-  // Effect to show/hide the payment type filter
-  useEffect(() => {
-    if (selectedCategories.includes("Ingreso")) {
-      setShowPaymentTypeFilter(true);
-    } else {
-      setShowPaymentTypeFilter(false);
-      setSelectedPaymentType(null);
-    }
-  }, [selectedCategories]);
 
   // Function to sort transactions
   const requestSort = (key: string) => {
@@ -100,14 +90,15 @@ export default function TransactionsPage() {
   // Filter by start date
   if (startDate) {
     filteredTransactions = filteredTransactions.filter(
-      (transaction) => transaction.date >= startDate
+      (transaction) => new Date(transaction.date) >= startDate
     );
   }
+  
 
   // Filter by end date
   if (endDate) {
     filteredTransactions = filteredTransactions.filter(
-      (transaction) => transaction.date <= endDate
+      (transaction) => new Date(transaction.date) <= endDate
     );
   }
 
@@ -181,7 +172,6 @@ export default function TransactionsPage() {
         setSelectedTypes={setSelectedTypes}
         selectedPaymentType={selectedPaymentType}
         setSelectedPaymentType={setSelectedPaymentType}
-        showPaymentTypeFilter={showPaymentTypeFilter}
         categories={categories}
         paymentMethods={paymentMethods}
         filteredCount={filteredTransactions.length}
