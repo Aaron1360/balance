@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DialogFooter } from "@/components/ui/dialog";
-import DatePicker from "./DatePicker";
+import DatePicker from "./input-components/DatePicker";
 import AmountInput from "./input-components/AmountInput";
 import NumPaymentsInput from "./input-components/NumPaymentsInput";
 import CategorySelect from "./input-components/CategorySelect";
@@ -170,7 +170,7 @@ export default function OutcomeTab() {
           <div className="w-3/4">
             <TextInput
               id="description"
-              placeholder="Describe tu ingreso"
+              placeholder="Describe tu gasto"
               value={description}
               onChange={setDescription}
             />
