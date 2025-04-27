@@ -5,6 +5,7 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import Header from "./report/Header";
 
@@ -20,11 +21,20 @@ export default function Layout() {
             <Header></Header>
           </div>
         </header>
-        {/* Page-specific content will be rendered here */}
-        <div className="flex flex-1 flex-col justify-center gap-4 px-1 w-full">
-          <Outlet />
-        </div>
+        <SidebarContent />
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+function SidebarContent() {
+  const { state: sidebarState } = useSidebar();
+  return (
+    <>
+      {/* Page-specific content will be rendered here */}
+      <div className="flex flex-1 flex-col justify-center gap-4 px-1 w-full">
+        <Outlet context={{ sidebarState }} />
+      </div>
+    </>
   );
 }

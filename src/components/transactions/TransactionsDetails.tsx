@@ -1,198 +1,230 @@
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
-import { Calendar, CreditCard, Clock, Info, Tag, Wallet, Receipt } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Separator } from "@/components/ui/separator"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { cn } from "@/lib/utils"
-import { Transactions } from "@/context/TransactionsContext"
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import {
+  Calendar,
+  CreditCard,
+  Clock,
+  Info,
+  Tag,
+  Wallet,
+  Receipt,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { Transactions } from "@/context/TransactionsContext";
 
 interface TransactionDetailsProps {
-  transaction: Transactions | null
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
+  transaction: Transactions | null;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function TransactionDetails({ transaction, isOpen, onOpenChange }: TransactionDetailsProps) {
-  if (!transaction) return null
+export function TransactionDetails({
+  transaction,
+  isOpen,
+  onOpenChange,
+}: TransactionDetailsProps) {
+  if (!transaction) return null;
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md overflow-y-auto">
+      <SheetContent className="sm:max-w-md overflow-y-auto pb-8">
         <SheetHeader>
           <SheetTitle className="flex items-center justify-between">
             <span>Detalles de Transacción</span>
             <Badge
-              className={cn(transaction.type === "income" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800")}
+              className={cn(
+                "text-sm",
+                transaction.type === "income"
+                  ? "bg-green-100 text-green-800 mx-10"
+                  : "bg-red-100 text-red-800 mx-10"
+              )}
             >
               {transaction.type === "income" ? "Ingreso" : "Gasto"}
             </Badge>
           </SheetTitle>
-          <SheetDescription>Descripción: {transaction.description}</SheetDescription>
+          <SheetDescription className="text-muted-foreground">
+            {transaction.description}
+          </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
-          {/* Main information */}
-          <div>
-            <h3 className="text-lg font-semibold mb-2">{transaction.description}</h3>
-            <p className={cn("text-2xl font-bold", transaction.type === "income" ? "text-green-600" : "text-red-600")}>
-              {transaction.amount.toLocaleString("es-MX", {
-                style: "currency",
-                currency: "MXN",
-              })}
-            </p>
-          </div>
+        <div className="mt-6 space-y-8">
+          {/* Amount & Description */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{transaction.description}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p
+                className={cn(
+                  "text-3xl font-bold",
+                  transaction.type === "income" ? "text-green-600" : "text-red-600"
+                )}
+              >
+                {transaction.amount.toLocaleString("es-MX", {
+                  style: "currency",
+                  currency: "MXN",
+                })}
+              </p>
+            </CardContent>
+          </Card>
 
           <Separator />
 
-          {/* Basic details */}
-          <div className="space-y-3">
-            <div className="flex items-start">
-              <Calendar className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium">Fecha</p>
-                <p className="text-sm text-muted-foreground">
-                  {format(transaction.date, "dd 'de' MMMM 'de' yyyy", { locale: es })}
-                </p>
-              </div>
-            </div>
+          {/* Basic Info */}
+          <div className="space-y-4 mx-5">
+            <InfoItem icon={<Calendar />} label="Fecha">
+              {format(transaction.date, "dd 'de' MMMM 'de' yyyy", { locale: es })}
+            </InfoItem>
 
-            <div className="flex items-start">
-              <Tag className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium">Categoría</p>
-                <p className="text-sm text-muted-foreground">{transaction.category}</p>
-              </div>
-            </div>
+            <InfoItem icon={<Tag />} label="Categoría">
+              {transaction.category}
+            </InfoItem>
 
-            <div className="flex items-start">
-              <Wallet className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium">Método de pago</p>
-                <p className="text-sm text-muted-foreground">{transaction.payment_method}</p>
-              </div>
-            </div>
+            <InfoItem icon={<Wallet />} label="Método de pago">
+              {transaction.payment_method}
+            </InfoItem>
 
-            {"merchant" in transaction && transaction.merchant && (
-              <div className="flex items-start">
-                <CreditCard className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Comercio</p>
-                  <p className="text-sm text-muted-foreground">{transaction.merchant}</p>
-                </div>
-              </div>
+            {"merchant" in transaction && (
+              <InfoItem icon={<CreditCard />} label="Comercio">
+                {transaction.merchant}
+              </InfoItem>
             )}
 
             {transaction.reference && (
-              <div className="flex items-start">
-                <Receipt className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Referencia</p>
-                  <p className="text-sm text-muted-foreground">{transaction.reference}</p>
-                </div>
-              </div>
+              <InfoItem icon={<Receipt />} label="Referencia">
+                {transaction.reference}
+              </InfoItem>
             )}
           </div>
 
           <Separator />
 
-          {/* Payment details */}
-          <div className="space-y-3">
-            <h4 className="font-semibold">Detalles de pago</h4>
+          {/* Payment Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Detalles de pago</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {transaction.type === "income" && transaction.payment_type && (
+                <InfoItem icon={<Clock />} label="Tipo de pago">
+                  {transaction.payment_type === "unica"
+                    ? "Única exhibición"
+                    : "Pago diferido"}
+                </InfoItem>
+              )}
 
-            {transaction.type === "income" && transaction.payment_type && (
-              <div className="flex items-start">
-                <Clock className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Tipo de pago</p>
-                  <p className="text-sm text-muted-foreground">
-                    {transaction.payment_type === "unica" ? "Única exhibición" : "Pago diferido"}
-                  </p>
-                </div>
-              </div>
-            )}
+              {"msi" in transaction && (
+                <InfoItem icon={<Clock />} label="Meses sin intereses">
+                  {transaction.msi} meses
+                </InfoItem>
+              )}
 
-            {"msi" in transaction && transaction.msi && (
-              <div className="flex items-start">
-                <Clock className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Meses sin intereses</p>
-                  <p className="text-sm text-muted-foreground">{transaction.msi} meses</p>
-                </div>
-              </div>
-            )}
-
-            {"status" in transaction && (
-              <div className="flex items-start">
-                <Info className="h-5 w-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-medium">Estado</p>
-                  <Badge variant="outline" className="mt-1">
+              {"status" in transaction && (
+                <InfoItem icon={<Info />} label="Estado">
+                  <Badge variant="outline">
                     {transaction.status === "completed" && "Completado"}
                     {transaction.status === "pending" && "Pendiente"}
                     {transaction.status === "cancelled" && "Cancelado"}
                   </Badge>
-                </div>
-              </div>
-            )}
-          </div>
+                </InfoItem>
+              )}
+            </CardContent>
+          </Card>
 
-          {/* Deferred payments (if applicable) */}
-          {transaction.type === "income" && transaction.payment_type === "diferido" && "msi" in transaction && (
-            <>
-              <Separator />
-              <div className="space-y-3">
-                <h4 className="font-semibold">Pagos programados</h4>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Fecha</TableHead>
-                        <TableHead>Monto</TableHead>
-                        <TableHead>Estado</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {Array.from({ length: transaction.msi || 0 }).map((_, index) => {
-                        const paymentDate = new Date(transaction.date)
-                        paymentDate.setMonth(paymentDate.getMonth() + index)
-                        
-                        const paymentAmount =transaction.msi ? transaction.amount / transaction.msi : 0
-
-                        return (
-                          <TableRow key={index}>
-                            <TableCell>{format(paymentDate, "dd/MM/yyyy")}</TableCell>
-                            <TableCell>
-                              {paymentAmount.toLocaleString("es-MX", {
-                                style: "currency",
-                                currency: "MXN",
-                              })}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className={index === 0 ? "bg-green-100 text-green-800" : ""}>
-                                {index === 0 ? "Pagado" : "Pendiente"}
-                              </Badge>
-                            </TableCell>
+          {/* Deferred Payments */}
+          {transaction.type === "expense" &&
+            transaction.payment_type === "diferido" &&
+            "msi" in transaction && (
+              <>
+                <Separator />
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pagos programados</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Fecha</TableHead>
+                            <TableHead>Monto</TableHead>
+                            <TableHead>Estado</TableHead>
                           </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            </>
-          )}
+                        </TableHeader>
+                        <TableBody>
+                          {Array.from({ length: transaction.msi || 0 }).map((_, index) => {
+                            const paymentDate = new Date(transaction.date);
+                            paymentDate.setMonth(paymentDate.getMonth() + index);
+
+                            const paymentAmount = transaction.amount / (transaction.msi ?? 1);
+
+                            return (
+                              <TableRow key={index}>
+                                <TableCell>
+                                  {format(paymentDate, "dd/MM/yyyy")}
+                                </TableCell>
+                                <TableCell>
+                                  {paymentAmount.toLocaleString("es-MX", {
+                                    style: "currency",
+                                    currency: "MXN",
+                                  })}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge
+                                    variant="outline"
+                                    className={
+                                      index === 0
+                                        ? "bg-green-100 text-green-800"
+                                        : ""
+                                    }
+                                  >
+                                    {index === 0 ? "Pagado" : "Pendiente"}
+                                  </Badge>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
 
           {/* Notes */}
           {transaction.notes && (
             <>
               <Separator />
-              <div className="space-y-2">
-                <h4 className="font-semibold">Notas</h4>
-                <p className="text-sm text-muted-foreground">{transaction.notes}</p>
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    {transaction.notes}
+                  </p>
+                </CardContent>
+              </Card>
             </>
           )}
 
@@ -200,28 +232,53 @@ export function TransactionDetails({ transaction, isOpen, onOpenChange }: Transa
           {transaction.tags && transaction.tags.length > 0 && (
             <>
               <Separator />
-              <div className="space-y-2">
-                <h4 className="font-semibold">Etiquetas</h4>
-                <div className="flex flex-wrap gap-2">
-                  {transaction.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Etiquetas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {transaction.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </>
           )}
+        </div>
 
-          {/* Action buttons */}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cerrar
-            </Button>
-            <Button>Editar</Button>
-          </div>
+        {/* Actions */}
+        <div className="flex justify-end gap-2 pt-6">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cerrar
+          </Button>
+          <Button>Editar</Button>
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
+}
+
+// Small helper component
+function InfoItem({
+  icon,
+  label,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="text-muted-foreground">{icon}</div>
+      <div className="space-y-0.5">
+        <p className="font-medium">{label}</p>
+        <div className="text-sm text-muted-foreground">{children}</div>
+      </div>
+    </div>
+  );
 }

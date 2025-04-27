@@ -185,6 +185,7 @@ export default function TransactionsPage() {
           onRowClick={handleRowClick}
           sortConfig={sortConfig}
           requestSort={requestSort}
+          isFilterOpen={isFilterOpen} 
         />
       </div>
 
