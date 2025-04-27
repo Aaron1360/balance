@@ -86,13 +86,13 @@ export function FilterPanel({
     );
   };
 
-  // Function to handle changes in selected types
-  const handleTypeChange = (type: string) => {
-    setSelectedTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-    );
-  };
-  
+  // // Function to handle changes in selected types
+  // const handleTypeChange = (type: string) => {
+  //   setSelectedTypes((prev) =>
+  //     prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+  //   );
+  // };
+
   return (
     <div
       className={`${
@@ -184,7 +184,7 @@ export function FilterPanel({
               </div>
 
               {/* Transaction type */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Tipo</Label>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
@@ -214,6 +214,39 @@ export function FilterPanel({
                     </Label>
                   </div>
                 </div>
+              </div> */}
+              {/* Transaction type */}
+              <div className="space-y-2">
+                <Label>Tipo</Label>
+                <RadioGroup
+                  value={selectedTypes[0] || "all"}
+                  onValueChange={(value) => {
+                    if (value === "all") {
+                      setSelectedTypes([]); 
+                    } else {
+                      setSelectedTypes([value]);
+                    }
+                  }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="all" id="type-all" />
+                    <Label htmlFor="type-all" className="font-normal">
+                      Todos
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="income" id="type-income" />
+                    <Label htmlFor="type-income" className="font-normal">
+                      Ingresos
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="expense" id="type-expense" />
+                    <Label htmlFor="type-expense" className="font-normal">
+                      Gastos
+                    </Label>
+                  </div>
+                </RadioGroup>
               </div>
 
               {/* Categories */}
@@ -241,7 +274,7 @@ export function FilterPanel({
                 </Select>
               </div>
 
-              {/* Payment type (conditional) */}
+              {/* Payment type */}
               <div className="space-y-2">
                 <Label>Tipo de pago</Label>
                 <RadioGroup

@@ -7,6 +7,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Toaster } from "sonner";
 import Header from "./report/Header";
 
 export default function Layout() {
@@ -23,6 +24,7 @@ export default function Layout() {
         </header>
         <SidebarContent />
       </SidebarInset>
+      <Toaster theme="dark" richColors/>
     </SidebarProvider>
   );
 }

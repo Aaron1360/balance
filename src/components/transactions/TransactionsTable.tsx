@@ -12,12 +12,14 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   Transactions,
   useTransactionsContext,
 } from "@/context/TransactionsContext";
 import { useOutletContext } from "react-router-dom";
+import { useEffect, useRef } from "react";
 
 interface TransactionsTableProps {
   transactions: Transactions[];
@@ -34,9 +36,27 @@ export function TransactionsTable({
   isFilterOpen,
 }: TransactionsTableProps) {
   // Get the sidebarState from the context
-  const { sidebarState } = useOutletContext<{ sidebarState: "expanded" | "collapsed" }>();
+  const { sidebarState } = useOutletContext<{
+    sidebarState: "expanded" | "collapsed";
+  }>();
   // Get the transactions context
-  const { handleRefresh } = useTransactionsContext();
+  const { handleRefresh, isLoading, error } = useTransactionsContext();
+  const wasLoading = useRef(isLoading);
+
+  // Show a toast when the loading state changes
+  useEffect(() => {
+    if (wasLoading.current && !isLoading && !error) {
+      toast.success("Transacciones actualizadas");
+    }
+    wasLoading.current = isLoading;
+  }, [isLoading, error]);
+
+  // Show an error toast if there's an error
+  useEffect(() => {
+    if (error) {
+      toast.error("Error al actualizar las transacciones: " + error.message);
+    }
+  }, [error]);
 
   return (
     <Card className="w-full overflow-hidden">
@@ -51,19 +71,27 @@ export function TransactionsTable({
               handleRefresh();
               requestSort("date");
             }}
+            disabled={isLoading} // ← Disable while loading
           >
-            <RefreshCw className="h-4 w-4" />
-            Actualizar
+            {isLoading ? (
+              "Actualizando..."
+            ) : (
+              <>
+                <RefreshCw className="h-4 w-4" />
+                Actualizar
+              </>
+            )}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col items-center px-2">
-        {/* <ScrollArea className="w-[740px] h-[600px] border rounded-md overflow-auto"> */}
         <ScrollArea
-          className={`
-            border rounded-md overflow-auto
-            ${(sidebarState === "expanded" && isFilterOpen === true) ? "w-[740px] h-[600px]" : "w-full h-[500px]"} 
-          `}
+          className={cn(
+            "w-full h-screen max-h-[700px] border rounded-md transition-all",
+            sidebarState === "expanded" && isFilterOpen
+              ? "max-w-[740px] md:max-w-[80%] lg:max-w-[95%]"
+              : "max-w-full sm:max-w-[80%] md:max-w-[90%] lg:max-w-[95%]"
+          )}
         >
           <Table>
             <TableHeader>

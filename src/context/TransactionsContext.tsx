@@ -8,6 +8,8 @@ export type Transactions = Income | Expense;
 interface TransactionsContextType {
   transactions: Transactions[];
   handleRefresh: () => void;
+  isLoading: boolean;
+  error: Error | null; 
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(
@@ -17,12 +19,14 @@ const TransactionsContext = createContext<TransactionsContextType | undefined>(
 export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { data: income, refetch: refetchIncome } =
+  const { data: income, isLoading: isLoadingIncome, error: incomeError, refetch: refetchIncome } =
     useFetchTableData<Income>("incomes");
-  const { data: expense, refetch: refetchExpense } =
+  const { data: expense, isLoading: isLoadingExpense, error: expenseError, refetch: refetchExpense } =
     useFetchTableData<Expense>("expenses");
   const [transactions, setTransactions] = useState<Transactions[]>([]);
-  
+  const isLoading = isLoadingIncome || isLoadingExpense;
+  const error = incomeError || expenseError;
+
   // Combine income and expense data into transactions
   const loadTransactions = () => {
     setTransactions([...(income || []), ...(expense || [])]);
@@ -43,6 +47,8 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({
   const contextValue: TransactionsContextType = {
     transactions,
     handleRefresh,
+    isLoading,
+    error,
   };
 
   return (
