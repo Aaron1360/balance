@@ -27,8 +27,16 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
   const { closeDialog } = useLayoutContext();
 
   // Supabase custom hooks
-  const { insertData, isLoading: isLoadingInsert, error: insertError } = useInsertTableData<Income>("incomes");
-  const { updateData, isLoading: isLoadingUpdate, error: updateError } = useUpdateTableData<Income>("incomes");
+  const {
+    insertData,
+    isLoading: isLoadingInsert,
+    error: insertError,
+  } = useInsertTableData<Income>("incomes");
+  const {
+    updateData,
+    isLoading: isLoadingUpdate,
+    error: updateError,
+  } = useUpdateTableData<Income>("incomes");
 
   // Form States
   const [, setId] = useState<string | undefined>(undefined);
@@ -176,16 +184,22 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
         } else {
           throw new Error("Transaction ID is undefined.");
         }
-        return;
-      }else {
+      } else {
         // If no transaction is provided, create a new one
         const newIncome = createIncome();
         if (!newIncome) return;
-  
+
         // Save new record
         await insertData(newIncome);
       }
-
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        console.error("Submission error:", e.message || e);
+      } else {
+        console.error("Unknown error:", e);
+      }
+      alert("Something went wrong");
+    } finally {
       // Reset form
       setId(undefined);
       setDate(new Date());
@@ -201,16 +215,9 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       setNotes("");
       setTags([]);
       setTagInput("");
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        console.error("Submission error:", e.message || e);
-      } else {
-        console.error("Unknown error:", e);
-      }
-      alert("Something went wrong");
+      // Close the dialog
+      closeDialog();
     }
-    // Close the dialog
-    closeDialog();
   };
 
   return (
@@ -409,7 +416,9 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
           {isLoadingInsert || isLoadingUpdate ? "Guardando..." : "Guardar"}
         </Button>
         {(insertError || updateError) && (
-          <p className="text-red-500 text-sm mt-2">Error: {insertError?.message || updateError?.message}</p>
+          <p className="text-red-500 text-sm mt-2">
+            Error: {insertError?.message || updateError?.message}
+          </p>
         )}
       </DialogFooter>
     </form>

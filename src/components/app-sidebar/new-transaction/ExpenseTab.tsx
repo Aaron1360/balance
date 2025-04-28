@@ -20,8 +20,8 @@ interface ExpenseTabProps {
 }
 
 export default function ExpenseTab({ transaction }: ExpenseTabProps) {
-   // Dialog state 
-   const { closeDialog } = useLayoutContext();
+  // Dialog state
+  const { closeDialog } = useLayoutContext();
 
   // Supabase custom hooks
   const {
@@ -158,7 +158,14 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
 
         await insertData(newExpense);
       }
-
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        console.error("Submission error:", e.message || e);
+      } else {
+        console.error("Unknown error:", e);
+      }
+      alert("Something went wrong");
+    } finally {
       // Reset form
       setDate(new Date());
       setDescription("");
@@ -172,16 +179,9 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
       setNotes("");
       setTags([]);
       setTagInput("");
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        console.error("Submission error:", e.message || e);
-      } else {
-        console.error("Unknown error:", e);
-      }
-      alert("Something went wrong");
+      // Close the dialog
+      closeDialog();
     }
-    // Close the dialog
-    closeDialog();
   };
 
   return (
