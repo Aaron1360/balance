@@ -33,6 +33,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import TransactionFormBtn from "../app-sidebar/new-transaction/TransactionFormBtn";
 import { cn } from "@/lib/utils";
 import { Transactions } from "@/context/TransactionsContext";
+import { useLayoutContext } from "@/context/LayoutContext";
+import { useEffect } from "react";
 
 interface TransactionDetailsProps {
   transaction: Transactions | null;
@@ -45,6 +47,15 @@ export function TransactionDetails({
   isOpen,
   onOpenChange,
 }: TransactionDetailsProps) {
+  const { isDialogOpen } = useLayoutContext(); // Access dialog state from context
+
+  // Automatically close the sheet when the dialog is closed
+  useEffect(() => {
+    if (!isDialogOpen && isOpen) {
+      onOpenChange(false); // Close the sheet
+    }
+  }, [isDialogOpen]);
+
   if (!transaction) return null;
 
   const handleDelete = () => {
@@ -89,7 +100,9 @@ export function TransactionDetails({
               <p
                 className={cn(
                   "text-3xl font-bold",
-                  transaction.type === "income" ? "text-green-600" : "text-red-600"
+                  transaction.type === "income"
+                    ? "text-green-600"
+                    : "text-red-600"
                 )}
               >
                 {transaction.amount.toLocaleString("es-MX", {
@@ -105,7 +118,9 @@ export function TransactionDetails({
           {/* Basic Info */}
           <div className="space-y-4 mx-5">
             <InfoItem icon={<Calendar />} label="Fecha">
-              {format(transaction.date, "dd 'de' MMMM 'de' yyyy", { locale: es })}
+              {format(transaction.date, "dd 'de' MMMM 'de' yyyy", {
+                locale: es,
+              })}
             </InfoItem>
 
             <InfoItem icon={<Tag />} label="Categoría">
@@ -184,38 +199,43 @@ export function TransactionDetails({
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {Array.from({ length: transaction.msi || 0 }).map((_, index) => {
-                            const paymentDate = new Date(transaction.date);
-                            paymentDate.setMonth(paymentDate.getMonth() + index);
+                          {Array.from({ length: transaction.msi || 0 }).map(
+                            (_, index) => {
+                              const paymentDate = new Date(transaction.date);
+                              paymentDate.setMonth(
+                                paymentDate.getMonth() + index
+                              );
 
-                            const paymentAmount = transaction.amount / (transaction.msi ?? 1);
+                              const paymentAmount =
+                                transaction.amount / (transaction.msi ?? 1);
 
-                            return (
-                              <TableRow key={index}>
-                                <TableCell>
-                                  {format(paymentDate, "dd/MM/yyyy")}
-                                </TableCell>
-                                <TableCell>
-                                  {paymentAmount.toLocaleString("es-MX", {
-                                    style: "currency",
-                                    currency: "MXN",
-                                  })}
-                                </TableCell>
-                                <TableCell>
-                                  <Badge
-                                    variant="outline"
-                                    className={
-                                      index === 0
-                                        ? "bg-green-100 text-green-800"
-                                        : ""
-                                    }
-                                  >
-                                    {index === 0 ? "Pagado" : "Pendiente"}
-                                  </Badge>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
+                              return (
+                                <TableRow key={index}>
+                                  <TableCell>
+                                    {format(paymentDate, "dd/MM/yyyy")}
+                                  </TableCell>
+                                  <TableCell>
+                                    {paymentAmount.toLocaleString("es-MX", {
+                                      style: "currency",
+                                      currency: "MXN",
+                                    })}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      variant="outline"
+                                      className={
+                                        index === 0
+                                          ? "bg-green-100 text-green-800"
+                                          : ""
+                                      }
+                                    >
+                                      {index === 0 ? "Pagado" : "Pendiente"}
+                                    </Badge>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            }
+                          )}
                         </TableBody>
                       </Table>
                     </div>
@@ -265,7 +285,11 @@ export function TransactionDetails({
 
         {/* Actions */}
         <div className="flex justify-end gap-1 pt-6 mx-5">
-          <TransactionFormBtn icon={Edit}  variant="default" transaction={transaction} />
+          <TransactionFormBtn
+            icon={Edit}
+            variant="default"
+            transaction={transaction}
+          />
           <Button
             variant="destructive"
             size="sm"

@@ -23,7 +23,7 @@ interface IncomeTabProps {
 }
 
 export default function IncomeTab({ transaction }: IncomeTabProps) {
-  // Dialog state
+  // Dialog and sheet states
   const { closeDialog } = useLayoutContext();
 
   // Supabase custom hooks

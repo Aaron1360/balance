@@ -62,7 +62,7 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({
     handleRefresh,
     isLoading,
     error,
-    isOnCooldown,
+    isOnCooldown
   };
 
   return (

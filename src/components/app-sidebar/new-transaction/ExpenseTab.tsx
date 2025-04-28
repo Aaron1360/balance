@@ -20,7 +20,7 @@ interface ExpenseTabProps {
 }
 
 export default function ExpenseTab({ transaction }: ExpenseTabProps) {
-  // Dialog state
+  // Dialog and sheet states 
   const { closeDialog } = useLayoutContext();
 
   // Supabase custom hooks

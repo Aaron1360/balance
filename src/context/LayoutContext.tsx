@@ -4,19 +4,20 @@ interface LayoutContextType {
   isDialogOpen: boolean;
   openDialog: () => void;
   closeDialog: () => void;
-  setIsDialogOpen: (isOpen: boolean) => void;
+  setDialogState: (isOpen: boolean) => void;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
 
 export const LayoutProvider = ({ children }: { children: ReactNode }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
+  const setDialogState = (isOpen: boolean) => setIsDialogOpen(isOpen);
 
   return (
-    <LayoutContext.Provider value={{ isDialogOpen, openDialog, closeDialog, setIsDialogOpen}}>
+    <LayoutContext.Provider value={{ isDialogOpen, openDialog, closeDialog, setDialogState }}>
       {children}
     </LayoutContext.Provider>
   );

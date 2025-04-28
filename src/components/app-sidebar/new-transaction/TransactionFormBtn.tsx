@@ -20,12 +20,12 @@ interface TransactionFormBtnProps {
 }
 
 export default function TransactionFormBtn({ icon: Icon, text, variant, transaction }: TransactionFormBtnProps) {
-  const { isDialogOpen, openDialog, setIsDialogOpen } = useLayoutContext();
+  const { isDialogOpen, openDialog, setDialogState } = useLayoutContext();
 
   return (
     // Store the current state of the dialog in the context
     <Dialog open={isDialogOpen} onOpenChange={(open) => {
-      setIsDialogOpen(open);
+      setDialogState(open);
     }}>
       <DialogTrigger asChild>
         <Button variant={variant} size="sm" className="mx-2" onClick={openDialog}>
