@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -12,13 +12,31 @@ import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
 import { useInsertTableData } from "@/hooks/useInsertTableData";
 import { Expense } from "@/types/expense";
+import { useUpdateTableData } from "@/hooks/useUpdateTableData";
+import { useLayoutContext } from "@/context/LayoutContext";
 
-export default function ExpenseTab() {
+interface ExpenseTabProps {
+  transaction?: Expense;
+}
+
+export default function ExpenseTab({ transaction }: ExpenseTabProps) {
+   // Dialog state 
+   const { closeDialog } = useLayoutContext();
+
   // Supabase custom hooks
-  const { insertData, isLoading, error } =
-    useInsertTableData<Expense>("expenses");
+  const {
+    insertData,
+    isLoading: isLoadingInsert,
+    error: errorInsert,
+  } = useInsertTableData<Expense>("expenses");
+  const {
+    updateData,
+    isLoading: isLoadingUpdate,
+    error: errorUpdate,
+  } = useUpdateTableData<Expense>("expenses");
 
   // Form States
+  const [, setId] = useState<string | undefined>(undefined);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("Varios");
@@ -34,6 +52,24 @@ export default function ExpenseTab() {
 
   // State for deferred payments
   const [msi, setMsi] = useState(0);
+
+  // Initialize state with transaction data if available
+  useEffect(() => {
+    if (transaction) {
+      setId(transaction.id || undefined);
+      setDate(transaction.date || undefined);
+      setDescription(transaction.description || "");
+      setCategory(transaction.category || "Varios");
+      setPaymentMethod(transaction.payment_method || "Tarjeta");
+      setPaymentType(transaction.payment_type || "unica");
+      setAmount(transaction.amount || 0);
+      setMerchant(transaction.merchant || "");
+      setReference(transaction.reference || undefined);
+      setNotes(transaction.notes || undefined);
+      setTags(transaction.tags || []);
+      setMsi(transaction.msi || 0);
+    }
+  }, [transaction]);
 
   // Lists of categories
   const outcomeCategories = [
@@ -105,12 +141,23 @@ export default function ExpenseTab() {
     }
 
     try {
-      const newExpense = createExpense();
-      if (!newExpense) return;
+      if (transaction) {
+        // Update existing record
+        const updatedExpense = createExpense();
+        if (!updatedExpense) return;
 
-      console.log(newExpense);
-      // Save new record
-      await insertData(newExpense);
+        if (transaction.id) {
+          await updateData(transaction.id, updatedExpense);
+        } else {
+          throw new Error("Transaction ID is undefined.");
+        }
+      } else {
+        // Create a new record
+        const newExpense = createExpense();
+        if (!newExpense) return;
+
+        await insertData(newExpense);
+      }
 
       // Reset form
       setDate(new Date());
@@ -133,6 +180,8 @@ export default function ExpenseTab() {
       }
       alert("Something went wrong");
     }
+    // Close the dialog
+    closeDialog();
   };
 
   return (
@@ -303,12 +352,14 @@ export default function ExpenseTab() {
         <Button
           type="submit"
           onClick={(e) => handleSubmit(e)}
-          disabled={isLoading}
+          disabled={isLoadingInsert || isLoadingUpdate}
         >
-          {isLoading ? "Guardando..." : "Guardar"}
+          {isLoadingInsert || isLoadingUpdate ? "Guardando..." : "Guardar"}
         </Button>
-        {error && (
-          <p className="text-red-500 text-sm mt-2">Error: {error.message}</p>
+        {(errorInsert || errorUpdate) && (
+          <p className="text-red-500 text-sm mt-2">
+            Error: {errorInsert ? errorInsert.message : errorUpdate?.message}
+          </p>
         )}
       </DialogFooter>
     </form>

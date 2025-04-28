@@ -1,7 +1,7 @@
 // import { addDays, addMonths, addWeeks } from "date-fns";
 // import { useEffect, useState } from "react";
 // import PendingPayments from "./input-components/PendingPayments";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -15,12 +15,23 @@ import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
 import { useInsertTableData } from "@/hooks/useInsertTableData";
 import { Income } from "@/types/income";
+import { useUpdateTableData } from "@/hooks/useUpdateTableData";
+import { useLayoutContext } from "@/context/LayoutContext";
 
-export default function IncomeTab() {
+interface IncomeTabProps {
+  transaction?: Income;
+}
+
+export default function IncomeTab({ transaction }: IncomeTabProps) {
+  // Dialog state
+  const { closeDialog } = useLayoutContext();
+
   // Supabase custom hooks
-  const { insertData, isLoading, error } = useInsertTableData<Income>("incomes");
+  const { insertData, isLoading: isLoadingInsert, error: insertError } = useInsertTableData<Income>("incomes");
+  const { updateData, isLoading: isLoadingUpdate, error: updateError } = useUpdateTableData<Income>("incomes");
 
   // Form States
+  const [, setId] = useState<string | undefined>(undefined);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("Salario");
@@ -39,6 +50,26 @@ export default function IncomeTab() {
   // const [installments, setInstallments] = useState<
   //   Array<{ date: Date; amount: number; paid: boolean }>
   // >([]);
+
+  // Initialize state with transaction data if available
+  useEffect(() => {
+    if (transaction) {
+      setId(transaction.id || undefined);
+      setDate(transaction.date || undefined);
+      setDescription(transaction.description || "");
+      setCategory(transaction.category || "Salario");
+      setPaymentMethod(transaction.payment_method || "Efectivo");
+      setPaymentType(transaction.payment_type || "unica");
+      setAmount(transaction.amount || 0);
+      setReference(transaction.reference || undefined);
+      setNumberOfPayments(transaction.number_of_payments || 1);
+      setPaymentFrequency(transaction.payment_frequency || "");
+      // setInstallments(transaction.installments || []);
+      setState(transaction.state || undefined);
+      setNotes(transaction.notes || undefined);
+      setTags(transaction.tags || []);
+    }
+  }, [transaction]);
 
   // Lists of categories
   const paymentMethodsCategories = [
@@ -134,14 +165,29 @@ export default function IncomeTab() {
     }
 
     try {
-      const newIncome = createIncome();
-      if (!newIncome) return;
+      // Check if the transaction is being updated
+      if (transaction) {
+        // Update existing record
+        const updatedIncome = createIncome();
+        if (!updatedIncome) return;
 
-      console.log(newIncome);
-      // Save new record
-      await insertData(newIncome);
+        if (transaction.id) {
+          await updateData(transaction.id, updatedIncome);
+        } else {
+          throw new Error("Transaction ID is undefined.");
+        }
+        return;
+      }else {
+        // If no transaction is provided, create a new one
+        const newIncome = createIncome();
+        if (!newIncome) return;
+  
+        // Save new record
+        await insertData(newIncome);
+      }
 
       // Reset form
+      setId(undefined);
       setDate(new Date());
       setDescription("");
       setAmount(0);
@@ -163,6 +209,8 @@ export default function IncomeTab() {
       }
       alert("Something went wrong");
     }
+    // Close the dialog
+    closeDialog();
   };
 
   return (
@@ -356,12 +404,12 @@ export default function IncomeTab() {
         <Button
           type="submit"
           onClick={(e) => handleSubmit(e)}
-          disabled={isLoading}
+          disabled={isLoadingInsert || isLoadingUpdate}
         >
-          {isLoading ? "Guardando..." : "Guardar"}
+          {isLoadingInsert || isLoadingUpdate ? "Guardando..." : "Guardar"}
         </Button>
-        {error && (
-          <p className="text-red-500 text-sm mt-2">Error: {error.message}</p>
+        {(insertError || updateError) && (
+          <p className="text-red-500 text-sm mt-2">Error: {insertError?.message || updateError?.message}</p>
         )}
       </DialogFooter>
     </form>

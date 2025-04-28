@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useFetchTableData } from "@/hooks/useFetchTableData";
 import { Income } from "@/types/income";
 import { Expense } from "@/types/expense";
+import { toast } from "sonner";
 
 export type Transactions = Income | Expense;
 
@@ -9,7 +10,8 @@ interface TransactionsContextType {
   transactions: Transactions[];
   handleRefresh: () => void;
   isLoading: boolean;
-  error: Error | null; 
+  error: Error | null;
+  isOnCooldown: boolean;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(
@@ -26,6 +28,8 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({
   const [transactions, setTransactions] = useState<Transactions[]>([]);
   const isLoading = isLoadingIncome || isLoadingExpense;
   const error = incomeError || expenseError;
+  const [isOnCooldown, setIsOnCooldown] = useState(false);
+  const cooldownDuration = 3000; // 3 seconds
 
   // Combine income and expense data into transactions
   const loadTransactions = () => {
@@ -40,8 +44,17 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({
   
   // This function is used to update the transactions when the button is clicked
   const handleRefresh = () => {
+    if (isOnCooldown) {
+      toast.error("Por favor, espera antes de actualizar nuevamente.");
+      // console.warn("Por favor, espera antes de actualizar nuevamente.");
+      return; 
+    }
+    setIsOnCooldown(true);
     refetchIncome();
     refetchExpense();
+    setTimeout(() => {
+      setIsOnCooldown(false);
+    }, cooldownDuration);
   };
 
   const contextValue: TransactionsContextType = {
@@ -49,6 +62,7 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({
     handleRefresh,
     isLoading,
     error,
+    isOnCooldown,
   };
 
   return (

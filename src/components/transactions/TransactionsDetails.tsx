@@ -8,6 +8,8 @@ import {
   Tag,
   Wallet,
   Receipt,
+  Trash2,
+  Edit,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import TransactionFormBtn from "../app-sidebar/new-transaction/TransactionFormBtn";
 import { cn } from "@/lib/utils";
 import { Transactions } from "@/context/TransactionsContext";
 
@@ -43,6 +46,16 @@ export function TransactionDetails({
   onOpenChange,
 }: TransactionDetailsProps) {
   if (!transaction) return null;
+
+  const handleDelete = () => {
+    // Add functionality to delete the transaction
+    console.log("Deleting transaction:", transaction);
+    // Example: Show a confirmation dialog before deleting
+    if (confirm("¿Estás seguro de que deseas eliminar esta transacción?")) {
+      console.log("Transaction deleted:", transaction);
+      onOpenChange(false); // Close the details sheet after deletion
+    }
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -251,11 +264,16 @@ export function TransactionDetails({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-2 pt-6">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cerrar
+        <div className="flex justify-end gap-1 pt-6 mx-5">
+          <TransactionFormBtn icon={Edit}  variant="default" transaction={transaction} />
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDelete}
+            className="flex items-center gap-2"
+          >
+            <Trash2 />
           </Button>
-          <Button>Editar</Button>
         </div>
       </SheetContent>
     </Sheet>

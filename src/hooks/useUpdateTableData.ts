@@ -10,8 +10,8 @@ export function useUpdateTableData<T>(tableName: string) {
     setError(null);
     try {
       await updateTableData<T>(tableName, id, updatedRecord);
-    } catch (error: any) {
-      setError(error);
+    } catch (error: unknown) {
+      setError(error as Error);
     } finally {
       setIsLoading(false);
     }

@@ -10,6 +10,7 @@ import {
   HandCoins,
   Car,
   Book,
+  Plus,
 } from "lucide-react";
 import { NavMain } from "./NavDashboard";
 import { NavProjects } from "./NavGoals";
@@ -22,7 +23,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import rebootImage from "@/assets/reboot1.png";
-import NewTransactionBtn from "./new-transaction/NewTransactionBtn";
+import TransactionFormBtn from "./new-transaction/TransactionFormBtn";
 
 // This is sample data.
 export const data = {
@@ -97,7 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
-        <NewTransactionBtn />
+        <TransactionFormBtn icon={Plus} text="Añadir Transacción" />
       </SidebarContent>
       <SidebarFooter></SidebarFooter>
       <SidebarRail />

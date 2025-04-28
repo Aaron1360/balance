@@ -40,7 +40,8 @@ export function TransactionsTable({
     sidebarState: "expanded" | "collapsed";
   }>();
   // Get the transactions context
-  const { handleRefresh, isLoading, error } = useTransactionsContext();
+  const { handleRefresh, isLoading, error, isOnCooldown } =
+    useTransactionsContext();
   const wasLoading = useRef(isLoading);
 
   // Show a toast when the loading state changes
@@ -69,11 +70,16 @@ export function TransactionsTable({
             className="gap-2"
             onClick={() => {
               handleRefresh();
-              requestSort("date");
+              // requestSort("date");
             }}
-            disabled={isLoading} // ← Disable while loading
+            disabled={isLoading || isOnCooldown} // Disable button during loading or cooldown
+            title={
+              isOnCooldown
+                ? "Espere antes de actualizar nuevamente" // Tooltip during cooldown
+                : ""
+            }
           >
-            {isLoading ? (
+            {isLoading || isOnCooldown ? (
               "Actualizando..."
             ) : (
               <>
@@ -84,15 +90,15 @@ export function TransactionsTable({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col items-center px-2">
-        <ScrollArea
-          className={cn(
-            "w-full h-screen max-h-[700px] border rounded-md transition-all",
-            sidebarState === "expanded" && isFilterOpen
-              ? "max-w-[740px] md:max-w-[80%] lg:max-w-[95%]"
-              : "max-w-full sm:max-w-[80%] md:max-w-[90%] lg:max-w-[95%]"
-          )}
-        >
+      <ScrollArea
+        className={cn(
+          "w-full h-screen max-h-[700px] border rounded-md transition-all",
+          sidebarState === "expanded" && isFilterOpen
+            ? "max-w-[740px] md:max-w-[80%] lg:max-w-[95%]"
+            : "max-w-full sm:max-w-[80%] md:max-w-[90%] lg:max-w-[95%]"
+        )}
+      >
+        <CardContent className="flex flex-col items-center px-2">
           <Table>
             <TableHeader>
               <TableRow>
@@ -246,11 +252,11 @@ export function TransactionsTable({
                   </TableRow>
                 ))
               )}
-              <ScrollBar orientation="horizontal" />
             </TableBody>
           </Table>
-        </ScrollArea>
-      </CardContent>
+          <ScrollBar orientation="horizontal" />
+        </CardContent>
+      </ScrollArea>
     </Card>
   );
 }

@@ -9,11 +9,16 @@ import ServiciosRoute from "./pages/Services";
 import CalendarPage from "./pages/Calendar";
 import { DateProvider } from "./context/DateContext";
 import { TransactionsProvider } from "./context/TransactionsContext";
+import { LayoutProvider } from "./context/LayoutContext";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      <LayoutProvider>
+        <Layout />
+      </LayoutProvider>
+    ),
     children: [
       {
         index: true,
