@@ -10,8 +10,8 @@ export function useDeleteTableData(tableName: string) {
     setError(null);
     try {
       await deleteTableData(tableName, id);
-    } catch (error: any) {
-      setError(error);
+    } catch (error: unknown) {
+      setError(error as Error);
     } finally {
       setIsLoading(false);
     }

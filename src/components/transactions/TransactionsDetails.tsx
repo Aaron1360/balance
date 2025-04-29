@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { Transactions } from "@/context/TransactionsContext";
 import { useLayoutContext } from "@/context/LayoutContext";
 import { useEffect } from "react";
+import { useDeleteTableData } from "@/hooks/useDeleteTableData";
 
 interface TransactionDetailsProps {
   transaction: Transactions | null;
@@ -48,6 +49,7 @@ export function TransactionDetails({
   onOpenChange,
 }: TransactionDetailsProps) {
   const { isDialogOpen } = useLayoutContext(); // Access dialog state from context
+  const { deleteData, isLoading: isDeleting, error: errorDeleting } = useDeleteTableData(transaction?.type === "income" ? "incomes" : "expenses");
 
   // Automatically close the sheet when the dialog is closed
   useEffect(() => {
@@ -58,13 +60,19 @@ export function TransactionDetails({
 
   if (!transaction) return null;
 
-  const handleDelete = () => {
-    // Add functionality to delete the transaction
-    console.log("Deleting transaction:", transaction);
-    // Example: Show a confirmation dialog before deleting
+  const handleDelete = async () => {
     if (confirm("¿Estás seguro de que deseas eliminar esta transacción?")) {
-      console.log("Transaction deleted:", transaction);
-      onOpenChange(false); // Close the details sheet after deletion
+      try {
+        if (transaction.id) {
+          await deleteData(transaction.id);
+        } else {
+          console.error("Transaction ID is undefined.");
+        }
+        console.log("Transaction deleted:", transaction);
+        onOpenChange(false);
+      } catch (error) {
+        console.error("Error deleting transaction:", error);
+      } 
     }
   };
 
@@ -294,11 +302,18 @@ export function TransactionDetails({
             variant="destructive"
             size="sm"
             onClick={handleDelete}
+            disabled={isDeleting}
             className="flex items-center gap-2"
           >
             <Trash2 />
           </Button>
         </div>
+        {/* Error Message */}
+        {errorDeleting && (
+          <div className="text-red-500 text-sm mt-2">
+            Error al eliminar la transacción: {errorDeleting.message}
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );
