@@ -12,7 +12,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import rebootImage from "@/assets/reboot1.png";
-import TransactionFormBtn from "../new-transaction-button/TransactionFormBtn";
+import TransactionsDialogBtn from "../transactions-dialog/TransactionsDialogBtn";
 
 // This is sample data.
 export const data = {
@@ -50,7 +50,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Plus className="w-5 h-5" />
             </div>
             {/* TransactionFormBtn styled as part of the button */}
-            <TransactionFormBtn text="Añadir Transacción" />
+            <TransactionsDialogBtn text="Añadir Transacción" />
           </SidebarMenuButton>
         </SidebarMenu>
       </SidebarFooter>

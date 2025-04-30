@@ -30,7 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import TransactionFormBtn from "../new-transaction-button/TransactionFormBtn";
+import TransactionsDialogBtn from "../transactions-dialog/TransactionsDialogBtn";
 import { cn } from "@/lib/utils";
 import { Transactions } from "@/context/TransactionsContext";
 import { useLayoutContext } from "@/context/LayoutContext";
@@ -293,7 +293,7 @@ export function TransactionDetails({
 
         {/* Actions */}
         <div className="flex justify-end gap-1 pt-6 mx-5">
-          <TransactionFormBtn
+          <TransactionsDialogBtn
             icon={Edit}
             variant="default"
             transaction={transaction}

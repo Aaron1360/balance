@@ -8,18 +8,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import TransactionFormTabs from "./TransactionFormTabs";
+import DialogTabs from "./DialogTabs";
 import { Transactions } from "@/context/TransactionsContext";
 import { useLayoutContext } from "@/context/LayoutContext";
 
-interface TransactionFormBtnProps {
+interface TransactionsDialogBtnProps {
   icon?: LucideIcon;
   text?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   transaction?: Transactions;
 }
 
-export default function TransactionFormBtn({ icon: Icon, text, variant, transaction }: TransactionFormBtnProps) {
+export default function TransactionsDialogBtn({ icon: Icon, text, variant, transaction }: TransactionsDialogBtnProps) {
   const { isDialogOpen, openDialog, setDialogState } = useLayoutContext();
 
   return (
@@ -40,7 +40,7 @@ export default function TransactionFormBtn({ icon: Icon, text, variant, transact
             Ingresa los detalles a continuación.
           </DialogDescription>
         </DialogHeader>
-        <TransactionFormTabs transaction={transaction} />
+        <DialogTabs transaction={transaction} />
       </DialogContent>
     </Dialog>
   );

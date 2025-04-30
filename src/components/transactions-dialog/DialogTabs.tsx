@@ -4,11 +4,11 @@ import ExpenseTab from "./ExpenseTab";
 import { Transactions } from "@/context/TransactionsContext";
 import { Expense } from "@/types/expense";
 
-interface TransactionFormTabsProps {
+interface DialogTabsProps {
   transaction?: Transactions;
 }
 
-function TransactionFormTabs({ transaction }: TransactionFormTabsProps) {
+function DialogTabs({ transaction }: DialogTabsProps) {
   // Determine the default tab
   const defaultTab = transaction?.type === "income" ? "income" : "expense";
 
@@ -32,4 +32,4 @@ function TransactionFormTabs({ transaction }: TransactionFormTabsProps) {
   );
 }
 
-export default TransactionFormTabs;
+export default DialogTabs;
