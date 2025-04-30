@@ -1,27 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
-import { fetchTableData } from "@/lib/transactions_db_operations";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTableData } from "@/lib/db_operations";
 
 export function useFetchTableData<T>(tableName: string) {
-  const [data, setData] = useState<T[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const result = await fetchTableData<T>(tableName);
-      setData(result);
-      setError(null);
-    } catch (error: unknown) {
-      setError(error as Error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [tableName]);
-
-  useEffect(() => {
-    fetchData(); // fetch on first render
-  }, [fetchData]);
-
-  return { data, isLoading, error, refetch: fetchData };
+  return useQuery<T[], Error>({
+    queryKey: [tableName], // Query key
+    queryFn: () => fetchTableData<T>(tableName) // Query function
+  });
 }

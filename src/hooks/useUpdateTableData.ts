@@ -1,4 +1,4 @@
-import { updateTableData } from "@/lib/transactions_db_operations";
+import { updateTableData } from "@/lib/db_operations";
 import { useState } from "react";
 
 export function useUpdateTableData<T>(tableName: string) {

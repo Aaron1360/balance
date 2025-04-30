@@ -1,4 +1,4 @@
-import { insertTableData } from "@/lib/transactions_db_operations";
+import { insertTableData } from "@/lib/db_operations";
 import { useState } from "react";
 
 export function useInsertTableData<T>(tableName: string) {

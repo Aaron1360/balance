@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { deleteTableData } from "@/lib/transactions_db_operations";
+import { deleteTableData } from "@/lib/db_operations";
 
 export function useDeleteTableData(tableName: string) {
   const [isLoading, setIsLoading] = useState(false);
