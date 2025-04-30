@@ -13,7 +13,7 @@ import { Transactions } from "@/context/TransactionsContext";
 import { useLayoutContext } from "@/context/LayoutContext";
 
 interface TransactionFormBtnProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
   text?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
   transaction?: Transactions;
@@ -28,8 +28,8 @@ export default function TransactionFormBtn({ icon: Icon, text, variant, transact
       setDialogState(open);
     }}>
       <DialogTrigger asChild>
-        <Button variant={variant} size="sm" className="mx-2" onClick={openDialog}>
-          <Icon className="h-4 w-4" />
+        <Button variant={variant} size="sm" className="mx-2 flex-1" onClick={openDialog}>
+          {Icon && <Icon className="h-4 w-4" />}
           {text}
         </Button>
       </DialogTrigger>

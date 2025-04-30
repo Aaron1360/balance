@@ -8,7 +8,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Toaster } from "sonner";
-import Header from "./report/Header";
+import Header from "./Header";
 
 export default function Layout() {
   return (

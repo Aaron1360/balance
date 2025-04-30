@@ -1,13 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import NotFoundPage from "./pages/NotFoundPage";
-import Layout from "./components/Layout";
-import Report from "./pages/Report";
+import Layout from "./components/layout/Layout";
 import Transactions from "./pages/Transactions";
-import SavingsPage from "./pages/Savings";
-import DebtPage from "./pages/Debts";
-import ServiciosRoute from "./pages/Services";
-import CalendarPage from "./pages/Calendar";
-import { DateProvider } from "./context/DateContext";
 import { TransactionsProvider } from "./context/TransactionsContext";
 import { LayoutProvider } from "./context/LayoutContext";
 
@@ -22,15 +16,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to={"/dashboard/estado-de-cuenta"} replace />,
-      },
-      {
-        path: "/dashboard/estado-de-cuenta",
-        element: (
-          <DateProvider>
-            <Report />
-          </DateProvider>
-        ),
+        element: <Navigate to={"/dashboard/transacciones"} replace />,
       },
       {
         path: "/dashboard/transacciones",
@@ -40,26 +26,10 @@ const router = createBrowserRouter([
           </TransactionsProvider>
         ),
       },
-      {
-        path: "/dashboard/ahorros",
-        element: <SavingsPage />,
-      },
-      {
-        path: "/dashboard/deudas",
-        element: <DebtPage />,
-      },
-      {
-        path: "/dashboard/servicios",
-        element: <ServiciosRoute />,
-      },
-      {
-        path: "/dashboard/calendario",
-        element: <CalendarPage />,
-      },
     ],
   },
   {
-    path: "*", // This will match any route that doesn't exist
+    path: "*", // 404 page
     element: <NotFoundPage />,
   },
 ]);

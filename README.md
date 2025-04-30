@@ -44,11 +44,6 @@ Esta aplicación está diseñada para ayudar a los usuarios a tener un mejor con
 
 ---
 
-## 📂 Estructura del Proyecto
-
-> *(Agregar esta sección una vez que inicie el desarrollo)*
-
----
 
 ## 📝 Licencia
 

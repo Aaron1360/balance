@@ -11,7 +11,7 @@ const NotFoundPage = (): JSX.Element => {
         <p className="text-lg text-gray-600 mb-6">Oops! La pagina que buscas no existe.</p>
         <Button className="text-white bg-gray-800 hover:bg-gray-600 py-2 px-6 rounded-lg text-xl">
         <Link
-          to="/dashboard/estado-de-cuenta"
+          to="/dashboard/transacciones"
         >
           Regresa a tu estado de cuenta.
         </Link>

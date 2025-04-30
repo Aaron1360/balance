@@ -30,7 +30,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import TransactionFormBtn from "../app-sidebar/new-transaction/TransactionFormBtn";
+import TransactionFormBtn from "../new-transaction-button/TransactionFormBtn";
 import { cn } from "@/lib/utils";
 import { Transactions } from "@/context/TransactionsContext";
 import { useLayoutContext } from "@/context/LayoutContext";

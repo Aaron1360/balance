@@ -1,29 +1,18 @@
 import * as React from "react";
-import {
-  FileText,
-  Repeat,
-  Receipt,
-  Wrench,
-  Calendar,
-  ShieldAlert,
-  Luggage,
-  HandCoins,
-  Car,
-  Book,
-  Plus,
-} from "lucide-react";
+import { Plus, Repeat } from "lucide-react";
 import { NavMain } from "./NavDashboard";
-import { NavProjects } from "./NavGoals";
 import { NavUser } from "./NavUser";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import rebootImage from "@/assets/reboot1.png";
-import TransactionFormBtn from "./new-transaction/TransactionFormBtn";
+import TransactionFormBtn from "../new-transaction-button/TransactionFormBtn";
 
 // This is sample data.
 export const data = {
@@ -34,57 +23,9 @@ export const data = {
   },
   navMain: [
     {
-      title: "Estado de Cuenta",
-      url: "/dashboard/estado-de-cuenta",
-      icon: FileText,
-      isActive: true,
-    },
-    {
       title: "Transacciones",
       url: "/dashboard/transacciones",
       icon: Repeat,
-    },
-    {
-      title: "Ahorros",
-      url: "/dashboard/ahorros",
-      icon: HandCoins,
-    },
-    {
-      title: "Deudas",
-      url: "/dashboard/deudas",
-      icon: Receipt,
-    },
-    {
-      title: "Servicios",
-      url: "/dashboard/servicios",
-      icon: Wrench,
-    },
-    {
-      title: "Calendario",
-      url: "/dashboard/calendario",
-      icon: Calendar,
-    },
-  ],
-  projects: [
-    {
-      name: "Vacaciones",
-      url: "#",
-      icon: Luggage,
-    },
-    {
-      name: "Fondo de Emergencia",
-      url: "#",
-      icon: ShieldAlert,
-    },
-    {
-      name: "Nuevo Coche",
-      url: "#",
-      icon: Car,
-    },
-    {
-      name: "Educación",
-      url: "#",
-      icon: Book,
     },
   ],
 };
@@ -97,10 +38,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
-        <TransactionFormBtn icon={Plus} text="Añadir Transacción" />
       </SidebarContent>
-      <SidebarFooter></SidebarFooter>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuButton
+            tooltip="Añadir Transacción"
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary"
+          >
+            {/* Plus icon styled to look like part of the button */}
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground">
+              <Plus className="w-5 h-5" />
+            </div>
+            {/* TransactionFormBtn styled as part of the button */}
+            <TransactionFormBtn text="Añadir Transacción" />
+          </SidebarMenuButton>
+        </SidebarMenu>
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );
