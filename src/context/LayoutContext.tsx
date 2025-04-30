@@ -1,4 +1,8 @@
+import { Expense } from "@/types/expense";
+import { Income } from "@/types/income";
 import { createContext, useContext, useState, ReactNode } from "react";
+
+export type Transactions = Income | Expense;
 
 interface LayoutContextType {
   isDialogOpen: boolean;

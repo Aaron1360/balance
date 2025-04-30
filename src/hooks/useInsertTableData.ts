@@ -1,21 +1,20 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { insertTableData } from "@/lib/db_operations";
-import { useState } from "react";
 
 export function useInsertTableData<T>(tableName: string) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const insertData = async (record: Omit<T, "id">) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await insertTableData<T>(tableName, record);
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error : new Error("An unknown error occurred"));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  return useMutation<T, Error, Omit<T, "id">>({
+    mutationFn: (record: Omit<T, "id">) =>
+      insertTableData<T>(tableName, record), 
+    onSuccess: () => {
+      // Invalidate the query to refetch data for the table
+      queryClient.invalidateQueries({ queryKey: [tableName] });
+    },
+    onError: (error) => {
+      console.error(`Error inserting data into ${tableName}:`, error);
 
-  return { insertData, isLoading, error };
+      // Optionally, surface the error to the user (e.g., via a toast notification)
+    },
+  });
 }

@@ -2,9 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useFetchTableData } from "@/hooks/useFetchTableData";
 import { Income } from "@/types/income";
 import { Expense } from "@/types/expense";
+import { Transactions } from "./LayoutContext";
 import { toast } from "sonner";
-
-export type Transactions = Income | Expense;
 
 interface TransactionsContextType {
   transactions: Transactions[];

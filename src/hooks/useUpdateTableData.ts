@@ -1,21 +1,20 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateTableData } from "@/lib/db_operations";
-import { useState } from "react";
 
 export function useUpdateTableData<T>(tableName: string) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const updateData = async (id: string, updatedRecord: Partial<T>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await updateTableData<T>(tableName, id, updatedRecord);
-    } catch (error: unknown) {
-      setError(error as Error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  return useMutation<T, Error, { id: string; updatedRecord: Partial<T> }>({
+    mutationFn: ({ id, updatedRecord }) =>
+      updateTableData<T>(tableName, id, updatedRecord), // Mutation function
+    onSuccess: () => {
+      // Invalidate the query to refetch data for the table
+      queryClient.invalidateQueries({ queryKey: [tableName] });
+    },
+    onError: (error) => {
+      console.error(`Error updating data in ${tableName}:`, error);
 
-  return { updateData, isLoading, error };
+      // Optionally, surface the error to the user (e.g., via a toast notification)
+    },
+  });
 }

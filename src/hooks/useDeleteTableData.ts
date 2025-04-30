@@ -1,21 +1,19 @@
-import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteTableData } from "@/lib/db_operations";
 
 export function useDeleteTableData(tableName: string) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const deleteData = async (id: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await deleteTableData(tableName, id);
-    } catch (error: unknown) {
-      setError(error as Error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  return useMutation<void, Error, string>({
+    mutationFn: (id: string) => deleteTableData(tableName, id), 
+    onSuccess: () => {
+      // Invalidate the query to refetch data for the table
+      queryClient.invalidateQueries({ queryKey: [tableName] });
+    },
+    onError: (error) => {
+      console.error(`Error deleting data from ${tableName}:`, error);
 
-  return { deleteData, isLoading, error };
+      // Optionally, surface the error to the user (e.g., via a toast notification)
+    },
+  });
 }

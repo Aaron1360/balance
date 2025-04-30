@@ -2,10 +2,8 @@ import { useState } from "react";
 import { FilterPanel } from "@/components/transactions/FilterPanel";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { TransactionDetails } from "@/components/transactions/TransactionsDetails";
-import {
-  Transactions,
-  useTransactionsContext,
-} from "@/context/TransactionsContext";
+import { useTransactionsContext } from "@/context/TransactionsContext";
+import { Transactions } from "@/context/LayoutContext";
 
 export default function TransactionsPage() {
   // Load transactions data from the context
@@ -45,7 +43,6 @@ export default function TransactionsPage() {
   const paymentMethods = Array.from(
     new Set(transactionsData.map((t) => t.payment_method))
   );
-
 
   // Function to sort transactions
   const requestSort = (key: string) => {
@@ -93,7 +90,6 @@ export default function TransactionsPage() {
       (transaction) => new Date(transaction.date) >= startDate
     );
   }
-  
 
   // Filter by end date
   if (endDate) {
@@ -185,7 +181,7 @@ export default function TransactionsPage() {
           onRowClick={handleRowClick}
           sortConfig={sortConfig}
           requestSort={requestSort}
-          isFilterOpen={isFilterOpen} 
+          isFilterOpen={isFilterOpen}
         />
       </div>
 
