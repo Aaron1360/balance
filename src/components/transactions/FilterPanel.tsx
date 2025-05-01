@@ -35,9 +35,9 @@ interface FilterPanelProps {
   selectedCategories: string[];
   setSelectedCategories: (categories: string[]) => void;
   selectedPaymentMethods: string[];
-  setSelectedPaymentMethods: React.Dispatch<React.SetStateAction<string[]>>; //(methods: string[]) => void
+  setSelectedPaymentMethods: React.Dispatch<React.SetStateAction<string[]>>;
   selectedTypes: string[];
-  setSelectedTypes: React.Dispatch<React.SetStateAction<string[]>>; //(types: string[]) => void
+  setSelectedTypes: React.Dispatch<React.SetStateAction<string[]>>;
   selectedPaymentType: string | null;
   setSelectedPaymentType: (type: string | null) => void;
   categories: string[];
@@ -85,13 +85,6 @@ export function FilterPanel({
         : [...prev, method]
     );
   };
-
-  // // Function to handle changes in selected types
-  // const handleTypeChange = (type: string) => {
-  //   setSelectedTypes((prev) =>
-  //     prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
-  //   );
-  // };
 
   return (
     <div
@@ -184,45 +177,13 @@ export function FilterPanel({
               </div>
 
               {/* Transaction type */}
-              {/* <div className="space-y-2">
-                <Label>Tipo</Label>
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="type-income"
-                      checked={selectedTypes.includes("income")}
-                      onCheckedChange={() => handleTypeChange("income")}
-                    />
-                    <Label
-                      htmlFor="type-income"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Ingresos
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="type-expense"
-                      checked={selectedTypes.includes("expense")}
-                      onCheckedChange={() => handleTypeChange("expense")}
-                    />
-                    <Label
-                      htmlFor="type-expense"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Gastos
-                    </Label>
-                  </div>
-                </div>
-              </div> */}
-              {/* Transaction type */}
               <div className="space-y-2">
                 <Label>Tipo</Label>
                 <RadioGroup
                   value={selectedTypes[0] || "all"}
                   onValueChange={(value) => {
                     if (value === "all") {
-                      setSelectedTypes([]); 
+                      setSelectedTypes([]);
                     } else {
                       setSelectedTypes([value]);
                     }
@@ -266,8 +227,8 @@ export function FilterPanel({
                   <SelectContent>
                     <SelectItem value="all">Todas las categorías</SelectItem>
                     {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
+                      <SelectItem key={category} value={category || "unknown"}>
+                        {category || "Sin categoría"}
                       </SelectItem>
                     ))}
                   </SelectContent>
