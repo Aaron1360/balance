@@ -35,6 +35,7 @@ import TransactionsDialogBtn from "../transactions-dialog/TransactionsDialogBtn"
 import { cn } from "@/lib/utils";
 import { Transactions, useLayoutContext } from "@/context/LayoutContext";
 import { useDeleteTableData } from "@/hooks/useDeleteTableData";
+import { toast } from "sonner";
 
 interface TransactionDetailsProps {
   transaction: Transactions | null;
@@ -73,11 +74,11 @@ export function TransactionDetails({
       if (transaction.id) {
         deleteData(transaction.id, {
           onSuccess: () => {
-            // console.log("Transaction deleted:", transaction);
+            toast.success("Transacción eliminada");
             onOpenChange(false); // Close the sheet after successful deletion
           },
           onError: (error) => {
-            console.error("Error deleting transaction:", error);
+            toast.error(`Error al eliminar la transacción: ${error.message}`); // Show error toast in Spanish
           },
         });
       } else {

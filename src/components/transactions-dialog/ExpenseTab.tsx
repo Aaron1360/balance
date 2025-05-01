@@ -170,8 +170,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
               closeDialog(); // Close the dialog on success
             },
             onError: (error) => {
-              // console.error("Error updating expense:", error);
-              alert(`Failed to update the expense: ${error.message}`);
+              toast.error(`Error al actualizar el gasto: ${error.message}`); // Show error toast in Spanish
             },
           }
         );
@@ -187,8 +186,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
           closeDialog(); // Close the dialog on success
         },
         onError: (error) => {
-          console.error("Error adding expense:", error);
-          alert(`Failed to add the expense: ${error.message}`);
+          toast.error(`Error al agregar el gasto: ${error.message}`); // Show error toast in Spanish
         },
       });
     }

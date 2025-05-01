@@ -169,7 +169,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
               closeDialog(); // Close the dialog on success
             },
             onError: (error) => {
-              alert(`Failed to update the income: ${error.message}`);
+              toast.error(`Error al actualizar el ingreso: ${error.message}`); // Show error toast in Spanish
             },
           }
         );
@@ -186,7 +186,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
           closeDialog(); // Close the dialog on success
         },
         onError: (error) => {
-          alert(`Failed to add the income: ${error.message}`);
+          toast.error(`Error al agregar el ingreso: ${error.message}`); // Show error toast in Spanish
         },
       });
     }
