@@ -14,13 +14,14 @@ import { useInsertTableData } from "@/hooks/useInsertTableData";
 import { Expense } from "@/types/expense";
 import { useUpdateTableData } from "@/hooks/useUpdateTableData";
 import { useLayoutContext } from "@/context/LayoutContext";
+import { toast } from "sonner";
 
 interface ExpenseTabProps {
   transaction?: Expense;
 }
 
 export default function ExpenseTab({ transaction }: ExpenseTabProps) {
-  // Dialog and sheet states 
+  // Dialog and sheet states
   const { closeDialog } = useLayoutContext();
 
   // Supabase custom hooks
@@ -164,12 +165,12 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
           { id: transaction.id, updatedRecord: expenseData },
           {
             onSuccess: () => {
-              console.log("Expense updated successfully!");
+              toast.success("Gasto actualizado exitosamente"); // Show success toast
               resetForm(); // Reset the form on success
               closeDialog(); // Close the dialog on success
             },
             onError: (error) => {
-              console.error("Error updating expense:", error);
+              // console.error("Error updating expense:", error);
               alert(`Failed to update the expense: ${error.message}`);
             },
           }
@@ -182,8 +183,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
       // Insert new record
       insertExpense(expenseData, {
         onSuccess: () => {
-          console.log("Expense added successfully!");
-          resetForm(); // Reset the form on success
+          toast.success("Gasto agregado exitosamente"); // Show success toast          resetForm(); // Reset the form on success
           closeDialog(); // Close the dialog on success
         },
         onError: (error) => {

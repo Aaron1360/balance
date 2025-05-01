@@ -14,6 +14,7 @@ import { useInsertTableData } from "@/hooks/useInsertTableData";
 import { Income } from "@/types/income";
 import { useUpdateTableData } from "@/hooks/useUpdateTableData";
 import { useLayoutContext } from "@/context/LayoutContext";
+import { toast } from "sonner";
 
 interface IncomeTabProps {
   transaction?: Income;
@@ -163,12 +164,11 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
           { id: transaction.id, updatedRecord: incomeData },
           {
             onSuccess: () => {
-              console.log("Income updated successfully!");
+              toast.success("Ingreso actualizado exitosamente"); // Show success toast
               resetForm(); // Reset the form on success
               closeDialog(); // Close the dialog on success
             },
             onError: (error) => {
-              console.error("Error updating income:", error);
               alert(`Failed to update the income: ${error.message}`);
             },
           }
@@ -181,12 +181,11 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       // Insert new record
       insertIncome(incomeData, {
         onSuccess: () => {
-          console.log("Income added successfully!");
+          toast.success("Ingreso agregado exitosamente"); // Show success toast
           resetForm(); // Reset the form on success
           closeDialog(); // Close the dialog on success
         },
         onError: (error) => {
-          console.error("Error adding income:", error);
           alert(`Failed to add the income: ${error.message}`);
         },
       });

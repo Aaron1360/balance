@@ -73,7 +73,7 @@ export function TransactionDetails({
       if (transaction.id) {
         deleteData(transaction.id, {
           onSuccess: () => {
-            console.log("Transaction deleted:", transaction);
+            // console.log("Transaction deleted:", transaction);
             onOpenChange(false); // Close the sheet after successful deletion
           },
           onError: (error) => {
