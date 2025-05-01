@@ -43,14 +43,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuButton
             tooltip="Añadir Transacción"
-            className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary"
+            className="flex items-center justify-between px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground "
           >
-            {/* Plus icon styled to look like part of the button */}
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground">
-              <Plus className="w-5 h-5" />
+            {/* Wrapper for the Plus icon */}
+            <div className="flex-shrink-0 flex items-center justify-left w-8 h-8 ">
+              <Plus className="w-5 h-5 " />
             </div>
-            {/* TransactionFormBtn styled as part of the button */}
-            <TransactionsDialogBtn text="Añadir Transacción" />
+            {/* Wrapper for TransactionsDialogBtn to make it grow */}
+            <div className="flex-grow flex items-center justify-center">
+              <TransactionsDialogBtn
+                text="Añadir Transacción"
+                triggerAsChild={true}
+              />
+            </div>
           </SidebarMenuButton>
         </SidebarMenu>
       </SidebarFooter>

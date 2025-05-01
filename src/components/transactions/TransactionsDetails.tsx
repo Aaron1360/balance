@@ -32,8 +32,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import TransactionsDialogBtn from "../transactions-dialog/TransactionsDialogBtn";
 import { cn } from "@/lib/utils";
-import { Transactions } from "@/context/TransactionsContext";
-import { useLayoutContext } from "@/context/LayoutContext";
+import { Transactions, useLayoutContext } from "@/context/LayoutContext";
 import { useEffect } from "react";
 import { useDeleteTableData } from "@/hooks/useDeleteTableData";
 

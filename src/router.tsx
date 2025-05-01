@@ -4,7 +4,6 @@ import Layout from "./components/layout/Layout";
 import Transactions from "./pages/Transactions";
 import { TransactionsProvider } from "./context/TransactionsContext";
 import { LayoutProvider } from "./context/LayoutContext";
-import TestHooks from "./TestHooks";
 
 const router = createBrowserRouter([
   {
@@ -25,12 +24,6 @@ const router = createBrowserRouter([
           <TransactionsProvider>
             <Transactions />
           </TransactionsProvider>
-        ),
-      },
-      {
-        path: "/dashboard/api-test",
-        element: (
-          <TestHooks></TestHooks>
         ),
       },
     ],
