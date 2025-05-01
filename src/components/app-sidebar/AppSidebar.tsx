@@ -54,6 +54,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <TransactionsDialogBtn
                 text="Añadir Transacción"
                 triggerAsChild={true}
+                className="flex flex-1 w-full items-center gap-2 cursor-pointer bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
               />
             </div>
           </SidebarMenuButton>

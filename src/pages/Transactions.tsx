@@ -177,7 +177,7 @@ export default function TransactionsPage() {
       {/* Transactions Table */}
       <div className="flex-1">
         <TransactionsTable
-          transactions={filteredTransactions}
+          filteredTransactions={filteredTransactions}
           onRowClick={handleRowClick}
           sortConfig={sortConfig}
           requestSort={requestSort}

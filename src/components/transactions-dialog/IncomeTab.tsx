@@ -1,6 +1,3 @@
-// import { addDays, addMonths, addWeeks } from "date-fns";
-// import { useEffect, useState } from "react";
-// import PendingPayments from "./input-components/PendingPayments";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -28,13 +25,14 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
 
   // Supabase custom hooks
   const {
-    insertData,
-    isLoading: isLoadingInsert,
+    mutate: insertIncome,
+    isPending: isLoadingInsert,
     error: insertError,
   } = useInsertTableData<Income>("incomes");
+
   const {
-    updateData,
-    isLoading: isLoadingUpdate,
+    mutate: updateData,
+    isPending: isLoadingUpdate,
     error: updateError,
   } = useUpdateTableData<Income>("incomes");
 
@@ -55,9 +53,6 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
   // States for deferred payments
   const [numberOfPayments, setNumberOfPayments] = useState(1);
   const [paymentFrequency, setPaymentFrequency] = useState("");
-  // const [installments, setInstallments] = useState<
-  //   Array<{ date: Date; amount: number; paid: boolean }>
-  // >([]);
 
   // Initialize state with transaction data if available
   useEffect(() => {
@@ -110,34 +105,6 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  // Define Installments
-  // useEffect(() => {
-  //   if (paymentType === "diferido" && date && numberOfPayments > 0 && amount > 0) {
-  //     const newInstallments = [];
-  //     const amountPerInstallment = amount / numberOfPayments;
-
-  //     for (let i = 0; i < numberOfPayments; i++) {
-  //       let installmentDate = new Date(date);
-
-  //       if (paymentFrequency === "mensual") {
-  //         installmentDate = addMonths(installmentDate, i);
-  //       } else if (paymentFrequency === "quincenal") {
-  //         installmentDate = addDays(installmentDate, i * 15);
-  //       } else if (paymentFrequency === "semanal") {
-  //         installmentDate = addWeeks(installmentDate, i);
-  //       }
-
-  //       newInstallments.push({
-  //         date: installmentDate,
-  //         amount: amountPerInstallment,
-  //         paid: i === 0, // First installment is considered paid
-  //       });
-  //     }
-
-  //     setInstallments(newInstallments);
-  //   }
-  // }, [paymentType, date, numberOfPayments, paymentFrequency, amount]);
-
   // Function to create a new entry
   const createIncome = (): Income => {
     if (!date) {
@@ -161,62 +128,68 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
     };
   };
 
-  // Function to handle form submission
-  const handleSubmit = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  // Helper function to reset the form
+  const resetForm = () => {
+    setId(undefined);
+    setDate(new Date());
+    setDescription("");
+    setAmount(0);
+    setCategory("Salario");
+    setPaymentMethod("Efectivo");
+    setPaymentType("unica");
+    setNumberOfPayments(1);
+    setPaymentFrequency("");
+    setReference("");
+    setState("completado");
+    setNotes("");
+    setTags([]);
+    setTagInput("");
+  };
+
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
 
     if (!amount || !date || !category) {
-      alert("Fill your data.");
+      alert("Please fill in all required fields.");
       return;
     }
 
-    try {
-      // Check if the transaction is being updated
-      if (transaction) {
-        // Update existing record
-        const updatedIncome = createIncome();
-        if (!updatedIncome) return;
+    const incomeData = createIncome();
 
-        if (transaction.id) {
-          await updateData(transaction.id, updatedIncome);
-        } else {
-          throw new Error("Transaction ID is undefined.");
-        }
+    if (transaction) {
+      // Update existing record
+      if (transaction.id) {
+        updateData(
+          { id: transaction.id, updatedRecord: incomeData },
+          {
+            onSuccess: () => {
+              console.log("Income updated successfully!");
+              resetForm(); // Reset the form on success
+              closeDialog(); // Close the dialog on success
+            },
+            onError: (error) => {
+              console.error("Error updating income:", error);
+              alert(`Failed to update the income: ${error.message}`);
+            },
+          }
+        );
       } else {
-        // If no transaction is provided, create a new one
-        const newIncome = createIncome();
-        if (!newIncome) return;
-
-        // Save new record
-        await insertData(newIncome);
+        console.error("Transaction ID is undefined.");
+        alert("Transaction ID is missing. Cannot update the record.");
       }
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        console.error("Submission error:", e.message || e);
-      } else {
-        console.error("Unknown error:", e);
-      }
-      alert("Something went wrong");
-    } finally {
-      // Reset form
-      setId(undefined);
-      setDate(new Date());
-      setDescription("");
-      setAmount(0);
-      setCategory("");
-      setPaymentMethod("");
-      setPaymentType("unica");
-      setNumberOfPayments(0);
-      setPaymentFrequency("");
-      setReference("");
-      setState("completado");
-      setNotes("");
-      setTags([]);
-      setTagInput("");
-      // Close the dialog
-      closeDialog();
+    } else {
+      // Insert new record
+      insertIncome(incomeData, {
+        onSuccess: () => {
+          console.log("Income added successfully!");
+          resetForm(); // Reset the form on success
+          closeDialog(); // Close the dialog on success
+        },
+        onError: (error) => {
+          console.error("Error adding income:", error);
+          alert(`Failed to add the income: ${error.message}`);
+        },
+      });
     }
   };
 

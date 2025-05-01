@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { ArrowDown, ArrowUp, ArrowUpDown, RefreshCw } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,14 +12,12 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Transactions } from "@/context/LayoutContext";
-import { useTransactionsContext } from "@/context/TransactionsContext";
 import { useOutletContext } from "react-router-dom";
-import { useEffect, useRef } from "react";
 
 interface TransactionsTableProps {
+  filteredTransactions: Transactions[];
   onRowClick: (transaction: Transactions) => void;
   sortConfig: { key: string; direction: "asc" | "desc" } | null;
   requestSort: (key: string) => void;
@@ -27,6 +25,7 @@ interface TransactionsTableProps {
 }
 
 export function TransactionsTable({
+  filteredTransactions,
   onRowClick,
   requestSort,
   isFilterOpen,
@@ -35,32 +34,32 @@ export function TransactionsTable({
   const { sidebarState } = useOutletContext<{
     sidebarState: "expanded" | "collapsed";
   }>();
-  // Get the transactions context
-  const { transactions, handleRefresh, isLoading, error } =
-    useTransactionsContext();
-  const wasLoading = useRef(isLoading);
+  // // Get the transactions context
+  // const { transactions, handleRefresh, isLoading, error } =
+  //   useTransactionsContext();
+  // const wasLoading = useRef(isLoading);
 
-  // Show a toast when the loading state changes
-  useEffect(() => {
-    if (wasLoading.current && !isLoading && !error) {
-      toast.success("Transacciones actualizadas");
-    }
-    wasLoading.current = isLoading;
-  }, [isLoading, error]);
+  // // Show a toast when the loading state changes
+  // useEffect(() => {
+  //   if (wasLoading.current && !isLoading && !error) {
+  //     toast.success("Transacciones actualizadas");
+  //   }
+  //   wasLoading.current = isLoading;
+  // }, [isLoading, error]);
 
-  // Show an error toast if there's an error
-  useEffect(() => {
-    if (error) {
-      toast.error("Error al actualizar las transacciones: " + error.message);
-    }
-  }, [error]);
+  // // Show an error toast if there's an error
+  // useEffect(() => {
+  //   if (error) {
+  //     toast.error("Error al actualizar las transacciones: " + error.message);
+  //   }
+  // }, [error]);
 
   return (
     <Card className="w-full overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
           <CardTitle>Transacciones</CardTitle>
-          <Button
+          {/* <Button
             variant="outline"
             size="sm"
             className="gap-2"
@@ -75,7 +74,7 @@ export function TransactionsTable({
                 Actualizar
               </>
             )}
-          </Button>
+          </Button> */}
         </div>
       </CardHeader>
       <ScrollArea
@@ -173,14 +172,14 @@ export function TransactionsTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.length === 0 ? (
+              {filteredTransactions.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
                     No se encontraron transacciones.
                   </TableCell>
                 </TableRow>
               ) : (
-                transactions.map((transaction, index) => (
+                filteredTransactions.map((transaction, index) => (
                   <TableRow
                     key={index}
                     className="cursor-pointer hover:bg-muted/50"

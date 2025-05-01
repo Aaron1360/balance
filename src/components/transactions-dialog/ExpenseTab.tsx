@@ -25,14 +25,15 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
 
   // Supabase custom hooks
   const {
-    insertData,
-    isLoading: isLoadingInsert,
-    error: errorInsert,
+    mutate: insertExpense,
+    isPending: isLoadingInsert,
+    error: insertError,
   } = useInsertTableData<Expense>("expenses");
+
   const {
-    updateData,
-    isLoading: isLoadingUpdate,
-    error: errorUpdate,
+    mutate: updateExpense,
+    isPending: isLoadingUpdate,
+    error: updateError,
   } = useUpdateTableData<Expense>("expenses");
 
   // Form States
@@ -129,58 +130,67 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
     };
   };
 
+  // Helper function to reset the form
+  const resetForm = () => {
+    setId(undefined);
+    setDate(new Date());
+    setDescription("");
+    setAmount(0);
+    setCategory("Varios");
+    setPaymentMethod("Tarjeta");
+    setPaymentType("unica");
+    setMsi(0);
+    setReference("");
+    setNotes("");
+    setTags([]);
+    setTagInput("");
+  };
+
   // Function to handle form submission
-  const handleSubmit = async (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
 
     if (!amount || !date || !category) {
-      alert("Fill your data.");
+      alert("Please fill in all required fields.");
       return;
     }
 
-    try {
-      if (transaction) {
-        // Update existing record
-        const updatedExpense = createExpense();
-        if (!updatedExpense) return;
+    const expenseData = createExpense();
 
-        if (transaction.id) {
-          await updateData(transaction.id, updatedExpense);
-        } else {
-          throw new Error("Transaction ID is undefined.");
-        }
+    if (transaction) {
+      // Update existing record
+      if (transaction.id) {
+        updateExpense(
+          { id: transaction.id, updatedRecord: expenseData },
+          {
+            onSuccess: () => {
+              console.log("Expense updated successfully!");
+              resetForm(); // Reset the form on success
+              closeDialog(); // Close the dialog on success
+            },
+            onError: (error) => {
+              console.error("Error updating expense:", error);
+              alert(`Failed to update the expense: ${error.message}`);
+            },
+          }
+        );
       } else {
-        // Create a new record
-        const newExpense = createExpense();
-        if (!newExpense) return;
-
-        await insertData(newExpense);
+        console.error("Transaction ID is undefined.");
+        alert("Transaction ID is missing. Cannot update the record.");
       }
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        console.error("Submission error:", e.message || e);
-      } else {
-        console.error("Unknown error:", e);
-      }
-      alert("Something went wrong");
-    } finally {
-      // Reset form
-      setDate(new Date());
-      setDescription("");
-      setAmount(0);
-      setCategory("");
-      setPaymentMethod("");
-      setPaymentType("unica");
-      setMsi(0);
-      setReference("");
-      // setStatus("completado");
-      setNotes("");
-      setTags([]);
-      setTagInput("");
-      // Close the dialog
-      closeDialog();
+    } else {
+      // Insert new record
+      insertExpense(expenseData, {
+        onSuccess: () => {
+          console.log("Expense added successfully!");
+          resetForm(); // Reset the form on success
+          closeDialog(); // Close the dialog on success
+        },
+        onError: (error) => {
+          console.error("Error adding expense:", error);
+          alert(`Failed to add the expense: ${error.message}`);
+        },
+      });
     }
   };
 
@@ -356,9 +366,9 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
         >
           {isLoadingInsert || isLoadingUpdate ? "Guardando..." : "Guardar"}
         </Button>
-        {(errorInsert || errorUpdate) && (
+        {(insertError || updateError) && (
           <p className="text-red-500 text-sm mt-2">
-            Error: {errorInsert ? errorInsert.message : errorUpdate?.message}
+            Error: {insertError?.message || updateError?.message}
           </p>
         )}
       </DialogFooter>

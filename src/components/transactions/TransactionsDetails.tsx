@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import {
@@ -33,7 +34,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import TransactionsDialogBtn from "../transactions-dialog/TransactionsDialogBtn";
 import { cn } from "@/lib/utils";
 import { Transactions, useLayoutContext } from "@/context/LayoutContext";
-import { useEffect } from "react";
 import { useDeleteTableData } from "@/hooks/useDeleteTableData";
 
 interface TransactionDetailsProps {
@@ -48,7 +48,16 @@ export function TransactionDetails({
   onOpenChange,
 }: TransactionDetailsProps) {
   const { isDialogOpen } = useLayoutContext(); // Access dialog state from context
-  const { deleteData, isLoading: isDeleting, error: errorDeleting } = useDeleteTableData(transaction?.type === "income" ? "incomes" : "expenses");
+
+  // Determine the table name dynamically based on the transaction type
+  const tableName = transaction?.type === "income" ? "incomes" : "expenses";
+
+  // Use the useDeleteTableData hook
+  const {
+    mutate: deleteData,
+    isPending: isDeleting,
+    error: errorDeleting,
+  } = useDeleteTableData(tableName);
 
   // Automatically close the sheet when the dialog is closed
   useEffect(() => {
@@ -59,19 +68,21 @@ export function TransactionDetails({
 
   if (!transaction) return null;
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (confirm("¿Estás seguro de que deseas eliminar esta transacción?")) {
-      try {
-        if (transaction.id) {
-          await deleteData(transaction.id);
-        } else {
-          console.error("Transaction ID is undefined.");
-        }
-        console.log("Transaction deleted:", transaction);
-        onOpenChange(false);
-      } catch (error) {
-        console.error("Error deleting transaction:", error);
-      } 
+      if (transaction.id) {
+        deleteData(transaction.id, {
+          onSuccess: () => {
+            console.log("Transaction deleted:", transaction);
+            onOpenChange(false); // Close the sheet after successful deletion
+          },
+          onError: (error) => {
+            console.error("Error deleting transaction:", error);
+          },
+        });
+      } else {
+        console.error("Transaction ID is undefined.");
+      }
     }
   };
 
@@ -292,14 +303,16 @@ export function TransactionDetails({
 
         {/* Actions */}
         <div className="flex justify-end gap-1 pt-6 mx-5">
-          <TransactionsDialogBtn
-            icon={Edit}
-            variant="default"
-            transaction={transaction}
-          />
+          <Button size="icon" className="flex items-center gap-2">
+            <TransactionsDialogBtn
+              icon={Edit}
+              transaction={transaction}
+              triggerAsChild={true}
+            />
+          </Button>
           <Button
             variant="destructive"
-            size="sm"
+            size="icon"
             onClick={handleDelete}
             disabled={isDeleting}
             className="flex items-center gap-2"
