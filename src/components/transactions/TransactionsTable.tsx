@@ -34,25 +34,6 @@ export function TransactionsTable({
   const { sidebarState } = useOutletContext<{
     sidebarState: "expanded" | "collapsed";
   }>();
-  // // Get the transactions context
-  // const { transactions, handleRefresh, isLoading, error } =
-  //   useTransactionsContext();
-  // const wasLoading = useRef(isLoading);
-
-  // // Show a toast when the loading state changes
-  // useEffect(() => {
-  //   if (wasLoading.current && !isLoading && !error) {
-  //     toast.success("Transacciones actualizadas");
-  //   }
-  //   wasLoading.current = isLoading;
-  // }, [isLoading, error]);
-
-  // // Show an error toast if there's an error
-  // useEffect(() => {
-  //   if (error) {
-  //     toast.error("Error al actualizar las transacciones: " + error.message);
-  //   }
-  // }, [error]);
 
   return (
     <Card className="w-full overflow-hidden">
