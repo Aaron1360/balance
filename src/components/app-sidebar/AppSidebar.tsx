@@ -43,11 +43,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuButton
             tooltip="Añadir Transacción"
-            className="flex items-center justify-between px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground "
+            className="flex items-center justify-between px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary focus:bg-primary"
           >
             {/* Wrapper for the Plus icon */}
-            <div className="flex-shrink-0 flex items-center justify-left w-8 h-8 ">
-              <Plus className="w-5 h-5 " />
+            <div className="flex-shrink-0 flex items-center justify-start w-8 h-8 bg-primary text-primary-foreground">
+              <Plus className="w-5 h-5 pointer-events-none" />
             </div>
             {/* Wrapper for TransactionsDialogBtn to make it grow */}
             <div className="flex-grow flex items-center justify-center">

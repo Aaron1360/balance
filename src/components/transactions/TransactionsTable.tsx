@@ -14,15 +14,12 @@ import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import {
-  Transactions,
-  useTransactionsContext,
-} from "@/context/TransactionsContext";
+import { Transactions } from "@/context/LayoutContext";
+import { useTransactionsContext } from "@/context/TransactionsContext";
 import { useOutletContext } from "react-router-dom";
 import { useEffect, useRef } from "react";
 
 interface TransactionsTableProps {
-  transactions: Transactions[];
   onRowClick: (transaction: Transactions) => void;
   sortConfig: { key: string; direction: "asc" | "desc" } | null;
   requestSort: (key: string) => void;
@@ -30,7 +27,6 @@ interface TransactionsTableProps {
 }
 
 export function TransactionsTable({
-  transactions,
   onRowClick,
   requestSort,
   isFilterOpen,
@@ -40,7 +36,7 @@ export function TransactionsTable({
     sidebarState: "expanded" | "collapsed";
   }>();
   // Get the transactions context
-  const { handleRefresh, isLoading, error, isOnCooldown } =
+  const { transactions, handleRefresh, isLoading, error } =
     useTransactionsContext();
   const wasLoading = useRef(isLoading);
 
@@ -68,18 +64,10 @@ export function TransactionsTable({
             variant="outline"
             size="sm"
             className="gap-2"
-            onClick={() => {
-              handleRefresh();
-              // requestSort("date");
-            }}
-            disabled={isLoading || isOnCooldown} // Disable button during loading or cooldown
-            title={
-              isOnCooldown
-                ? "Espere antes de actualizar nuevamente" // Tooltip during cooldown
-                : ""
-            }
-          >
-            {isLoading || isOnCooldown ? (
+            onClick={handleRefresh}
+            disabled={isLoading} // Disable button during loading or cooldown
+            >
+            {isLoading ? (
               "Actualizando..."
             ) : (
               <>

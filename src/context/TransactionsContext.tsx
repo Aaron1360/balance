@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useMemo, useCallback } from "react";
 import { useFetchTableData } from "@/hooks/useFetchTableData";
 import { Income } from "@/types/income";
 import { Expense } from "@/types/expense";
@@ -7,10 +7,9 @@ import { toast } from "sonner";
 
 interface TransactionsContextType {
   transactions: Transactions[];
-  handleRefresh: () => void;
   isLoading: boolean;
   error: Error | null;
-  isOnCooldown: boolean;
+  handleRefresh: () => void;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(
@@ -20,49 +19,48 @@ const TransactionsContext = createContext<TransactionsContextType | undefined>(
 export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { data: income, isLoading: isLoadingIncome, error: incomeError, refetch: refetchIncome } =
-    useFetchTableData<Income>("incomes");
-  const { data: expense, isLoading: isLoadingExpense, error: expenseError, refetch: refetchExpense } =
-    useFetchTableData<Expense>("expenses");
-  const [transactions, setTransactions] = useState<Transactions[]>([]);
+  // Fetch income and expense data using React Query
+  const {
+    data: income = [],
+    isLoading: isLoadingIncome,
+    error: incomeError,
+    refetch: refetchIncome,
+  } = useFetchTableData<Income>("incomes");
+
+  const {
+    data: expense = [],
+    isLoading: isLoadingExpense,
+    error: expenseError,
+    refetch: refetchExpense,
+  } = useFetchTableData<Expense>("expenses");
+
+  // Combine income and expense data into a single transactions array
+  const transactions = useMemo(
+    () => [...income, ...expense],
+    [income, expense]
+  );
+
+  // Combine loading and error states
   const isLoading = isLoadingIncome || isLoadingExpense;
   const error = incomeError || expenseError;
-  const [isOnCooldown, setIsOnCooldown] = useState(false);
-  const cooldownDuration = 3000; // 3 seconds
 
-  // Combine income and expense data into transactions
-  const loadTransactions = () => {
-    setTransactions([...(income || []), ...(expense || [])]);
-  };  
-  
-  // Fetch data for the first time
-  useEffect(() => {
-    loadTransactions();
-  }
-  , [income, expense]);
-  
-  // This function is used to update the transactions when the button is clicked
-  const handleRefresh = () => {
-    if (isOnCooldown) {
-      toast.error("Por favor, espera antes de actualizar nuevamente.");
-      // console.warn("Por favor, espera antes de actualizar nuevamente.");
-      return; 
-    }
-    setIsOnCooldown(true);
+  // Memoize the refresh function
+  const handleRefresh = useCallback(() => {
     refetchIncome();
     refetchExpense();
-    setTimeout(() => {
-      setIsOnCooldown(false);
-    }, cooldownDuration);
-  };
+    toast.success("Transacciones actualizadas");
+  }, [refetchIncome, refetchExpense]);
 
-  const contextValue: TransactionsContextType = {
-    transactions,
-    handleRefresh,
-    isLoading,
-    error,
-    isOnCooldown
-  };
+  // Provide context value
+  const contextValue = useMemo(
+    () => ({
+      transactions,
+      isLoading,
+      error,
+      handleRefresh,
+    }),
+    [transactions, isLoading, error, handleRefresh]
+  );
 
   return (
     <TransactionsContext.Provider value={contextValue}>
