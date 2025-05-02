@@ -19,10 +19,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Transactions } from "@/context/LayoutContext";
+import { Transactions, useLayoutContext } from "@/context/LayoutContext";
 import { useOutletContext } from "react-router-dom";
 import { useState } from "react";
 
@@ -45,6 +52,8 @@ export function TransactionsTable({
     sidebarState: "expanded" | "collapsed";
   }>();
 
+  const { periods, selectedPeriod, setSelectedPeriod } = useLayoutContext();
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -61,13 +70,42 @@ export function TransactionsTable({
     setCurrentPage(page);
   };
 
+  // Handle period change via Carousel
+  const handlePeriodChange = (direction: "next" | "previous") => {
+    const currentIndex = periods.indexOf(selectedPeriod || "");
+    if (direction === "next" && currentIndex < periods.length - 1) {
+      setSelectedPeriod(periods[currentIndex + 1]);
+    } else if (direction === "previous" && currentIndex > 0) {
+      setSelectedPeriod(periods[currentIndex - 1]);
+    }
+  };
+
   return (
     <Card className="w-full overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-center">
-          <CardTitle>Transacciones</CardTitle>
-        </div>
+      {/* Header */}
+      <CardHeader className="pb-3 flex justify-between items-center">
+        <CardTitle>Transacciones</CardTitle>
+        <Carousel className="w-32 flex-shrink-0 mr-10">
+          <CarouselPrevious
+            onClick={() => handlePeriodChange("previous")}
+            disabled={periods.indexOf(selectedPeriod || "") === 0}
+          />
+          <CarouselContent>
+            <CarouselItem>
+              <div className="text-center font-medium">
+                {selectedPeriod || "Sin periodo"}
+              </div>
+            </CarouselItem>
+          </CarouselContent>
+          <CarouselNext
+            onClick={() => handlePeriodChange("next")}
+            disabled={
+              periods.indexOf(selectedPeriod || "") === periods.length - 1
+            }
+          />
+        </Carousel>
       </CardHeader>
+      {/* Table */}
       <ScrollArea
         className={cn(
           "w-full h-screen max-h-[700px] border rounded-md transition-all",
