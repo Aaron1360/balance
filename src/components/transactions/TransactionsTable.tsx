@@ -31,7 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Transactions, useLayoutContext } from "@/context/LayoutContext";
 import { useOutletContext } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface TransactionsTableProps {
   filteredTransactions: Transactions[];
@@ -57,6 +57,11 @@ export function TransactionsTable({
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+
+  // Reset currentPage when selectedPeriod changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedPeriod]);
 
   // Calculate paginated transactions
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
@@ -275,41 +280,41 @@ export function TransactionsTable({
       </ScrollArea>
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center py-4">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                {currentPage > 1 && (
-                  <PaginationPrevious
-                    // href="#"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                  />
-                )}
+      <div className="flex justify-center py-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              {currentPage > 1 && (
+                <PaginationPrevious
+                  // href="#"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                />
+              )}
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  // href="#"
+                  isActive={currentPage === i + 1}
+                  onClick={() => handlePageChange(i + 1)}
+                >
+                  {i + 1}
+                </PaginationLink>
               </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
-                    // href="#"
-                    isActive={currentPage === i + 1}
-                    onClick={() => handlePageChange(i + 1)}
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                {currentPage < totalPages && (
-                  <PaginationNext
-                    // href="#"
-                    onClick={() =>
-                      handlePageChange(Math.min(currentPage + 1, totalPages))
-                    }
-                  />
-                )}
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+            ))}
+            <PaginationItem>
+              {currentPage < totalPages && (
+                <PaginationNext
+                  // href="#"
+                  onClick={() =>
+                    handlePageChange(Math.min(currentPage + 1, totalPages))
+                  }
+                />
+              )}
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
       )}
     </Card>
   );

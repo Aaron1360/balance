@@ -233,7 +233,6 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
     selectedPeriod,
     sortConfig,
   ]);
-
   return (
     <LayoutContext.Provider
       value={{
