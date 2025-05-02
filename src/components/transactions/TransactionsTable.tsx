@@ -3,6 +3,15 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
+  Pagination,
+  PaginationContent,
+  // PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   Table,
   TableBody,
   TableCell,
@@ -15,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Transactions } from "@/context/LayoutContext";
 import { useOutletContext } from "react-router-dom";
+import { useState } from "react";
 
 interface TransactionsTableProps {
   filteredTransactions: Transactions[];
@@ -35,27 +45,27 @@ export function TransactionsTable({
     sidebarState: "expanded" | "collapsed";
   }>();
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
+  // Calculate paginated transactions
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const paginatedTransactions = filteredTransactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
     <Card className="w-full overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
           <CardTitle>Transacciones</CardTitle>
-          {/* <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={handleRefresh}
-            disabled={isLoading} // Disable button during loading or cooldown
-            >
-            {isLoading ? (
-              "Actualizando..."
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4" />
-                Actualizar
-              </>
-            )}
-          </Button> */}
         </div>
       </CardHeader>
       <ScrollArea
@@ -153,14 +163,14 @@ export function TransactionsTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredTransactions.length === 0 ? (
+              {paginatedTransactions.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="h-24 text-center">
                     No se encontraron transacciones.
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredTransactions.map((transaction, index) => (
+                paginatedTransactions.map((transaction, index) => (
                   <TableRow
                     key={index}
                     className="cursor-pointer hover:bg-muted/50"
@@ -225,6 +235,38 @@ export function TransactionsTable({
           <ScrollBar orientation="horizontal" />
         </CardContent>
       </ScrollArea>
+      {/* Pagination */}
+      <div className="flex justify-center py-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  href="#"
+                  isActive={currentPage === i + 1}
+                  onClick={() => handlePageChange(i + 1)}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={() =>
+                  handlePageChange(Math.min(currentPage + 1, totalPages))
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </Card>
   );
 }

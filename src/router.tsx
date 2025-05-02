@@ -2,7 +2,6 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import NotFoundPage from "./pages/NotFoundPage";
 import Layout from "./components/layout/Layout";
 import Transactions from "./pages/Transactions";
-import { TransactionsProvider } from "./context/TransactionsContext";
 import { LayoutProvider } from "./context/LayoutContext";
 
 const router = createBrowserRouter([
@@ -20,11 +19,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/dashboard/transacciones",
-        element: (
-          <TransactionsProvider>
-            <Transactions />
-          </TransactionsProvider>
-        ),
+        element: <Transactions />,
       },
     ],
   },
