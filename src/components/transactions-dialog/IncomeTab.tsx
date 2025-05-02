@@ -39,7 +39,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
 
   // Form States
   const [, setId] = useState<string | undefined>(undefined);
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [date, setDate] = useState<Date | undefined>(transaction?.date ? new Date(transaction.date) : new Date());
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("Salario");
   const [paymentMethod, setPaymentMethod] = useState<string>("Efectivo");
