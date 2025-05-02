@@ -1,6 +1,4 @@
 import { useEffect } from "react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import {
   Calendar,
   CreditCard,
@@ -48,7 +46,7 @@ export function TransactionDetails({
   isOpen,
   onOpenChange,
 }: TransactionDetailsProps) {
-  const { isDialogOpen } = useLayoutContext(); // Access dialog state from context
+  const { isDialogOpen, formatDate } = useLayoutContext(); // Access dialog state from context
 
   // Determine the table name dynamically based on the transaction type
   const tableName = transaction?.type === "income" ? "incomes" : "expenses";
@@ -137,9 +135,7 @@ export function TransactionDetails({
           {/* Basic Info */}
           <div className="space-y-4 mx-5">
             <InfoItem icon={<Calendar />} label="Fecha">
-              {format(transaction.date, "dd 'de' MMMM 'de' yyyy", {
-                locale: es,
-              })}
+              {formatDate(transaction.date)}
             </InfoItem>
 
             <InfoItem icon={<Tag />} label="Categoría">
@@ -231,7 +227,7 @@ export function TransactionDetails({
                               return (
                                 <TableRow key={index}>
                                   <TableCell>
-                                    {format(paymentDate, "dd/MM/yyyy")}
+                                    {formatDate(paymentDate)}
                                   </TableCell>
                                   <TableCell>
                                     {paymentAmount.toLocaleString("es-MX", {

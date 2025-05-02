@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { toDate } from "date-fns-tz";
 import {
   createContext,
   useContext,
@@ -49,6 +50,12 @@ interface LayoutContextType {
   periods: string[];
   selectedPeriod: string | null;
   setSelectedPeriod: React.Dispatch<React.SetStateAction<string | null>>;
+
+  // Format date
+  formatDate: (
+    date: string | Date | null | undefined,
+    formatString?: string
+  ) => string;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -233,6 +240,17 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
     selectedPeriod,
     sortConfig,
   ]);
+
+  // Utility function to format dates
+  const formatDate = (
+    date: string | Date | null | undefined,
+    formatString: string = "dd/MM/yyyy" // Default format
+  ): string => {
+    if (!date) return "Sin fecha"; // Fallback for missing dates
+    const zonedDate = toDate(date, { timeZone: "America/Mexico_City" }); // Parse the date in the correct timezone
+    return format(zonedDate, formatString, { locale: es }); // Format the date
+  };
+
   return (
     <LayoutContext.Provider
       value={{
@@ -261,6 +279,7 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
         periods,
         selectedPeriod,
         setSelectedPeriod,
+        formatDate,
       }}
     >
       {children}

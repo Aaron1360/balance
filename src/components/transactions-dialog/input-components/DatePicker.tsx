@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -9,6 +8,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
+import { useLayoutContext } from "@/context/LayoutContext";
 
 // Define the arguments type for the DatePicker component
 interface DatePickerProps {
@@ -19,6 +19,7 @@ interface DatePickerProps {
 
 // DatePicker Component
 export default function DatePicker({ id, date, setDate }: DatePickerProps) {
+  const { formatDate } = useLayoutContext();
   return (
     <Popover modal={true}>
       <PopoverTrigger asChild>
@@ -32,7 +33,7 @@ export default function DatePicker({ id, date, setDate }: DatePickerProps) {
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {date ? (
-            format(date, "PPP", { locale: es })
+            formatDate(date, "PPP") 
           ) : (
             <span>Selecciona una fecha</span>
           )}

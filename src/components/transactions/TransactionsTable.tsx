@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,7 +51,8 @@ export function TransactionsTable({
     sidebarState: "expanded" | "collapsed";
   }>();
 
-  const { periods, selectedPeriod, setSelectedPeriod } = useLayoutContext();
+  const { periods, selectedPeriod, setSelectedPeriod, formatDate } =
+    useLayoutContext();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -220,7 +220,7 @@ export function TransactionsTable({
                     onClick={() => onRowClick(transaction)}
                   >
                     <TableCell className="font-medium">
-                      {format(transaction.date, "dd/MM/yyyy")}
+                      {formatDate(transaction.date)}
                     </TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>
@@ -280,41 +280,41 @@ export function TransactionsTable({
       </ScrollArea>
       {/* Pagination */}
       {totalPages > 1 && (
-      <div className="flex justify-center py-4">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              {currentPage > 1 && (
-                <PaginationPrevious
-                  // href="#"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                />
-              )}
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, i) => (
-              <PaginationItem key={i}>
-                <PaginationLink
-                  // href="#"
-                  isActive={currentPage === i + 1}
-                  onClick={() => handlePageChange(i + 1)}
-                >
-                  {i + 1}
-                </PaginationLink>
+        <div className="flex justify-center py-4">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                {currentPage > 1 && (
+                  <PaginationPrevious
+                    // href="#"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                  />
+                )}
               </PaginationItem>
-            ))}
-            <PaginationItem>
-              {currentPage < totalPages && (
-                <PaginationNext
-                  // href="#"
-                  onClick={() =>
-                    handlePageChange(Math.min(currentPage + 1, totalPages))
-                  }
-                />
-              )}
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    // href="#"
+                    isActive={currentPage === i + 1}
+                    onClick={() => handlePageChange(i + 1)}
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                {currentPage < totalPages && (
+                  <PaginationNext
+                    // href="#"
+                    onClick={() =>
+                      handlePageChange(Math.min(currentPage + 1, totalPages))
+                    }
+                  />
+                )}
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       )}
     </Card>
   );
