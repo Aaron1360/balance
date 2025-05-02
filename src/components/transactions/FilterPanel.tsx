@@ -1,18 +1,9 @@
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { CalendarIcon, Filter, Search, X } from "lucide-react";
+import { Filter, Search, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -22,16 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useLayoutContext } from "@/context/LayoutContext";
 
 interface FilterPanelProps {
   isOpen: boolean;
   onToggle: () => void;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  startDate: Date | undefined;
-  setStartDate: (date: Date | undefined) => void;
-  endDate: Date | undefined;
-  setEndDate: (date: Date | undefined) => void;
   selectedCategories: string[];
   setSelectedCategories: (categories: string[]) => void;
   selectedPaymentMethods: string[];
@@ -51,10 +39,6 @@ export function FilterPanel({
   onToggle,
   searchTerm,
   setSearchTerm,
-  startDate,
-  setStartDate,
-  endDate,
-  setEndDate,
   selectedCategories,
   setSelectedCategories,
   selectedPaymentMethods,
@@ -68,6 +52,8 @@ export function FilterPanel({
   filteredCount,
   resetFilters,
 }: FilterPanelProps) {
+  const { periods, selectedPeriod, setSelectedPeriod } = useLayoutContext();
+
   // Function to handle changes in selected categories
   const handleCategoryChange = (value: string) => {
     if (value === "all") {
@@ -118,62 +104,24 @@ export function FilterPanel({
                 </div>
               </div>
 
-              {/* Date range */}
+              {/* Period */}
               <div className="space-y-2">
-                <Label>Rango de fechas</Label>
-                <div className="flex flex-col gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "justify-start text-left font-normal",
-                          !startDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {startDate
-                          ? format(startDate, "dd/MM/yyyy")
-                          : "Fecha inicial"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={startDate}
-                        onSelect={setStartDate}
-                        initialFocus
-                        locale={es}
-                      />
-                    </PopoverContent>
-                  </Popover>
-
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "justify-start text-left font-normal",
-                          !endDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {endDate
-                          ? format(endDate, "dd/MM/yyyy")
-                          : "Fecha final"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={endDate}
-                        onSelect={setEndDate}
-                        initialFocus
-                        locale={es}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                <Label>Periodo</Label>
+                <Select
+                  onValueChange={(value) => setSelectedPeriod(value)}
+                  value={selectedPeriod || ""}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar periodo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {periods.map((period) => (
+                      <SelectItem key={period} value={period}>
+                        {period}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Transaction type */}

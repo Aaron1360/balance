@@ -1,8 +1,18 @@
-import { createContext, useContext, useMemo, useCallback, useState, ReactNode } from "react";
+import { format } from "date-fns";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useCallback,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import { useFetchTableData } from "@/hooks/useFetchTableData";
 import { Income } from "@/types/income";
 import { Expense } from "@/types/expense";
 import { toast } from "sonner";
+import { es } from "date-fns/locale";
 
 export type Transactions = Income | Expense;
 
@@ -19,13 +29,8 @@ interface LayoutContextType {
   isLoading: boolean;
   error: Error | null;
   handleRefresh: () => void;
-
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  startDate: Date | undefined;
-  setStartDate: (date: Date | undefined) => void;
-  endDate: Date | undefined;
-  setEndDate: (date: Date | undefined) => void;
   selectedCategories: string[];
   setSelectedCategories: (categories: string[]) => void;
   selectedPaymentMethods: string[];
@@ -39,6 +44,11 @@ interface LayoutContextType {
   // Sorting
   sortConfig: { key: string; direction: "asc" | "desc" } | null;
   requestSort: (key: string) => void;
+
+  // Periods
+  periods: string[];
+  selectedPeriod: string | null;
+  setSelectedPeriod: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -66,7 +76,10 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
   } = useFetchTableData<Expense>("expenses");
 
   // Combine income and expense data into a single transactions array
-  const transactions = useMemo(() => [...income, ...expense], [income, expense]);
+  const transactions = useMemo(
+    () => [...income, ...expense],
+    [income, expense]
+  );
 
   // Combine loading and error states
   const isLoading = isLoadingIncome || isLoadingExpense;
@@ -81,32 +94,62 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
 
   // Filter state
   const [searchTerm, setSearchTerm] = useState("");
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<string[]>([]);
+  const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<
+    string[]
+  >([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedPaymentType, setSelectedPaymentType] = useState<string | null>(null);
+  const [selectedPaymentType, setSelectedPaymentType] = useState<string | null>(
+    null
+  );
+
+  // Generate available periods
+  const periods = useMemo(() => {
+    const uniquePeriods = new Set<string>();
+    transactions.forEach((transaction) => {
+      const date = new Date(transaction.date);
+      const formattedPeriod = format(date, "MMMM-yyyy", { locale: es });
+      uniquePeriods.add(formattedPeriod);
+    });
+    return Array.from(uniquePeriods).sort(
+      (a, b) => new Date(`01-${b}`).getTime() - new Date(`01-${a}`).getTime() // Sort descending
+    );
+  }, [transactions]);
+
+  // Selected period state (default to the most recent period)
+  const [selectedPeriod, setSelectedPeriod] = useState<string | null>(() =>
+    periods.length > 0 ? periods[0] : null
+  );
+
+  useEffect(() => {
+    if (periods.length > 0 && !selectedPeriod) {
+      setSelectedPeriod(periods[0]); // Set the most recent period if not already selected
+    }
+  }, [periods, selectedPeriod]);
 
   // Reset filters
   const resetFilters = () => {
     setSearchTerm("");
-    setStartDate(undefined);
-    setEndDate(undefined);
     setSelectedCategories([]);
     setSelectedPaymentMethods([]);
     setSelectedTypes([]);
     setSelectedPaymentType(null);
+    setSelectedPeriod(periods.length > 0 ? periods[0] : null);
   };
 
   // Sorting state
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(
-    null
-  );
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: "asc" | "desc";
+  } | null>(null);
 
   const requestSort = (key: string) => {
     let direction: "asc" | "desc" = "asc";
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === "asc"
+    ) {
       direction = "desc";
     }
     setSortConfig({ key, direction });
@@ -121,16 +164,6 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
       filtered = filtered.filter((transaction) =>
         transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
-    }
-
-    // Filter by start date
-    if (startDate) {
-      filtered = filtered.filter((transaction) => new Date(transaction.date) >= startDate);
-    }
-
-    // Filter by end date
-    if (endDate) {
-      filtered = filtered.filter((transaction) => new Date(transaction.date) <= endDate);
     }
 
     // Filter by categories
@@ -149,12 +182,16 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
 
     // Filter by type (income/expense)
     if (selectedTypes.length > 0) {
-      filtered = filtered.filter((transaction) => selectedTypes.includes(transaction.type));
+      filtered = filtered.filter((transaction) =>
+        selectedTypes.includes(transaction.type)
+      );
     }
 
     // Filter by payment type (one-time/deferred)
     if (selectedPaymentType) {
-      filtered = filtered.filter((transaction) => transaction.payment_type === selectedPaymentType);
+      filtered = filtered.filter(
+        (transaction) => transaction.payment_type === selectedPaymentType
+      );
     }
 
     // Sort transactions
@@ -173,16 +210,27 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
       });
     }
 
+    // Filter by selected period
+    if (selectedPeriod) {
+      filtered = filtered.filter((transaction) => {
+        const transactionPeriod = format(
+          new Date(transaction.date),
+          "MMMM-yyyy",
+          { locale: es }
+        );
+        return transactionPeriod === selectedPeriod;
+      });
+    }
+
     return filtered;
   }, [
     transactions,
     searchTerm,
-    startDate,
-    endDate,
     selectedCategories,
     selectedPaymentMethods,
     selectedTypes,
     selectedPaymentType,
+    selectedPeriod,
     sortConfig,
   ]);
 
@@ -200,10 +248,6 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
         handleRefresh,
         searchTerm,
         setSearchTerm,
-        startDate,
-        setStartDate,
-        endDate,
-        setEndDate,
         selectedCategories,
         setSelectedCategories,
         selectedPaymentMethods,
@@ -215,6 +259,9 @@ export const LayoutProvider = ({ children }: { children: ReactNode }) => {
         resetFilters,
         sortConfig,
         requestSort,
+        periods,
+        selectedPeriod,
+        setSelectedPeriod,
       }}
     >
       {children}

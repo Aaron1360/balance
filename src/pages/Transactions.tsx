@@ -10,10 +10,6 @@ export default function TransactionsPage() {
     transactions,
     searchTerm,
     setSearchTerm,
-    startDate,
-    setStartDate,
-    endDate,
-    setEndDate,
     selectedCategories,
     setSelectedCategories,
     selectedPaymentMethods,
@@ -46,10 +42,6 @@ export default function TransactionsPage() {
         onToggle={() => setIsFilterOpen(!isFilterOpen)}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
         selectedCategories={selectedCategories}
         setSelectedCategories={setSelectedCategories}
         selectedPaymentMethods={selectedPaymentMethods}
