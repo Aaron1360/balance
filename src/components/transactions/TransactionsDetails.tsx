@@ -31,9 +31,11 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import TransactionsDialogBtn from "../transactions-dialog/TransactionsDialogBtn";
 import { cn } from "@/lib/utils";
-import { Transactions, useLayoutContext } from "@/context/LayoutContext";
 import { useDeleteTableData } from "@/hooks/useDeleteTableData";
 import { toast } from "sonner";
+import { Transactions } from "@/context/TransactionsContext";
+import { useDialogContext } from "@/context/DialogContext";
+import { formatDate } from "@/lib/dateUtils";
 
 interface TransactionDetailsProps {
   transaction: Transactions | null;
@@ -46,7 +48,7 @@ export function TransactionDetails({
   isOpen,
   onOpenChange,
 }: TransactionDetailsProps) {
-  const { isDialogOpen, formatDate } = useLayoutContext(); // Access dialog state from context
+  const { isDialogOpen } = useDialogContext(); // Access dialog state from context
 
   // Determine the table name dynamically based on the transaction type
   const tableName = transaction?.type === "income" ? "incomes" : "expenses";

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { DialogFooter } from "@/components/ui/dialog";
 import DatePicker from "./input-components/DatePicker";
 import AmountInput from "./input-components/AmountInput";
@@ -11,10 +12,9 @@ import TextInput from "./input-components/TextInput";
 import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
 import { useInsertTableData } from "@/hooks/useInsertTableData";
-import { Expense } from "@/types/expense";
 import { useUpdateTableData } from "@/hooks/useUpdateTableData";
-import { useLayoutContext } from "@/context/LayoutContext";
-import { toast } from "sonner";
+import { Expense } from "@/types/expense";
+import { useDialogContext } from "@/context/DialogContext";
 
 interface ExpenseTabProps {
   transaction?: Expense;
@@ -22,7 +22,7 @@ interface ExpenseTabProps {
 
 export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   // Dialog and sheet states
-  const { closeDialog } = useLayoutContext();
+  const { closeDialog } = useDialogContext();
 
   // Supabase custom hooks
   const {
@@ -43,7 +43,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("Varios");
   const [paymentMethod, setPaymentMethod] = useState<string>("Tarjeta");
-  const [paymentType, setPaymentType] = useState("unica");
+  const [paymentType, setPaymentType] = useState<"unica" | "diferido">("unica");
   const [amount, setAmount] = useState(0);
   const [merchant, setMerchant] = useState<string>("");
   // const [status, setStatus] = useState<string>("Completado");
@@ -63,7 +63,11 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
       setDescription(transaction.description || "");
       setCategory(transaction.category || "Varios");
       setPaymentMethod(transaction.payment_method || "Tarjeta");
-      setPaymentType(transaction.payment_type || "unica");
+      setPaymentType(
+        transaction.payment_type === "unica" || transaction.payment_type === "diferido"
+          ? transaction.payment_type
+          : "unica"
+      );
       setAmount(transaction.amount || 0);
       setMerchant(transaction.merchant || "");
       setReference(transaction.reference || undefined);

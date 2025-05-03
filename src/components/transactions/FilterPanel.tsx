@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useLayoutContext } from "@/context/LayoutContext";
+import { usePeriodsContext } from "@/context/PeriodsContext";
 
 interface FilterPanelProps {
   isOpen: boolean;
@@ -23,9 +23,9 @@ interface FilterPanelProps {
   selectedCategories: string[];
   setSelectedCategories: (categories: string[]) => void;
   selectedPaymentMethods: string[];
-  setSelectedPaymentMethods: React.Dispatch<React.SetStateAction<string[]>>;
+  setSelectedPaymentMethods: (methods: string[]) => void;
   selectedTypes: string[];
-  setSelectedTypes: React.Dispatch<React.SetStateAction<string[]>>;
+  setSelectedTypes: (types: string[]) => void;
   selectedPaymentType: string | null;
   setSelectedPaymentType: (type: string | null) => void;
   categories: string[];
@@ -52,7 +52,7 @@ export function FilterPanel({
   filteredCount,
   resetFilters,
 }: FilterPanelProps) {
-  const { periods, selectedPeriod, setSelectedPeriod } = useLayoutContext();
+  const { periods, selectedPeriod, setSelectedPeriod } = usePeriodsContext();
 
   // Function to handle changes in selected categories
   const handleCategoryChange = (value: string) => {
@@ -65,11 +65,10 @@ export function FilterPanel({
 
   // Function to handle changes in selected payment methods
   const handlePaymentMethodChange = (method: string) => {
-    setSelectedPaymentMethods((prev) =>
-      prev.includes(method)
-        ? prev.filter((m) => m !== method)
-        : [...prev, method]
-    );
+    const updatedMethods = selectedPaymentMethods.includes(method)
+      ? selectedPaymentMethods.filter((m) => m !== method)
+      : [...selectedPaymentMethods, method];
+    setSelectedPaymentMethods(updatedMethods);
   };
 
   return (

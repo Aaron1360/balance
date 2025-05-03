@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import DatePicker from "./input-components/DatePicker";
 import AmountInput from "./input-components/AmountInput";
 import NumPaymentsInput from "./input-components/NumPaymentsInput";
@@ -11,10 +14,9 @@ import TextInput from "./input-components/TextInput";
 import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
 import { useInsertTableData } from "@/hooks/useInsertTableData";
-import { Income } from "@/types/income";
 import { useUpdateTableData } from "@/hooks/useUpdateTableData";
-import { useLayoutContext } from "@/context/LayoutContext";
-import { toast } from "sonner";
+import { Income, Installment } from "@/types/income";
+import { useDialogContext } from "@/context/DialogContext";
 
 interface IncomeTabProps {
   transaction?: Income;
@@ -22,7 +24,7 @@ interface IncomeTabProps {
 
 export default function IncomeTab({ transaction }: IncomeTabProps) {
   // Dialog and sheet states
-  const { closeDialog } = useLayoutContext();
+  const { closeDialog } = useDialogContext();
 
   // Supabase custom hooks
   const {
@@ -39,21 +41,33 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
 
   // Form States
   const [, setId] = useState<string | undefined>(undefined);
-  const [date, setDate] = useState<Date | undefined>(transaction?.date ? new Date(transaction.date) : new Date());
+  const [date, setDate] = useState<Date | undefined>(
+    transaction?.date ? new Date(transaction.date) : new Date()
+  );
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("Salario");
   const [paymentMethod, setPaymentMethod] = useState<string>("Efectivo");
-  const [paymentType, setPaymentType] = useState("unica");
+  const [paymentType, setPaymentType] = useState<"unica" | "diferido">("unica");
   const [amount, setAmount] = useState(0);
   const [reference, setReference] = useState<string | undefined>(undefined);
-  const [state, setState] = useState<string | undefined>(undefined);
   const [notes, setNotes] = useState<string | undefined>(undefined);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
   // States for deferred payments
   const [numberOfPayments, setNumberOfPayments] = useState(1);
-  const [paymentFrequency, setPaymentFrequency] = useState("");
+  const [paymentFrequency, setPaymentFrequency] = useState<
+    "Mensual" | "Quincenal" | "Semanal" | "Personalizado" | undefined
+  >(undefined);
+
+  // State for installments (if needed)
+  const [installments, setInstallments] = useState<Installment[]>(
+    transaction?.installments || []
+  );
+
+  // State for alert visibility and message
+  const [alertVisible, setAlertVisible] = useState(false); // State to control alert visibility
+  const [alertMessage, setAlertMessage] = useState(""); // State to store the alert message
 
   // Initialize state with transaction data if available
   useEffect(() => {
@@ -67,9 +81,8 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       setAmount(transaction.amount || 0);
       setReference(transaction.reference || undefined);
       setNumberOfPayments(transaction.number_of_payments || 1);
-      setPaymentFrequency(transaction.payment_frequency || "");
-      // setInstallments(transaction.installments || []);
-      setState(transaction.state || undefined);
+      setPaymentFrequency(transaction.payment_frequency || undefined);
+      setInstallments(transaction.installments || []);
       setNotes(transaction.notes || undefined);
       setTags(transaction.tags || []);
     }
@@ -82,7 +95,12 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
     "Tarjeta",
     "Otro",
   ];
-  const paymentFrequencyCategories = ["Mensual", "Quincenal", "Semanal"];
+  const paymentFrequencyCategories = [
+    "Mensual",
+    "Quincenal",
+    "Semanal",
+    "Personalizado",
+  ];
   const incomeCategories = [
     "Salario",
     "Freelance",
@@ -91,7 +109,6 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
     "Regalo",
     "Otro",
   ];
-  const stateCategories = ["Completado", "Pendiente", "Cancelado"];
 
   // Function to add tags
   const handleAddTag = () => {
@@ -105,6 +122,45 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
+
+  const generateInstallments = () => {
+    if (!date || numberOfPayments <= 0) return;
+
+    const newInstallments: Installment[] = [];
+    const baseAmount = amount / numberOfPayments;
+
+    for (let i = 0; i < numberOfPayments; i++) {
+      const dueDate = new Date(date);
+      if (paymentFrequency === "Mensual") {
+        dueDate.setMonth(dueDate.getMonth() + i);
+      } else if (paymentFrequency === "Quincenal") {
+        dueDate.setDate(dueDate.getDate() + i * 15);
+      } else if (paymentFrequency === "Semanal") {
+        dueDate.setDate(dueDate.getDate() + i * 7);
+      }
+
+      newInstallments.push({
+        amount: parseFloat(baseAmount.toFixed(2)),
+        due_date: dueDate,
+        status: "pendiente",
+      });
+    }
+
+    setInstallments(newInstallments);
+  };
+
+  // Effect to generate installments when number of payments or payment frequency changes
+  useEffect(() => {
+    if (paymentType === "unica") {
+      setNumberOfPayments(1);
+      setPaymentFrequency(undefined);
+      setInstallments([]); // Clear installments if switching to "unica"
+    } else if (paymentType === "diferido") {
+      setNumberOfPayments(3);
+      setPaymentFrequency("Mensual");
+      generateInstallments(); // Generate installments when switching to "diferido"
+    }
+  }, [paymentType, numberOfPayments, paymentFrequency, date]);
 
   // Function to create a new entry
   const createIncome = (): Income => {
@@ -122,8 +178,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       reference: reference || undefined,
       number_of_payments: numberOfPayments || undefined,
       payment_frequency: paymentFrequency || undefined,
-      installments: [], // You can populate this later based on your payment logic
-      state: state || undefined,
+      installments: paymentType === "diferido" ? installments : undefined,
       notes: notes || undefined,
       tags: tags.length ? tags : undefined,
     };
@@ -139,22 +194,60 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
     setPaymentMethod("Efectivo");
     setPaymentType("unica");
     setNumberOfPayments(1);
-    setPaymentFrequency("");
+    setPaymentFrequency(undefined);
+    setInstallments([]);
     setReference("");
-    setState("completado");
     setNotes("");
     setTags([]);
     setTagInput("");
   };
 
+  // Validation function
+  const validateForm = (): string | null => {
+    const missingFields: string[] = [];
+
+    if (amount <= 0) {
+      missingFields.push("Cantidad");
+    }
+
+    if (!description.trim()) {
+      missingFields.push("Descripción");
+    }
+
+    if (!date || isNaN(date.getTime())) {
+      missingFields.push("Fecha");
+    }
+
+    if (missingFields.length > 0) {
+      return `Por favor, completa los siguientes campos obligatorios: ${missingFields.join(
+        ", "
+      )}.`;
+    }
+
+    return null; // No errors
+  };
+  
+  // Effect to show alert if any required field is invalid
+  useEffect(() => {
+    // Check if all required fields are valid
+    if (amount > 0 && description.trim() && date && !isNaN(date.getTime())) {
+      setAlertVisible(false); // Hide the alert
+    }
+  }, [amount, description, date]);
+
+  // Function to handle form submission
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
 
-    if (!amount || !date || !category) {
-      alert("Please fill in all required fields.");
+    // Validate the form
+    const errorMessage = validateForm();
+    if (errorMessage) {
+      setAlertMessage(errorMessage); // Set the alert message
+      setAlertVisible(true); // Show the alert
       return;
     }
 
+    // Proceed with form submission
     const incomeData = createIncome();
 
     if (transaction) {
@@ -174,8 +267,8 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
           }
         );
       } else {
-        console.error("Transaction ID is undefined.");
-        alert("Transaction ID is missing. Cannot update the record.");
+        setAlertMessage("Transaction ID is missing. Cannot update the record.");
+        setAlertVisible(true); // Show the alert
       }
     } else {
       // Insert new record
@@ -186,7 +279,8 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
           closeDialog(); // Close the dialog on success
         },
         onError: (error) => {
-          toast.error(`Error al agregar el ingreso: ${error.message}`); // Show error toast in Spanish
+          setAlertMessage(`Error al agregar el ingreso: ${error.message}`);
+          setAlertVisible(true); // Show the alert
         },
       });
     }
@@ -251,38 +345,45 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       {/* Additional fields for deferred payment */}
       {paymentType === "diferido" && (
         <>
-          {/* Row: Number of payments and Frequency */}
           <div className="grid grid-cols-2 gap-4">
+            {/* Number of Payments */}
             <div className="flex items-center gap-2">
               <Label htmlFor="number_of_payments" className="w-1/4 text-right">
-                Número de pagos
+                Número de Pagos
               </Label>
               <div className="w-3/4">
                 <NumPaymentsInput
-                  id="num-payments"
-                  placeholder="0"
+                  id="number_of_payments"
+                  placeholder="Número de pagos"
                   value={numberOfPayments}
                   onChange={setNumberOfPayments}
                 />
               </div>
             </div>
+
+            {/* Payment Frequency */}
             <div className="flex items-center gap-2">
               <Label htmlFor="payment_frequency" className="w-1/4 text-right">
-                Frecuencia
+                Frecuencia de Pago
               </Label>
               <div className="w-3/4">
                 <CategorySelect
                   id="payment_frequency"
-                  value={paymentFrequency}
-                  onChange={setPaymentFrequency}
+                  value={paymentFrequency || ""}
+                  onChange={(value) =>
+                    setPaymentFrequency(
+                      value as
+                        | "Mensual"
+                        | "Quincenal"
+                        | "Semanal"
+                        | "Personalizado"
+                    )
+                  }
                   categories={paymentFrequencyCategories}
                 />
               </div>
             </div>
           </div>
-
-          {/* Pending payments */}
-          {/* <PendingPayments installments={installments} /> */}
         </>
       )}
 
@@ -316,33 +417,18 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
         </div>
       </div>
 
-      {/* Fourth row: Reference and Status */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="reference" className="w-1/4 text-right">
-            Referencia
-          </Label>
-          <div className="w-3/4">
-            <TextInput
-              id="reference"
-              placeholder="Referencia (opcional)"
-              value={reference ? reference : ""}
-              onChange={setReference}
-            />
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Label htmlFor="state" className="w-1/4 text-right">
-            Estado
-          </Label>
-          <div className="w-3/4">
-            <CategorySelect
-              id="state"
-              value={state ? state : ""}
-              onChange={setState}
-              categories={stateCategories}
-            />
-          </div>
+      {/* Fourth row: Reference */}
+      <div className="flex items-center gap-2">
+        <Label htmlFor="reference" className="w-1/8 text-right">
+          Referencia
+        </Label>
+        <div className="w-7/8">
+          <TextInput
+            id="reference"
+            placeholder="Referencia (opcional)"
+            value={reference ? reference : ""}
+            onChange={setReference}
+          />
         </div>
       </div>
 
@@ -380,6 +466,16 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       </div>
 
       <DialogFooter>
+        {/* Alert for errors */}
+        {alertVisible && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <div>
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{alertMessage}</AlertDescription>
+            </div>
+          </Alert>
+        )}
         <Button
           type="submit"
           onClick={(e) => handleSubmit(e)}

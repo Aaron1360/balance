@@ -3,8 +3,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface PaymentTypeProps {
   id: string;
-  value: string;
-  onChange: (value: string) => void;
+  value: "unica" | "diferido"; 
+  onChange: (value: "unica" | "diferido") => void; 
 }
 
 function PaymentType({ id, value, onChange }: PaymentTypeProps) {

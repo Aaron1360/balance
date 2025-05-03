@@ -2,15 +2,21 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import NotFoundPage from "./pages/NotFoundPage";
 import Layout from "./components/layout/Layout";
 import Transactions from "./pages/Transactions";
-import { LayoutProvider } from "./context/LayoutContext";
+// import { LayoutProvider } from "./context/LayoutContext";
+import { TransactionsProvider } from "./context/TransactionsContext";
+import { DialogProvider } from "./context/DialogContext";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <LayoutProvider>
-        <Layout />
-      </LayoutProvider>
+      // <LayoutProvider>
+        <TransactionsProvider>
+          <DialogProvider>
+            <Layout />
+          </DialogProvider>
+        </TransactionsProvider>
+      // </LayoutProvider>
     ),
     children: [
       {

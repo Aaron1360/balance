@@ -28,9 +28,11 @@ import {
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Transactions, useLayoutContext } from "@/context/LayoutContext";
 import { useOutletContext } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { Transactions } from "@/context/TransactionsContext";
+import { usePeriodsContext } from "@/context/PeriodsContext";
+import { formatDate } from "@/lib/dateUtils";
 
 interface TransactionsTableProps {
   filteredTransactions: Transactions[];
@@ -51,8 +53,8 @@ export function TransactionsTable({
     sidebarState: "expanded" | "collapsed";
   }>();
 
-  const { periods, selectedPeriod, setSelectedPeriod, formatDate } =
-    useLayoutContext();
+  const { periods, selectedPeriod, setSelectedPeriod } =
+    usePeriodsContext();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);

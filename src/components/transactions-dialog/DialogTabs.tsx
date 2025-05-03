@@ -1,8 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import IncomeTab from "./IncomeTab";
 import ExpenseTab from "./ExpenseTab";
-import { Transactions } from "@/context/LayoutContext";
+import { Transactions } from "@/context/TransactionsContext";
 import { Expense } from "@/types/expense";
+import { Income } from "@/types/income";
 
 interface DialogTabsProps {
   transaction?: Transactions;
@@ -21,7 +22,7 @@ function DialogTabs({ transaction }: DialogTabsProps) {
 
       {/* Income Tab */}
       <TabsContent value="income">
-        <IncomeTab transaction={transaction?.type === "income" ? transaction : undefined} />
+        <IncomeTab transaction={transaction?.type === "income" ? (transaction as Income) : undefined} />
       </TabsContent>
 
       {/* Expense Tab */}

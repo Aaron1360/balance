@@ -8,18 +8,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import DialogTabs from "./DialogTabs";
-import { Transactions, useLayoutContext } from "@/context/LayoutContext";
+import { Transactions } from "@/context/TransactionsContext";
+import { useDialogContext } from "@/context/DialogContext";
 
 interface TransactionsDialogBtnProps {
   icon?: LucideIcon;
   text?: string;
-  variant?:
-    | "default"
-    | "destructive"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | "link";
   transaction?: Transactions;
   triggerAsChild?: boolean;
   className?: string;
@@ -32,7 +26,7 @@ export default function TransactionsDialogBtn({
   triggerAsChild = true,
   className = "",
 }: TransactionsDialogBtnProps) {
-  const { isDialogOpen, openDialog, setDialogState } = useLayoutContext();
+  const { isDialogOpen, openDialog, setDialogState } = useDialogContext();
 
   return (
     // Store the current state of the dialog in the context

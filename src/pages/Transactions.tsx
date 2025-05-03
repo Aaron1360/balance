@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FilterPanel } from "@/components/transactions/FilterPanel";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { TransactionDetails } from "@/components/transactions/TransactionsDetails";
-import { Transactions, useLayoutContext } from "@/context/LayoutContext";
+import { Transactions, useTransactionsContext } from "@/context/TransactionsContext";
 
 export default function TransactionsPage() {
   const {
@@ -21,7 +21,7 @@ export default function TransactionsPage() {
     resetFilters,
     sortConfig,
     requestSort,
-  } = useLayoutContext();
+  } = useTransactionsContext();
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transactions | null>(null);
