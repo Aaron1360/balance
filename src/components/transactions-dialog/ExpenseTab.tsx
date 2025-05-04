@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import { DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import DatePicker from "./input-components/DatePicker";
 import AmountInput from "./input-components/AmountInput";
 import NumPaymentsInput from "./input-components/NumPaymentsInput";
@@ -13,8 +15,9 @@ import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
 import { useInsertTableData } from "@/hooks/useInsertTableData";
 import { useUpdateTableData } from "@/hooks/useUpdateTableData";
-import { Expense } from "@/types/expense";
+import { Installment } from "@/types/installment";
 import { useDialogContext } from "@/context/DialogContext";
+import { Expense } from "@/types/expense";
 
 interface ExpenseTabProps {
   transaction?: Expense;
@@ -32,28 +35,43 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   } = useInsertTableData<Expense>("expenses");
 
   const {
-    mutate: updateExpense,
+    mutate: updateData,
     isPending: isLoadingUpdate,
     error: updateError,
   } = useUpdateTableData<Expense>("expenses");
 
   // Form States
   const [, setId] = useState<string | undefined>(undefined);
-  const [date, setDate] = useState<Date | undefined>(transaction?.date ? new Date(transaction.date) : new Date());
+  const [date, setDate] = useState<Date | undefined>(
+    transaction?.date ? new Date(transaction.date) : new Date()
+  );
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("Varios");
   const [paymentMethod, setPaymentMethod] = useState<string>("Tarjeta");
   const [paymentType, setPaymentType] = useState<"unica" | "diferido">("unica");
   const [amount, setAmount] = useState(0);
   const [merchant, setMerchant] = useState<string>("");
-  // const [status, setStatus] = useState<string>("Completado");
   const [reference, setReference] = useState<string | undefined>(undefined);
   const [notes, setNotes] = useState<string | undefined>(undefined);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
-  // State for deferred payments
-  const [msi, setMsi] = useState(0);
+  // States for deferred payments
+  const [numberOfPayments, setNumberOfPayments] = useState(1);
+  const [paymentFrequency, setPaymentFrequency] = useState<
+    "Mensual" | "Quincenal" | "Semanal" | "Personalizado" | undefined
+  >(undefined);
+  const [interestRate, setInterestRate] = useState<number>(0);
+  const [isMsi, setIsMsi] = useState<boolean>(false);
+
+  // State for installments (if needed)
+  const [installments, setInstallments] = useState<Installment[]>(
+    transaction?.installments || []
+  );
+
+  // State for alert visibility and message
+  const [alertVisible, setAlertVisible] = useState(false); // State to control alert visibility
+  const [alertMessage, setAlertMessage] = useState(""); // State to store the alert message
 
   // Initialize state with transaction data if available
   useEffect(() => {
@@ -63,21 +81,33 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
       setDescription(transaction.description || "");
       setCategory(transaction.category || "Varios");
       setPaymentMethod(transaction.payment_method || "Tarjeta");
-      setPaymentType(
-        transaction.payment_type === "unica" || transaction.payment_type === "diferido"
-          ? transaction.payment_type
-          : "unica"
-      );
+      setPaymentType(transaction.payment_type || "unica");
       setAmount(transaction.amount || 0);
       setMerchant(transaction.merchant || "");
       setReference(transaction.reference || undefined);
+      setNumberOfPayments(transaction.number_of_payments || 1);
+      setPaymentFrequency(transaction.payment_frequency || undefined);
+      setInterestRate(transaction.interest_rate || 0);
+      setIsMsi(transaction.is_msi || false);
+      setInstallments(transaction.installments || []);
       setNotes(transaction.notes || undefined);
       setTags(transaction.tags || []);
-      setMsi(transaction.msi || 0);
     }
   }, [transaction]);
 
   // Lists of categories
+  const paymentMethodsCategories = [
+    "Efectivo",
+    "Transferencia",
+    "Tarjeta",
+    "Otro",
+  ];
+  const paymentFrequencyCategories = [
+    "Mensual",
+    "Quincenal",
+    "Semanal",
+    "Personalizado",
+  ];
   const outcomeCategories = [
     "Comida",
     "Servicios",
@@ -90,15 +120,6 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
     "Ahorros",
     "Varios",
   ];
-
-  const paymentMethodsCategories = [
-    "Efectivo",
-    "Transferencia",
-    "Tarjeta",
-    "Otro",
-  ];
-
-  // const stateCategories = ["Completado", "Pendiente", "Cancelado"];
 
   // Function to add tags
   const handleAddTag = () => {
@@ -113,10 +134,53 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  // Function to create a new expense object
+  // Generate installments dynamically
+  const generateInstallments = () => {
+    if (!date || numberOfPayments <= 0) return;
+
+    const newInstallments: Installment[] = [];
+    const baseAmount = isMsi
+      ? amount / numberOfPayments // No interest for "msi"
+      : (amount * (1 + interestRate / 100)) / numberOfPayments; // Include interest
+
+    for (let i = 0; i < numberOfPayments; i++) {
+      const dueDate = new Date(date);
+      if (paymentFrequency === "Mensual") {
+        dueDate.setMonth(dueDate.getMonth() + i);
+      } else if (paymentFrequency === "Quincenal") {
+        dueDate.setDate(dueDate.getDate() + i * 15);
+      } else if (paymentFrequency === "Semanal") {
+        dueDate.setDate(dueDate.getDate() + i * 7);
+      }
+
+      newInstallments.push({
+        amount: parseFloat(baseAmount.toFixed(2)),
+        due_date: dueDate,
+        status: "pendiente",
+      });
+    }
+
+    setInstallments(newInstallments);
+  };
+
+  // Effect to generate installments when relevant fields change
+  useEffect(() => {
+    if (paymentType === "diferido") {
+      generateInstallments();
+    }
+  }, [
+    numberOfPayments,
+    paymentFrequency,
+    date,
+    paymentType,
+    interestRate,
+    isMsi,
+  ]);
+
+  // Function to create a new entry
   const createExpense = (): Expense => {
     if (!date) {
-      throw new Error("Date is required");
+      throw new Error("Date is required to create an expense entry.");
     }
     return {
       type: "expense",
@@ -127,9 +191,14 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
       payment_type: paymentType,
       amount: amount,
       merchant: merchant,
-      // status: status,
       reference: reference || undefined,
-      msi: msi || undefined,
+      number_of_payments:
+        paymentType === "diferido" ? numberOfPayments : undefined,
+      payment_frequency:
+        paymentType === "diferido" ? paymentFrequency : undefined,
+      interest_rate: paymentType === "diferido" ? interestRate : undefined,
+      is_msi: paymentType === "diferido" ? isMsi : undefined,
+      installments: paymentType === "diferido" ? installments : undefined,
       notes: notes || undefined,
       tags: tags.length ? tags : undefined,
     };
@@ -144,28 +213,70 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
     setCategory("Varios");
     setPaymentMethod("Tarjeta");
     setPaymentType("unica");
-    setMsi(0);
+    setNumberOfPayments(1);
+    setPaymentFrequency(undefined);
+    setInterestRate(0);
+    setIsMsi(false);
+    setInstallments([]);
+    setMerchant("");
     setReference("");
     setNotes("");
     setTags([]);
     setTagInput("");
   };
 
+  // Validation function
+  const validateForm = (): string | null => {
+    const missingFields: string[] = [];
+
+    if (amount <= 0) {
+      missingFields.push("Cantidad");
+    }
+
+    if (!description.trim()) {
+      missingFields.push("Descripción");
+    }
+
+    if (!date || isNaN(date.getTime())) {
+      missingFields.push("Fecha");
+    }
+
+    if (missingFields.length > 0) {
+      return `Por favor, completa los siguientes campos obligatorios: ${missingFields.join(
+        ", "
+      )}.`;
+    }
+
+    return null; // No errors
+  };
+
+  // Effect to show alert if any required field is invalid
+  useEffect(() => {
+    // Check if all required fields are valid
+    if (amount > 0 && description.trim() && date && !isNaN(date.getTime())) {
+      setAlertVisible(false); // Hide the alert
+    }
+  }, [amount, description, date]);
+
   // Function to handle form submission
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
 
-    if (!amount || !date || !category) {
-      alert("Please fill in all required fields.");
+    // Validate the form
+    const errorMessage = validateForm();
+    if (errorMessage) {
+      setAlertMessage(errorMessage); // Set the alert message
+      setAlertVisible(true); // Show the alert
       return;
     }
 
+    // Proceed with form submission
     const expenseData = createExpense();
 
     if (transaction) {
       // Update existing record
       if (transaction.id) {
-        updateExpense(
+        updateData(
           { id: transaction.id, updatedRecord: expenseData },
           {
             onSuccess: () => {
@@ -174,23 +285,25 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
               closeDialog(); // Close the dialog on success
             },
             onError: (error) => {
-              toast.error(`Error al actualizar el gasto: ${error.message}`); // Show error toast in Spanish
+              toast.error(`Error al actualizar el gasto: ${error.message}`);
             },
           }
         );
       } else {
-        console.error("Transaction ID is undefined.");
-        alert("Transaction ID is missing. Cannot update the record.");
+        setAlertMessage("Transaction ID is missing. Cannot update the record.");
+        setAlertVisible(true); // Show the alert
       }
     } else {
       // Insert new record
       insertExpense(expenseData, {
         onSuccess: () => {
-          toast.success("Gasto agregado exitosamente"); // Show success toast          resetForm(); // Reset the form on success
+          toast.success("Gasto agregado exitosamente"); // Show success toast
+          resetForm(); // Reset the form on success
           closeDialog(); // Close the dialog on success
         },
         onError: (error) => {
-          toast.error(`Error al agregar el gasto: ${error.message}`); // Show error toast in Spanish
+          setAlertMessage(`Error al agregar el gasto: ${error.message}`);
+          setAlertVisible(true); // Show the alert
         },
       });
     }
@@ -201,7 +314,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
       {/* First row: Amount and Date */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
-          <Label htmlFor="amount" className="w-1/4 text-right">
+          <Label htmlFor="amount" className="w-1/4 text-left">
             Cantidad
           </Label>
           <div className="w-3/4">
@@ -214,7 +327,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="date" className="w-1/4 text-right">
+          <Label htmlFor="date" className="w-1/4 text-left">
             Fecha
           </Label>
           <div className="w-3/4">
@@ -223,53 +336,23 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
         </div>
       </div>
 
-      {/* Second row: Description and Merchant */}
+      {/* Second row: Payment method and type */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
-          <Label htmlFor="description" className="w-1/4 text-right">
-            Descripción
-          </Label>
-          <div className="w-3/4">
-            <TextInput
-              id="description"
-              placeholder="Describe tu gasto"
-              value={description}
-              onChange={setDescription}
-            />
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Label htmlFor="merchant" className="w-1/4 text-right">
-            Comercio
-          </Label>
-          <div className="w-3/4">
-            <TextInput
-              id="merchant"
-              placeholder="Donde realizaste tu compra"
-              value={merchant}
-              onChange={setMerchant}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Third row: Category and Status */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex items-start gap-2">
-          <Label htmlFor="category" className="w-1/4 text-right mt-2">
-            Categoria
+          <Label htmlFor="payment_method" className="w-1/4 text-left">
+            Forma de pago
           </Label>
           <div className="w-3/4">
             <CategorySelect
-              id="category"
-              value={category}
-              onChange={setCategory}
-              categories={outcomeCategories}
+              id="payment_method"
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+              categories={paymentMethodsCategories}
             />
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="payment_type" className="w-1/4 text-right">
+          <Label htmlFor="payment_type" className="w-1/4 text-left">
             Tipo
           </Label>
           <div className="w-3/4">
@@ -282,39 +365,133 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
         </div>
       </div>
 
-      {/* Fourth row: Payment method and Payment type */}
+      {/* Additional fields for deferred payment */}
+      {paymentType === "diferido" && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Number of Payments */}
+            <div className="flex items-center gap-2">
+              <Label htmlFor="number_of_payments" className="w-1/4 text-left">
+                Número de Pagos
+              </Label>
+              <div className="w-3/4">
+                <NumPaymentsInput
+                  id="number_of_payments"
+                  placeholder="Número de pagos"
+                  value={numberOfPayments}
+                  onChange={setNumberOfPayments}
+                />
+              </div>
+            </div>
+
+            {/* Payment Frequency */}
+            <div className="flex items-center gap-2">
+              <Label htmlFor="payment_frequency" className="w-1/4 text-left">
+                Frecuencia de Pago
+              </Label>
+              <div className="w-3/4">
+                <CategorySelect
+                  id="payment_frequency"
+                  value={paymentFrequency || ""}
+                  onChange={(value) =>
+                    setPaymentFrequency(
+                      value as
+                        | "Mensual"
+                        | "Quincenal"
+                        | "Semanal"
+                        | "Personalizado"
+                    )
+                  }
+                  categories={paymentFrequencyCategories}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Interest Rate and MSI */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="interest_rate" className="w-1/4 text-left">
+                Tasa de Interés (%)
+              </Label>
+              <div className="w-3/4">
+                <AmountInput
+                  id="interest_rate"
+                  placeholder="0%"
+                  value={interestRate}
+                  onChange={setInterestRate}
+                  disabled={isMsi} // Disable if MSI is selected
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="is_msi" className="w-1/4 text-left">
+                MSI
+              </Label>
+              <div className="w-3/4">
+                <input
+                  id="is_msi"
+                  type="checkbox"
+                  checked={isMsi}
+                  onChange={(e) => {
+                    setIsMsi(e.target.checked);
+                    if (e.target.checked) setInterestRate(0); // Reset interest rate if MSI is selected
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Third row: Description and category */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="payment_method" className="w-1/4 text-right">
-            Forma de pago
+        <div className="flex items-start gap-2">
+          <Label htmlFor="description" className="w-1/4 text-left mt-2">
+            Descripción
           </Label>
           <div className="w-3/4">
-            <CategorySelect
-              id="payment_method"
-              value={paymentMethod}
-              onChange={setPaymentMethod}
-              categories={paymentMethodsCategories}
+            <TextInput
+              id="description"
+              placeholder="Describe tu gasto"
+              value={description}
+              onChange={setDescription}
             />
           </div>
         </div>
-        {paymentType === "diferido" && (
-          <div className="grid grid-cols-4 items-center gap-2">
-            <Label htmlFor="msi" className="text-right">
-              MSI
-            </Label>
-            <NumPaymentsInput
-              id="msi"
-              placeholder="0"
-              value={msi}
-              onChange={setMsi}
+        <div className="flex items-center gap-2">
+          <Label htmlFor="category" className="w-1/4 text-left">
+            Categoría
+          </Label>
+          <div className="w-3/4">
+            <CategorySelect
+              id="category"
+              value={category}
+              onChange={setCategory}
+              categories={outcomeCategories}
             />
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* Fourth row: Merchant */}
+      <div className="flex items-center gap-2">
+        <Label htmlFor="merchant" className="w-1/8 text-left">
+          Comercio
+        </Label>
+        <div className="w-7/8">
+          <TextInput
+            id="merchant"
+            placeholder="Nombre del comerciante (opcional)"
+            value={merchant}
+            onChange={setMerchant}
+          />
+        </div>
       </div>
 
       {/* Fifth row: Reference */}
-      <div className="flex items-start gap-2">
-        <Label htmlFor="reference" className="w-1/8 text-right mt-2">
+      <div className="flex items-center gap-2">
+        <Label htmlFor="reference" className="w-1/8 text-left">
           Referencia
         </Label>
         <div className="w-7/8">
@@ -329,7 +506,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
 
       {/* Sixth row: Tags */}
       <div className="flex items-center gap-2">
-        <Label htmlFor="tags" className="w-1/8 text-right">
+        <Label htmlFor="tags" className="w-1/8 text-left">
           Etiquetas
         </Label>
         <div className="w-7/8">
@@ -347,7 +524,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
 
       {/* Seventh row: Notes */}
       <div className="flex items-start gap-2">
-        <Label htmlFor="notes" className="w-1/8 text-right mt-2">
+        <Label htmlFor="notes" className="w-1/8 text-left mt-2">
           Notas
         </Label>
         <div className="w-7/8">
@@ -361,6 +538,16 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
       </div>
 
       <DialogFooter>
+        {/* Alert for errors */}
+        {alertVisible && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <div>
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{alertMessage}</AlertDescription>
+            </div>
+          </Alert>
+        )}
         <Button
           type="submit"
           onClick={(e) => handleSubmit(e)}

@@ -15,7 +15,8 @@ import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
 import { useInsertTableData } from "@/hooks/useInsertTableData";
 import { useUpdateTableData } from "@/hooks/useUpdateTableData";
-import { Income, Installment } from "@/types/income";
+import { Income } from "@/types/income";
+import { Installment } from "@/types/installment";
 import { useDialogContext } from "@/context/DialogContext";
 
 interface IncomeTabProps {
@@ -34,7 +35,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
   } = useInsertTableData<Income>("incomes");
 
   const {
-    mutate: updateData,
+    mutate: updateIncome,
     isPending: isLoadingUpdate,
     error: updateError,
   } = useUpdateTableData<Income>("incomes");
@@ -247,7 +248,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
     if (transaction) {
       // Update existing record
       if (transaction.id) {
-        updateData(
+        updateIncome(
           { id: transaction.id, updatedRecord: incomeData },
           {
             onSuccess: () => {
@@ -285,7 +286,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       {/* First row: Amount and Date */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
-          <Label htmlFor="amount" className="w-1/4 text-right">
+          <Label htmlFor="amount" className="w-1/4 text-left">
             Cantidad
           </Label>
           <div className="w-3/4">
@@ -298,7 +299,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="date" className="w-1/4 text-right">
+          <Label htmlFor="date" className="w-1/4 text-left">
             Fecha
           </Label>
           <div className="w-3/4">
@@ -310,7 +311,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       {/* Second row: Payment method and type */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
-          <Label htmlFor="payment_method" className="w-1/4 text-right">
+          <Label htmlFor="payment_method" className="w-1/4 text-left">
             Forma de pago
           </Label>
           <div className="w-3/4">
@@ -323,7 +324,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="payment_type" className="w-1/4 text-right">
+          <Label htmlFor="payment_type" className="w-1/4 text-left">
             Tipo
           </Label>
           <div className="w-3/4">
@@ -342,7 +343,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
           <div className="grid grid-cols-2 gap-4">
             {/* Number of Payments */}
             <div className="flex items-center gap-2">
-              <Label htmlFor="number_of_payments" className="w-1/4 text-right">
+              <Label htmlFor="number_of_payments" className="w-1/4 text-left">
                 Número de Pagos
               </Label>
               <div className="w-3/4">
@@ -357,7 +358,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
 
             {/* Payment Frequency */}
             <div className="flex items-center gap-2">
-              <Label htmlFor="payment_frequency" className="w-1/4 text-right">
+              <Label htmlFor="payment_frequency" className="w-1/4 text-left">
                 Frecuencia de Pago
               </Label>
               <div className="w-3/4">
@@ -384,7 +385,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       {/* Third row: Description and category */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-start gap-2">
-          <Label htmlFor="description" className="w-1/4 text-right mt-2">
+          <Label htmlFor="description" className="w-1/4 text-left mt-2">
             Descripción
           </Label>
           <div className="w-3/4">
@@ -397,7 +398,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Label htmlFor="category" className="w-1/4 text-right">
+          <Label htmlFor="category" className="w-1/4 text-left">
             Categoría
           </Label>
           <div className="w-3/4">
@@ -413,7 +414,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
 
       {/* Fourth row: Reference */}
       <div className="flex items-center gap-2">
-        <Label htmlFor="reference" className="w-1/8 text-right">
+        <Label htmlFor="reference" className="w-1/8 text-left">
           Referencia
         </Label>
         <div className="w-7/8">
@@ -428,7 +429,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
 
       {/* Fifth row: Tags */}
       <div className="flex items-center gap-2">
-        <Label htmlFor="tags" className="w-1/8 text-right">
+        <Label htmlFor="tags" className="w-1/8 text-left">
           Etiquetas
         </Label>
         <div className="w-7/8">
@@ -446,7 +447,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
 
       {/* Sixth row: Notes */}
       <div className="flex items-start gap-2">
-        <Label htmlFor="notes" className="w-1/8 text-right mt-2">
+        <Label htmlFor="notes" className="w-1/8 text-left mt-2">
           Notas
         </Label>
         <div className="w-7/8">

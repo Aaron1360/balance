@@ -1,5 +1,5 @@
 // This file defines the Expense type, which represents an expense record in the application.
-import { Installment } from "./installment"
+import { Installment } from "./installment";
 
 export type Expense = {
   type: string;
@@ -8,12 +8,14 @@ export type Expense = {
   description: string;
   category: string;
   payment_method: string;
-  payment_type: "unica" | "diferido";
+  payment_type: "unica" | "diferido"; 
   amount: number;
   merchant: string;
   reference?: string;
   number_of_payments?: number;
-  payment_frequency?: "Mensual" | "Quincenal" | "Semanal" | "Personalizado";
+  payment_frequency?: "Mensual" | "Quincenal" | "Semanal" | "Personalizado"; 
+  interest_rate?: number;
+  is_msi?: boolean; 
   installments?: Installment[];
   notes?: string;
   tags?: string[];
