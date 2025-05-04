@@ -3,10 +3,10 @@ import { FilterPanel } from "@/components/transactions/FilterPanel";
 import { TransactionsTable } from "@/components/transactions/TransactionsTable";
 import { TransactionDetails } from "@/components/transactions/TransactionsDetails";
 import { Transactions, useTransactionsContext } from "@/context/TransactionsContext";
+import { PeriodsProvider, usePeriodsContext } from "@/context/PeriodsContext";
 
-export default function TransactionsPage() {
+function TransactionsContent() {
   const {
-    filteredTransactions,
     transactions,
     searchTerm,
     setSearchTerm,
@@ -18,10 +18,11 @@ export default function TransactionsPage() {
     setSelectedTypes,
     selectedPaymentType,
     setSelectedPaymentType,
-    resetFilters,
     sortConfig,
     requestSort,
   } = useTransactionsContext();
+
+  const { filteredTransactions, resetFilters } = usePeriodsContext();
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transactions | null>(null);
@@ -72,5 +73,19 @@ export default function TransactionsPage() {
         onOpenChange={setIsSheetOpen}
       />
     </div>
+  );
+}
+
+export default function TransactionsPage() {
+  const { transactions, filteredTransactions, resetFilters } = useTransactionsContext();
+
+  return (
+    <PeriodsProvider
+      transactions={transactions}
+      filteredTransactions={filteredTransactions}
+      resetFilters={resetFilters}
+    >
+      <TransactionsContent />
+    </PeriodsProvider>
   );
 }

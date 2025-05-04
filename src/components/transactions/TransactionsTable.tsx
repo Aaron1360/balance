@@ -60,10 +60,10 @@ export function TransactionsTable({
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // Reset currentPage when selectedPeriod changes
+  // Reset currentPage when filteredTransactions or selectedPeriod changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedPeriod]);
+  }, [filteredTransactions, selectedPeriod]);
 
   // Calculate paginated transactions
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);

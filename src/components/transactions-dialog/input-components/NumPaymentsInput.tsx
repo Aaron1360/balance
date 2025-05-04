@@ -16,28 +16,40 @@ export default function NumPaymentsInput({
 }: AmountInputProps) {
   const [stringValue, setStringValue] = useState(value.toString());
 
-  if (stringValue === "0") {setStringValue("")}
-
   useEffect(() => {
     setStringValue(value.toString());
   }, [value]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const cleanedValue = e.target.value.replace(/[^0-9]/g, "");
-    setStringValue(cleanedValue);
+    const inputValue = e.target.value;
 
-    const parsedValue = cleanedValue ? parseInt(cleanedValue) : 0;
-    onChange(parsedValue);
+    if (inputValue === "") {
+      // Handle empty input by setting the value to 0
+      setStringValue("");
+      onChange(1);
+      return;
+    }
+
+    const parsedValue = parseInt(inputValue, 10);
+
+    // Ensure the value is a valid number and clamp it between 1 and 60
+    if (!isNaN(parsedValue)) {
+      const clampedValue = Math.min(Math.max(parsedValue, 1), 60);
+      setStringValue(clampedValue.toString());
+      onChange(clampedValue);
+    }
   }
 
   return (
     <div className="grid items-center gap-1.5">
       <Input
         id={id}
-        type="text"
+        type="number"
         placeholder={placeholder}
         value={stringValue}
         onChange={handleChange}
+        min={1} // Minimum value
+        max={60} // Maximum value
       />
     </div>
   );

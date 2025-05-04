@@ -149,19 +149,13 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
     setInstallments(newInstallments);
   };
 
-  // Effect to generate installments when number of payments or payment frequency changes
+  // Effect to generate installments when number of payments, payment frequency, or date changes
   useEffect(() => {
-    if (paymentType === "unica") {
-      setNumberOfPayments(1);
-      setPaymentFrequency(undefined);
-      setInstallments([]); // Clear installments if switching to "unica"
-    } else if (paymentType === "diferido") {
-      setNumberOfPayments(3);
-      setPaymentFrequency("Mensual");
-      generateInstallments(); // Generate installments when switching to "diferido"
+    if (paymentType === "diferido") {
+      generateInstallments(); // Call generateInstallments only for "diferido" payment type
     }
-  }, [paymentType, numberOfPayments, paymentFrequency, date]);
-
+  }, [numberOfPayments, paymentFrequency, date, paymentType]);
+  
   // Function to create a new entry
   const createIncome = (): Income => {
     if (!date) {
@@ -226,7 +220,7 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
 
     return null; // No errors
   };
-  
+
   // Effect to show alert if any required field is invalid
   useEffect(() => {
     // Check if all required fields are valid
