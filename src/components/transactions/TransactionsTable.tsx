@@ -53,8 +53,7 @@ export function TransactionsTable({
     sidebarState: "expanded" | "collapsed";
   }>();
 
-  const { periods, selectedPeriod, setSelectedPeriod } =
-    usePeriodsContext();
+  const { periods, selectedPeriod, setSelectedPeriod } = usePeriodsContext();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -189,9 +188,9 @@ export function TransactionsTable({
                   <Button
                     variant="ghost"
                     className="p-0 font-medium"
-                    onClick={() => requestSort("msi")}
+                    onClick={() => requestSort("number_of_payments")}
                   >
-                    MSI
+                    Pagos
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
@@ -251,13 +250,14 @@ export function TransactionsTable({
                       )}
                     </TableCell>
                     <TableCell>
-                      {"msi" in transaction && transaction.msi ? (
-                        <Badge variant="outline" className="font-mono">
-                          {transaction.msi}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
+                      <div className="flex justify-center">
+                        {"number_of_payments" in transaction &&
+                        transaction.number_of_payments ? (
+                          <span>{transaction.number_of_payments}</span>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell
                       className={cn(

@@ -18,6 +18,7 @@ import { useUpdateTableData } from "@/hooks/useUpdateTableData";
 import { Installment } from "@/types/installment";
 import { useDialogContext } from "@/context/DialogContext";
 import { Expense } from "@/types/expense";
+import { toDate } from "date-fns-tz";
 
 interface ExpenseTabProps {
   transaction?: Expense;
@@ -43,7 +44,9 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   // Form States
   const [, setId] = useState<string | undefined>(undefined);
   const [date, setDate] = useState<Date | undefined>(
-    transaction?.date ? new Date(transaction.date) : new Date()
+    transaction?.date
+      ? toDate(transaction.date, { timeZone: "America/Mexico_City" })
+      : new Date()
   );
   const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<string>("Varios");
@@ -77,7 +80,11 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   useEffect(() => {
     if (transaction) {
       setId(transaction.id || undefined);
-      setDate(transaction.date ? new Date(transaction.date) : undefined);
+      setDate(
+        transaction.date
+          ? toDate(transaction.date, { timeZone: "America/Mexico_City" })
+          : undefined
+      );
       setDescription(transaction.description || "");
       setCategory(transaction.category || "Varios");
       setPaymentMethod(transaction.payment_method || "Tarjeta");
