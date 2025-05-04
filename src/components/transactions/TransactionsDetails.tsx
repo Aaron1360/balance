@@ -3,7 +3,6 @@ import {
   Calendar,
   CreditCard,
   Clock,
-  Info,
   Tag,
   Wallet,
   Receipt,
@@ -177,89 +176,78 @@ export function TransactionDetails({
                 </InfoItem>
               )}
 
-              {"msi" in transaction && (
-                <InfoItem icon={<Clock />} label="Meses sin intereses">
-                  {transaction.msi} meses
-                </InfoItem>
-              )}
-
-              {"status" in transaction && (
-                <InfoItem icon={<Info />} label="Estado">
-                  <Badge variant="outline">
-                    {transaction.status === "completed" && "Completado"}
-                    {transaction.status === "pending" && "Pendiente"}
-                    {transaction.status === "cancelled" && "Cancelado"}
-                  </Badge>
+              {"number_of_payments" in transaction && (
+                <InfoItem icon={<Clock />} label="Número de pagos">
+                  {transaction.payment_frequency === "Mensual"
+                    ? "Mensual"
+                    : transaction.payment_frequency === "Quincenal"
+                    ? "Quincenal"
+                    : transaction.payment_frequency === "Semanal"
+                    ? "Semanal"
+                    : transaction.payment_frequency === "Personalizado"
+                    ? "Personalizado"
+                    : "No definido"}{" "}
+                  {transaction.number_of_payments}{" "}
+                  {transaction.number_of_payments === 1 ? "pago" : "pagos"}
                 </InfoItem>
               )}
             </CardContent>
           </Card>
 
           {/* Deferred Payments */}
-          {transaction.type === "expense" &&
-            transaction.payment_type === "diferido" &&
-            "msi" in transaction && (
-              <>
-                <Separator />
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pagos programados</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="rounded-md border">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Fecha</TableHead>
-                            <TableHead>Monto</TableHead>
-                            <TableHead>Estado</TableHead>
+          {transaction.installments && transaction.installments.length > 0 && (
+            <>
+              <Separator />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pagos programados</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Fecha</TableHead>
+                          <TableHead>Monto</TableHead>
+                          <TableHead>Estado</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {transaction.installments.map((installment, index) => (
+                          <TableRow key={index}>
+                            <TableCell>
+                              {formatDate(installment.due_date)}
+                            </TableCell>
+                            <TableCell>
+                              {installment.amount.toLocaleString("es-MX", {
+                                style: "currency",
+                                currency: "MXN",
+                              })}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  installment.status === "pagado"
+                                    ? "bg-green-100 text-green-800"
+                                    : installment.status === "vencido"
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                                )}
+                              >
+                                {installment.status.charAt(0).toUpperCase() +
+                                  installment.status.slice(1)}
+                              </Badge>
+                            </TableCell>
                           </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {Array.from({ length: transaction.msi || 0 }).map(
-                            (_, index) => {
-                              const paymentDate = new Date(transaction.date);
-                              paymentDate.setMonth(
-                                paymentDate.getMonth() + index
-                              );
-
-                              const paymentAmount =
-                                transaction.amount / (transaction.msi ?? 1);
-
-                              return (
-                                <TableRow key={index}>
-                                  <TableCell>
-                                    {formatDate(paymentDate)}
-                                  </TableCell>
-                                  <TableCell>
-                                    {paymentAmount.toLocaleString("es-MX", {
-                                      style: "currency",
-                                      currency: "MXN",
-                                    })}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Badge
-                                      variant="outline"
-                                      className={
-                                        index === 0
-                                          ? "bg-green-100 text-green-800"
-                                          : ""
-                                      }
-                                    >
-                                      {index === 0 ? "Pagado" : "Pendiente"}
-                                    </Badge>
-                                  </TableCell>
-                                </TableRow>
-                              );
-                            }
-                          )}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            )}
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
 
           {/* Notes */}
           {transaction.notes && (

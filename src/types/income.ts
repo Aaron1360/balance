@@ -1,9 +1,5 @@
-export type Installment = {
-  amount: number; 
-  due_date: Date; 
-  paid_date?: Date; 
-  status: "pendiente" | "pagado" | "vencido" | "cancelado"; 
-};
+// This file defines the Income type, which represents an income record in the application.
+import { Installment } from "./installment";
 
 export type Income = {
   type: string;
