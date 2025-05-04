@@ -59,7 +59,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   // States for deferred payments
   const [numberOfPayments, setNumberOfPayments] = useState(1);
   const [paymentFrequency, setPaymentFrequency] = useState<
-    "Mensual" | "Quincenal" | "Semanal" | "Personalizado" | undefined
+    "Mensual" | "Quincenal" | "Semanal" | undefined
   >(undefined);
   const [interestRate, setInterestRate] = useState<number>(0);
   const [isMsi, setIsMsi] = useState<boolean>(false);
@@ -77,7 +77,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   useEffect(() => {
     if (transaction) {
       setId(transaction.id || undefined);
-      setDate(transaction.date || undefined);
+      setDate(transaction.date ? new Date(transaction.date) : undefined);
       setDescription(transaction.description || "");
       setCategory(transaction.category || "Varios");
       setPaymentMethod(transaction.payment_method || "Tarjeta");
@@ -106,7 +106,6 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
     "Mensual",
     "Quincenal",
     "Semanal",
-    "Personalizado",
   ];
   const outcomeCategories = [
     "Comida",
@@ -179,7 +178,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
 
   // Function to create a new entry
   const createExpense = (): Expense => {
-    if (!date) {
+    if (!date || isNaN(date.getTime())) {
       throw new Error("Date is required to create an expense entry.");
     }
     return {
@@ -399,7 +398,6 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
                         | "Mensual"
                         | "Quincenal"
                         | "Semanal"
-                        | "Personalizado"
                     )
                   }
                   categories={paymentFrequencyCategories}

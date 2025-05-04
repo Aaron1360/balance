@@ -12,7 +12,7 @@ export type Income = {
   amount: number; 
   reference?: string;
   number_of_payments?: number;
-  payment_frequency?: "Mensual" | "Quincenal" | "Semanal" | "Personalizado";
+  payment_frequency?: "Mensual" | "Quincenal" | "Semanal";
   installments?: Installment[];
   notes?: string;
   tags?: string[];

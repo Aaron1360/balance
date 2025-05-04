@@ -13,7 +13,7 @@ export type Expense = {
   merchant: string;
   reference?: string;
   number_of_payments?: number;
-  payment_frequency?: "Mensual" | "Quincenal" | "Semanal" | "Personalizado"; 
+  payment_frequency?: "Mensual" | "Quincenal" | "Semanal"; 
   interest_rate?: number;
   is_msi?: boolean; 
   installments?: Installment[];
