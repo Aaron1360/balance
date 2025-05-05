@@ -17,7 +17,7 @@ import { useInsertTableData } from "@/hooks/useInsertTableData";
 import { useUpdateTableData } from "@/hooks/useUpdateTableData";
 import { useDialogContext } from "@/context/DialogContext";
 import { useInstallmentsContext } from "@/context/InstallmentsContext";
-// import { Installment } from "@/types/installment";
+import { paymentMethodsCategories ,paymentFrequencyCategories, outcomeCategories } from "@/constants/categories";
 import { Expense } from "@/types/expense";
 import { toDate } from "date-fns-tz";
 
@@ -75,11 +75,6 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   const [interestRate, setInterestRate] = useState<number>(0);
   const [isMsi, setIsMsi] = useState<boolean>(false);
 
-  // // State for installments (if needed)
-  // const [installments, setInstallments] = useState<Installment[]>(
-  //   transaction?.installments || []
-  // );
-
   // State for alert visibility and message
   const [alertVisible, setAlertVisible] = useState(false); // State to control alert visibility
   const [alertMessage, setAlertMessage] = useState(""); // State to store the alert message
@@ -114,27 +109,6 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
     }
   }, [transaction]);
 
-  // Lists of categories
-  const paymentMethodsCategories = [
-    "Efectivo",
-    "Transferencia",
-    "Tarjeta",
-    "Otro",
-  ];
-  const paymentFrequencyCategories = ["Mensual", "Quincenal", "Semanal"];
-  const outcomeCategories = [
-    "Comida",
-    "Servicios",
-    "Facturas",
-    "Transporte",
-    "Entretenimiento",
-    "Compras",
-    "Salud y Bienestar",
-    "Pago de Deudas",
-    "Ahorros",
-    "Varios",
-  ];
-
   // Function to add tags
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -147,35 +121,6 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
-
-  // Generate installments dynamically
-  // const generateInstallments = () => {
-  //   if (!date || numberOfPayments <= 0) return;
-
-  //   const newInstallments: Installment[] = [];
-  //   const baseAmount = isMsi
-  //     ? amount / numberOfPayments // No interest for "msi"
-  //     : (amount * (1 + interestRate / 100)) / numberOfPayments; // Include interest
-
-  //   for (let i = 0; i < numberOfPayments; i++) {
-  //     const dueDate = new Date(date);
-  //     if (paymentFrequency === "Mensual") {
-  //       dueDate.setMonth(dueDate.getMonth() + i);
-  //     } else if (paymentFrequency === "Quincenal") {
-  //       dueDate.setDate(dueDate.getDate() + i * 15);
-  //     } else if (paymentFrequency === "Semanal") {
-  //       dueDate.setDate(dueDate.getDate() + i * 7);
-  //     }
-
-  //     newInstallments.push({
-  //       amount: parseFloat(baseAmount.toFixed(2)),
-  //       due_date: dueDate,
-  //       status: "pendiente",
-  //     });
-  //   }
-
-  //   setInstallments(newInstallments);
-  // };
 
   // Effect to generate installments when relevant fields change
   useEffect(() => {

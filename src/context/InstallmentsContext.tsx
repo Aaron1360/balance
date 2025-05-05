@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { toDate } from "date-fns-tz";
 import { Installment } from "@/types/installment";
+import { paymentFrequencyCategories } from "@/constants/categories";
 
 interface InstallmentsContextType {
   installments: Installment[];
@@ -8,7 +9,7 @@ interface InstallmentsContextType {
   generateInstallments: (
     amount: number,
     numberOfPayments: number,
-    paymentFrequency: "Mensual" | "Quincenal" | "Semanal",
+    paymentFrequency: typeof paymentFrequencyCategories[number],
     startDate: Date,
     isMsi: boolean,
     interestRate?: number
@@ -29,7 +30,7 @@ export const InstallmentsProvider = ({
   const generateInstallments = (
     amount: number,
     numberOfPayments: number,
-    paymentFrequency: "Mensual" | "Quincenal" | "Semanal",
+    paymentFrequency: typeof paymentFrequencyCategories[number],
     startDate: Date,
     isMsi: boolean,
     interestRate: number = 0 // Default to 0 for cases without interest

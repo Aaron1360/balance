@@ -17,8 +17,8 @@ import { useInsertTableData } from "@/hooks/useInsertTableData";
 import { useUpdateTableData } from "@/hooks/useUpdateTableData";
 import { useDialogContext } from "@/context/DialogContext";
 import { useInstallmentsContext } from "@/context/InstallmentsContext";
+import { paymentMethodsCategories ,paymentFrequencyCategories, incomeCategories } from "@/constants/categories";
 import { Income } from "@/types/income";
-// import { Installment } from "@/types/installment";
 import { toDate } from "date-fns-tz";
 
 interface IncomeTabProps {
@@ -68,11 +68,6 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
     "Mensual" | "Quincenal" | "Semanal" | undefined
   >(undefined);
 
-  // // State for installments (if needed)
-  // const [installments, setInstallments] = useState<Installment[]>(
-  //   transaction?.installments || []
-  // );
-
   // State for alert visibility and message
   const [alertVisible, setAlertVisible] = useState(false); // State to control alert visibility
   const [alertMessage, setAlertMessage] = useState(""); // State to store the alert message
@@ -103,27 +98,6 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       setPaymentMethod("Efectivo");
     }
   }, [transaction]);
-
-  // Lists of categories
-  const paymentMethodsCategories = [
-    "Efectivo",
-    "Transferencia",
-    "Tarjeta",
-    "Otro",
-  ];
-  const paymentFrequencyCategories = [
-    "Mensual",
-    "Quincenal",
-    "Semanal",
-  ];
-  const incomeCategories = [
-    "Salario",
-    "Freelance",
-    "Inversiones",
-    "Reembolso",
-    "Regalo",
-    "Otro",
-  ];
 
   // Function to add tags
   const handleAddTag = () => {
