@@ -49,8 +49,12 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
       : new Date()
   );
   const [description, setDescription] = useState<string>("");
-  const [category, setCategory] = useState<string>("Varios");
-  const [paymentMethod, setPaymentMethod] = useState<string>("Tarjeta");
+  const [category, setCategory] = useState<string>(
+    transaction?.category || "Varios"
+  );
+  const [paymentMethod, setPaymentMethod] = useState<string>(
+    transaction?.payment_method || "Tarjeta"
+  );
   const [paymentType, setPaymentType] = useState<"unica" | "diferido">("unica");
   const [amount, setAmount] = useState(0);
   const [merchant, setMerchant] = useState<string>("");
@@ -99,6 +103,10 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
       setInstallments(transaction.installments || []);
       setNotes(transaction.notes || undefined);
       setTags(transaction.tags || []);
+    } else {
+      // If no transaction is provided (creating a new record), set default values
+      setCategory("Varios");
+      setPaymentMethod("Tarjeta");
     }
   }, [transaction]);
 
@@ -109,11 +117,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
     "Tarjeta",
     "Otro",
   ];
-  const paymentFrequencyCategories = [
-    "Mensual",
-    "Quincenal",
-    "Semanal",
-  ];
+  const paymentFrequencyCategories = ["Mensual", "Quincenal", "Semanal"];
   const outcomeCategories = [
     "Comida",
     "Servicios",
@@ -401,10 +405,7 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
                   value={paymentFrequency || ""}
                   onChange={(value) =>
                     setPaymentFrequency(
-                      value as
-                        | "Mensual"
-                        | "Quincenal"
-                        | "Semanal"
+                      value as "Mensual" | "Quincenal" | "Semanal"
                     )
                   }
                   categories={paymentFrequencyCategories}

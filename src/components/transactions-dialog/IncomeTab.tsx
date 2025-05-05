@@ -83,8 +83,8 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
           : undefined
       );
       setDescription(transaction.description || "");
-      setCategory(transaction.category || "Salario");
-      setPaymentMethod(transaction.payment_method || "Efectivo");
+      setCategory(transaction.category || "");
+      setPaymentMethod(transaction.payment_method || "");
       setPaymentType(transaction.payment_type || "unica");
       setAmount(transaction.amount || 0);
       setReference(transaction.reference || undefined);
@@ -93,6 +93,10 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
       setInstallments(transaction.installments || []);
       setNotes(transaction.notes || undefined);
       setTags(transaction.tags || []);
+    }
+    else {
+      setCategory("Salario");
+      setPaymentMethod("Efectivo");
     }
   }, [transaction]);
 
