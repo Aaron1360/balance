@@ -15,8 +15,9 @@ import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
 import { useInsertTableData } from "@/hooks/useInsertTableData";
 import { useUpdateTableData } from "@/hooks/useUpdateTableData";
-import { Installment } from "@/types/installment";
 import { useDialogContext } from "@/context/DialogContext";
+import { useInstallmentsContext } from "@/context/InstallmentsContext";
+// import { Installment } from "@/types/installment";
 import { Expense } from "@/types/expense";
 import { toDate } from "date-fns-tz";
 
@@ -27,6 +28,9 @@ interface ExpenseTabProps {
 export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   // Dialog and sheet states
   const { closeDialog } = useDialogContext();
+  // Installments context
+  const { installments, setInstallments, generateInstallments } =
+    useInstallmentsContext();
 
   // Supabase custom hooks
   const {
@@ -71,10 +75,10 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   const [interestRate, setInterestRate] = useState<number>(0);
   const [isMsi, setIsMsi] = useState<boolean>(false);
 
-  // State for installments (if needed)
-  const [installments, setInstallments] = useState<Installment[]>(
-    transaction?.installments || []
-  );
+  // // State for installments (if needed)
+  // const [installments, setInstallments] = useState<Installment[]>(
+  //   transaction?.installments || []
+  // );
 
   // State for alert visibility and message
   const [alertVisible, setAlertVisible] = useState(false); // State to control alert visibility
@@ -145,40 +149,48 @@ export default function ExpenseTab({ transaction }: ExpenseTabProps) {
   };
 
   // Generate installments dynamically
-  const generateInstallments = () => {
-    if (!date || numberOfPayments <= 0) return;
+  // const generateInstallments = () => {
+  //   if (!date || numberOfPayments <= 0) return;
 
-    const newInstallments: Installment[] = [];
-    const baseAmount = isMsi
-      ? amount / numberOfPayments // No interest for "msi"
-      : (amount * (1 + interestRate / 100)) / numberOfPayments; // Include interest
+  //   const newInstallments: Installment[] = [];
+  //   const baseAmount = isMsi
+  //     ? amount / numberOfPayments // No interest for "msi"
+  //     : (amount * (1 + interestRate / 100)) / numberOfPayments; // Include interest
 
-    for (let i = 0; i < numberOfPayments; i++) {
-      const dueDate = new Date(date);
-      if (paymentFrequency === "Mensual") {
-        dueDate.setMonth(dueDate.getMonth() + i);
-      } else if (paymentFrequency === "Quincenal") {
-        dueDate.setDate(dueDate.getDate() + i * 15);
-      } else if (paymentFrequency === "Semanal") {
-        dueDate.setDate(dueDate.getDate() + i * 7);
-      }
+  //   for (let i = 0; i < numberOfPayments; i++) {
+  //     const dueDate = new Date(date);
+  //     if (paymentFrequency === "Mensual") {
+  //       dueDate.setMonth(dueDate.getMonth() + i);
+  //     } else if (paymentFrequency === "Quincenal") {
+  //       dueDate.setDate(dueDate.getDate() + i * 15);
+  //     } else if (paymentFrequency === "Semanal") {
+  //       dueDate.setDate(dueDate.getDate() + i * 7);
+  //     }
 
-      newInstallments.push({
-        amount: parseFloat(baseAmount.toFixed(2)),
-        due_date: dueDate,
-        status: "pendiente",
-      });
-    }
+  //     newInstallments.push({
+  //       amount: parseFloat(baseAmount.toFixed(2)),
+  //       due_date: dueDate,
+  //       status: "pendiente",
+  //     });
+  //   }
 
-    setInstallments(newInstallments);
-  };
+  //   setInstallments(newInstallments);
+  // };
 
   // Effect to generate installments when relevant fields change
   useEffect(() => {
     if (paymentType === "diferido") {
-      generateInstallments();
+      generateInstallments(
+        amount,
+        numberOfPayments,
+        paymentFrequency || "Mensual",
+        date || new Date(),
+        isMsi,
+        interestRate
+      );
     }
   }, [
+    amount,
     numberOfPayments,
     paymentFrequency,
     date,

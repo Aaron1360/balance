@@ -5,18 +5,19 @@ import Transactions from "./pages/Transactions";
 // import { LayoutProvider } from "./context/LayoutContext";
 import { TransactionsProvider } from "./context/TransactionsContext";
 import { DialogProvider } from "./context/DialogContext";
+import { InstallmentsProvider } from "./context/InstallmentsContext";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      // <LayoutProvider>
-        <TransactionsProvider>
-          <DialogProvider>
+      <TransactionsProvider>
+        <DialogProvider>
+          <InstallmentsProvider>
             <Layout />
-          </DialogProvider>
-        </TransactionsProvider>
-      // </LayoutProvider>
+          </InstallmentsProvider>
+        </DialogProvider>
+      </TransactionsProvider>
     ),
     children: [
       {

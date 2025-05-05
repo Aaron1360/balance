@@ -15,9 +15,10 @@ import AddTags from "./input-components/TagsInput";
 import DisplayTags from "./input-components/DisplayTags";
 import { useInsertTableData } from "@/hooks/useInsertTableData";
 import { useUpdateTableData } from "@/hooks/useUpdateTableData";
-import { Income } from "@/types/income";
-import { Installment } from "@/types/installment";
 import { useDialogContext } from "@/context/DialogContext";
+import { useInstallmentsContext } from "@/context/InstallmentsContext";
+import { Income } from "@/types/income";
+// import { Installment } from "@/types/installment";
 import { toDate } from "date-fns-tz";
 
 interface IncomeTabProps {
@@ -27,6 +28,9 @@ interface IncomeTabProps {
 export default function IncomeTab({ transaction }: IncomeTabProps) {
   // Dialog and sheet states
   const { closeDialog } = useDialogContext();
+  // Installments context
+    const { installments, setInstallments, generateInstallments } =
+      useInstallmentsContext();
 
   // Supabase custom hooks
   const {
@@ -64,10 +68,10 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
     "Mensual" | "Quincenal" | "Semanal" | undefined
   >(undefined);
 
-  // State for installments (if needed)
-  const [installments, setInstallments] = useState<Installment[]>(
-    transaction?.installments || []
-  );
+  // // State for installments (if needed)
+  // const [installments, setInstallments] = useState<Installment[]>(
+  //   transaction?.installments || []
+  // );
 
   // State for alert visibility and message
   const [alertVisible, setAlertVisible] = useState(false); // State to control alert visibility
@@ -134,38 +138,44 @@ export default function IncomeTab({ transaction }: IncomeTabProps) {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  const generateInstallments = () => {
-    if (!date || numberOfPayments <= 0) return;
+  // const generateInstallments = () => {
+  //   if (!date || numberOfPayments <= 0) return;
 
-    const newInstallments: Installment[] = [];
-    const baseAmount = amount / numberOfPayments;
+  //   const newInstallments: Installment[] = [];
+  //   const baseAmount = amount / numberOfPayments;
 
-    for (let i = 0; i < numberOfPayments; i++) {
-      const dueDate = new Date(date);
-      if (paymentFrequency === "Mensual") {
-        dueDate.setMonth(dueDate.getMonth() + i);
-      } else if (paymentFrequency === "Quincenal") {
-        dueDate.setDate(dueDate.getDate() + i * 15);
-      } else if (paymentFrequency === "Semanal") {
-        dueDate.setDate(dueDate.getDate() + i * 7);
-      }
+  //   for (let i = 0; i < numberOfPayments; i++) {
+  //     const dueDate = new Date(date);
+  //     if (paymentFrequency === "Mensual") {
+  //       dueDate.setMonth(dueDate.getMonth() + i);
+  //     } else if (paymentFrequency === "Quincenal") {
+  //       dueDate.setDate(dueDate.getDate() + i * 15);
+  //     } else if (paymentFrequency === "Semanal") {
+  //       dueDate.setDate(dueDate.getDate() + i * 7);
+  //     }
 
-      newInstallments.push({
-        amount: parseFloat(baseAmount.toFixed(2)),
-        due_date: dueDate,
-        status: "pendiente",
-      });
-    }
+  //     newInstallments.push({
+  //       amount: parseFloat(baseAmount.toFixed(2)),
+  //       due_date: dueDate,
+  //       status: "pendiente",
+  //     });
+  //   }
 
-    setInstallments(newInstallments);
-  };
+  //   setInstallments(newInstallments);
+  // };
 
   // Effect to generate installments when number of payments, payment frequency, or date changes
   useEffect(() => {
     if (paymentType === "diferido") {
-      generateInstallments(); // Call generateInstallments only for "diferido" payment type
+      generateInstallments(
+        amount,
+        numberOfPayments,
+        paymentFrequency || "Mensual",
+        date || new Date(),
+        false // MSI is not applicable for incomes
+      );
     }
-  }, [numberOfPayments, paymentFrequency, date, paymentType]);
+  }, [amount, numberOfPayments, paymentFrequency, date, paymentType]);
   
   // Function to create a new entry
   const createIncome = (): Income => {
