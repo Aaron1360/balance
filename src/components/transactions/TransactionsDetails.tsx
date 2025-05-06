@@ -19,16 +19,17 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+// import {
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableHead,
+//   TableHeader,
+//   TableRow,
+// } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import TransactionsDialogBtn from "../transactions-dialog/TransactionsDialogBtn";
+import { DeferredPaymentsTable } from "./DeferredPaymentsTable";
 import { cn } from "@/lib/utils";
 import { useDeleteTableData } from "@/hooks/useDeleteTableData";
 import { toast } from "sonner";
@@ -203,47 +204,10 @@ export function TransactionDetails({
                   <CardTitle>Pagos programados</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Fecha</TableHead>
-                          <TableHead>Monto</TableHead>
-                          <TableHead>Estado</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {transaction.installments.map((installment, index) => (
-                          <TableRow key={index}>
-                            <TableCell>
-                              {formatDate(installment.due_date)}
-                            </TableCell>
-                            <TableCell>
-                              {installment.amount.toLocaleString("es-MX", {
-                                style: "currency",
-                                currency: "MXN",
-                              })}
-                            </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant="outline"
-                                className={cn(
-                                  installment.status === "pagado"
-                                    ? "bg-green-100 text-green-800"
-                                    : installment.status === "vencido"
-                                    ? "bg-red-100 text-red-800"
-                                    : "bg-yellow-100 text-yellow-800"
-                                )}
-                              >
-                                {installment.status.charAt(0).toUpperCase() +
-                                  installment.status.slice(1)}
-                              </Badge>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                <DeferredPaymentsTable
+                    installments={transaction.installments}
+                    setInstallments={transaction.setInstallments}
+                  />
                 </CardContent>
               </Card>
             </>
