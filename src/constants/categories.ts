@@ -1,4 +1,4 @@
-export const paymentFrequencyCategories = ["Mensual", "Quincenal", "Semanal"];
+export const paymentFrequencyCategories = ["Mensual", "Quincenal", "Semanal", "Personalizado"];
 
 export const paymentMethodsCategories = [
     "Efectivo",

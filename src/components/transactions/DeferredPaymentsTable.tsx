@@ -1,50 +1,66 @@
 import { useState } from "react";
+import { MoreVertical, CheckIcon, XIcon } from "lucide-react";
+import { useUpdateTableData } from "@/hooks/useUpdateTableData";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import DatePicker from "@/components/transactions-dialog/input-components/DatePicker";
 import AmountInput from "@/components/transactions-dialog/input-components/AmountInput";
-import { CheckIcon, XIcon, TrashIcon, PencilIcon } from "lucide-react";
 import { Installment } from "@/types/installment";
+import { Income } from "@/types/income";
+import { Expense } from "@/types/expense";
 
-export function DeferredPaymentsTable({ installments, setInstallments }: { installments: Installment[]; setInstallments: (installments: Installment[]) => void }) {
+export function DeferredPaymentsTable({
+  transaction,
+}: {
+  transaction: Income | Expense;
+}) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Installment | null>(null);
 
+  // Dynamically set the table name based on transaction type
+  const tableName = transaction.type === "income" ? "incomes" : "expenses";
+
+  // Use the custom hook to update the database
+  const { mutate: updateInstallments } = useUpdateTableData<Partial<Income | Expense>>(tableName);
+
   const handleEdit = (index: number) => {
+    if (!transaction.installments) return;
     setEditingIndex(index);
-    setEditForm({ ...installments[index] });
+    setEditForm({ ...transaction.installments[index] });
   };
 
   const handleDelete = (index: number) => {
-    const updatedInstallments = installments.filter((_, i) => i !== index);
-    setInstallments(updatedInstallments);
+    if (!transaction.installments) return;
+    const updatedInstallments = transaction.installments.filter((_, i) => i !== index);
+
+    // Update the database after deletion
+    updateInstallments({
+      id: transaction.id ?? "",
+      updatedRecord: { ...transaction, installments: updatedInstallments },
+    });
   };
 
   const handleSave = () => {
     if (editForm === null || editingIndex === null) return;
 
-    const updatedInstallments = [...installments];
+    const updatedInstallments = [...(transaction.installments ?? [])];
     updatedInstallments[editingIndex] = editForm;
 
-    setInstallments(updatedInstallments);
     setEditingIndex(null);
     setEditForm(null);
+
+    // Update the database after saving changes
+    updateInstallments({
+      id: transaction.id ?? "",
+      updatedRecord: { ...transaction, installments: updatedInstallments },
+    });
   };
 
   const handleCancel = () => {
     setEditingIndex(null);
     setEditForm(null);
-  };
-
-  const handleStatusChange = (
-      index: number,
-      newStatus: "pendiente" | "pagado" | "vencido" | "cancelado"
-  ) => {
-      const updatedInstallments = [...installments];
-      updatedInstallments[index].status = newStatus;
-      setInstallments(updatedInstallments);
   };
 
   return (
@@ -59,15 +75,17 @@ export function DeferredPaymentsTable({ installments, setInstallments }: { insta
           </TableRow>
         </TableHeader>
         <TableBody>
-          {installments.map((installment, index) => (
+          {transaction.installments?.map((installment, index) => (
             <TableRow key={index}>
               <TableCell>
                 {editingIndex === index ? (
                   <DatePicker
                     id={`due_date-${index}`}
-                    date={new Date(installment.due_date)}
+                    date={editForm?.due_date ? new Date(editForm.due_date) : undefined}
                     setDate={(date) =>
-                      setEditForm((prev) => prev ? { ...prev, due_date: date || prev.due_date } : null)
+                      setEditForm((prev) =>
+                        prev ? { ...prev, due_date: date || prev.due_date } : null
+                      )
                     }
                   />
                 ) : (
@@ -79,7 +97,7 @@ export function DeferredPaymentsTable({ installments, setInstallments }: { insta
                   <AmountInput
                     id={`amount-${index}`}
                     placeholder="$0.00"
-                    value={installment.amount}
+                    value={editForm?.amount || 0}
                     onChange={(value) =>
                       setEditForm((prev) => prev && { ...prev, amount: value })
                     }
@@ -92,37 +110,21 @@ export function DeferredPaymentsTable({ installments, setInstallments }: { insta
                 )}
               </TableCell>
               <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Badge
-                      variant="outline"
-                      className={`cursor-pointer ${
-                        installment.status === "pagado"
-                          ? "bg-green-100 text-green-800"
-                          : installment.status === "vencido"
-                          ? "bg-red-100 text-red-800"
-                          : installment.status === "cancelado"
-                          ? "bg-gray-100 text-gray-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {installment.status.charAt(0).toUpperCase() +
-                        installment.status.slice(1)}
-                    </Badge>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {["Pagado", "Pendiente", "Atrasado", "Cancelado"].map(
-                      (status) => (
-                        <DropdownMenuItem
-                          key={status}
-                          onClick={() => handleStatusChange(index, status.toLowerCase() as "pendiente" | "pagado" | "vencido" | "cancelado")}
-                        >
-                          {status}
-                        </DropdownMenuItem>
-                      )
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Badge
+                  variant="outline"
+                  className={`cursor-pointer ${
+                    installment.status === "pagado"
+                      ? "bg-green-100 text-green-800"
+                      : installment.status === "vencido"
+                      ? "bg-red-100 text-red-800"
+                      : installment.status === "cancelado"
+                      ? "bg-gray-100 text-gray-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
+                  {installment.status.charAt(0).toUpperCase() +
+                    installment.status.slice(1)}
+                </Badge>
               </TableCell>
               <TableCell>
                 {editingIndex === index ? (
@@ -137,24 +139,24 @@ export function DeferredPaymentsTable({ installments, setInstallments }: { insta
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(index)}
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                      <span className="sr-only">Edit</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(index)}
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEdit(index)}>
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(index)}
+                        className="text-red-500"
+                      >
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </TableCell>
             </TableRow>

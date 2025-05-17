@@ -70,14 +70,25 @@ export const InstallmentsProvider = ({
         dueDate.setDate(startDate.getDate() + i * 7);
       }
 
-      // Convert the due date to the specified timezone
-      dueDate = toDate(dueDate, { timeZone: "America/Mexico_City" });
+      if (paymentFrequency === "Personalizado") {
+        // Create a single installment by default
+        dueDate = toDate(startDate, { timeZone: "America/Mexico_City" });
+        newInstallments.push({
+          amount: parseFloat(amount.toFixed(2)), // Use the full amount for the single installment
+          due_date: dueDate,
+          status: "pendiente",
+        });
+        break; // Exit the loop since only one installment is needed
+      } else {
+        // Convert the due date to the specified timezone
+        dueDate = toDate(dueDate, { timeZone: "America/Mexico_City" });
 
-      newInstallments.push({
-        amount: parseFloat(baseAmount.toFixed(2)),
-        due_date: dueDate,
-        status: "pendiente",
-      });
+        newInstallments.push({
+          amount: parseFloat(baseAmount.toFixed(2)),
+          due_date: dueDate,
+          status: "pendiente",
+        });
+      }
     }
 
     setInstallments(newInstallments);

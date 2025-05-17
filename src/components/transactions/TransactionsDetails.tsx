@@ -205,8 +205,7 @@ export function TransactionDetails({
                 </CardHeader>
                 <CardContent>
                 <DeferredPaymentsTable
-                    installments={transaction.installments}
-                    setInstallments={transaction.setInstallments}
+                    transaction = {transaction}
                   />
                 </CardContent>
               </Card>
@@ -259,6 +258,7 @@ export function TransactionDetails({
               icon={Edit}
               transaction={transaction}
               triggerAsChild={true}
+              className="flex w-full h-full justify-center items-center"
             />
           </Button>
           <Button
