@@ -5,6 +5,11 @@ const db = require('./db');
 const { body, validationResult } = require('express-validator');
 const cors = require('cors');
 
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -224,7 +229,3 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
-}));
