@@ -49,54 +49,40 @@ app.post(
 );
 
 app.get('/purchases', (req, res, next) => {
-  // Pagination parameters
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
 
-  // Filtering parameters (example: by card or date)
-  const { card, from, to } = req.query;
-  let where = [];
-  let params = [];
+  const { start, end, category, state } = req.query;
+  const params = [];
+  let whereClause = "";
 
-  if (card) {
-    where.push('card = ?');
-    params.push(card);
+  if (start) {
+    whereClause += (whereClause ? " AND " : " WHERE ") + "date >= ?";
+    params.push(start);
   }
-  if (from) {
-    where.push('date >= ?');
-    params.push(from);
+  if (end) {
+    whereClause += (whereClause ? " AND " : " WHERE ") + "date <= ?";
+    params.push(end);
   }
-  if (to) {
-    where.push('date <= ?');
-    params.push(to);
+  if (category) {
+    whereClause += (whereClause ? " AND " : " WHERE ") + "LOWER(category) = LOWER(?)";
+    params.push(category);
+  }
+  if (state === "paid") {
+    whereClause += (whereClause ? " AND " : " WHERE ") + "payments_made = msi_term";
+  } else if (state === "unpaid") {
+    whereClause += (whereClause ? " AND " : " WHERE ") + "payments_made < msi_term";
   }
 
-  const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
-
-  // Count total for pagination
-  db.get(`SELECT COUNT(*) as count FROM purchases ${whereClause}`, params, (err, countRow) => {
-    if (err) {
-      return next({ status: 500, message: err.message });
+  db.all(
+    `SELECT * FROM purchases ${whereClause} ORDER BY date DESC LIMIT ? OFFSET ?`,
+    [...params, limit, offset],
+    (err, rows) => {
+      if (err) return next({ status: 500, message: err.message });
+      res.json({ purchases: rows });
     }
-
-    // Get paginated results
-    db.all(
-      `SELECT * FROM purchases ${whereClause} ORDER BY date DESC LIMIT ? OFFSET ?`,
-      [...params, limit, offset],
-      (err, rows) => {
-        if (err) {
-          return next({ status: 500, message: err.message });
-        }
-        res.json({
-          page,
-          limit,
-          total: countRow.count,
-          purchases: rows
-        });
-      }
-    );
-  });
+  );
 });
 
 app.patch(
@@ -172,14 +158,15 @@ app.get('/summary', (req, res, next) => {
     const perMsi = {};
 
     rows.forEach(row => {
-      // Per card
-      if (!perCard[row.card]) {
-        perCard[row.card] = { spent: 0, outstanding: 0 };
+      // Per card (case-insensitive)
+      const cardKey = row.card ? row.card.toLowerCase() : "";
+      if (!perCard[cardKey]) {
+        perCard[cardKey] = { spent: 0, outstanding: 0 };
       }
-      perCard[row.card].spent += row.amount;
+      perCard[cardKey].spent += row.amount;
       const payments_left = row.msi_term - row.payments_made;
       const monthly_payment = row.amount / row.msi_term;
-      perCard[row.card].outstanding += payments_left > 0 ? payments_left * monthly_payment : 0;
+      perCard[cardKey].outstanding += payments_left > 0 ? payments_left * monthly_payment : 0;
 
       // Per MSI term
       if (!perMsi[row.msi_term]) {

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { usePurchases } from "@/hooks/usePurchases";
 import { Plus } from "lucide-react";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious, PaginationLink } from "@/components/ui/pagination";
@@ -9,8 +10,14 @@ type HomeScreenProps = {
 const PAGE_SIZE = 10;
 
 export function HomeScreen({ onAdd }: HomeScreenProps) {
-  // Use page and setPage from context!
-  const { purchases, total, loading, page, setPage, totalDebt } = usePurchases();
+  const { purchases, total, loading, page, setPage, totalDebt, refresh } = usePurchases();
+
+  // Filter state
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [category, setCategory] = useState("");
+  const [state, setState] = useState(""); // "", "paid", "unpaid"
+  const [showFilters, setShowFilters] = useState(false);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -47,8 +54,92 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
           </span>
         </div>
       </section>
-      <section>
+      <section className="flex items-center justify-between mb-2">
         <h2 className="text-md font-semibold mb-2 text-muted-foreground">Historial de compras</h2>
+        <div className="relative">
+          <button
+            className="bg-card text-foreground px-3 py-1 rounded shadow"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            Filtros
+          </button>
+          {showFilters && (
+            <div className="absolute right-0 mt-2 z-50 bg-card border border-border rounded-lg shadow-lg p-4 w-64">
+              <div className="flex flex-col gap-3">
+                <label className="text-xs text-muted-foreground">Fecha inicial:</label>
+                <input
+                  type="date"
+                  value={start}
+                  onChange={e => setStart(e.target.value)}
+                  className="bg-background text-foreground px-2 py-1 rounded"
+                />
+                <label className="text-xs text-muted-foreground">Fecha final:</label>
+                <input
+                  type="date"
+                  value={end}
+                  onChange={e => setEnd(e.target.value)}
+                  className="bg-background text-foreground px-2 py-1 rounded"
+                />
+                <label className="text-xs text-muted-foreground">Categoría:</label>
+                <select
+                  value={category}
+                  onChange={e => setCategory(e.target.value)}
+                  className="bg-background text-foreground px-2 py-1 rounded"
+                >
+                  <option value="">Todas</option>
+                  <option value="Comida">Comida</option>
+                  <option value="Despensa">Despensa</option>
+                  <option value="Tecnología">Tecnología</option>
+                  <option value="Servicios">Servicios</option>
+                  <option value="Entretenimiento">Entretenimiento</option>
+                  <option value="Salud">Salud</option>
+                  <option value="Mascotas">Mascotas</option>
+                  <option value="Ropa">Ropa</option>
+                  <option value="Regalos">Regalos</option>
+                  <option value="Hogar">Hogar</option>
+                  <option value="Educación">Educación</option>
+                  <option value="Transporte">Transporte</option>
+                </select>
+                <label className="text-xs text-muted-foreground">Estado:</label>
+                <select
+                  value={state}
+                  onChange={e => setState(e.target.value)}
+                  className="bg-background text-foreground px-2 py-1 rounded"
+                >
+                  <option value="">Todos</option>
+                  <option value="paid">Pagados</option>
+                  <option value="unpaid">Pendientes</option>
+                </select>
+                <button
+                  className="bg-primary/50 text-primary-foreground px-4 py-1 rounded mt-2"
+                  onClick={() => {
+                    setShowFilters(false);
+                    setPage(1);
+                    refresh({ start, end, category, state });
+                  }}
+                >
+                  Aplicar filtros
+                </button>
+                <button
+                  className="bg-muted-foreground text-foreground px-4 py-1 rounded mt-2"
+                  onClick={() => {
+                    setStart("");
+                    setEnd("");
+                    setCategory("");
+                    setState("");
+                    setShowFilters(false);
+                    setPage(1);
+                    refresh({ start: "", end: "", category: "", state: "" });
+                  }}
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+      <section>
         {loading ? (
           <div className="text-muted-foreground">Cargando...</div>
         ) : purchases.length === 0 ? (

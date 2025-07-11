@@ -1,0 +1,452 @@
+[
+  {
+    "name": "Laptop",
+    "date": "2025-07-10",
+    "msi_term": 12,
+    "card": "BBVA",
+    "amount": 12000,
+    "payments_made": 0,
+    "category": "Tecnología"
+  },
+  {
+    "name": "Supermercado",
+    "date": "2025-07-10",
+    "msi_term": 6,
+    "card": "BBVA",
+    "amount": 2500,
+    "payments_made": 6,
+    "category": "Despensa"
+  },
+  {
+    "name": "Membresía de Gimnasio",
+    "date": "2025-07-09",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 600,
+    "payments_made": 1,
+    "category": "Salud"
+  },
+  {
+    "name": "Cafetería",
+    "date": "2025-07-09",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 80,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Servicio de Streaming",
+    "date": "2025-07-08",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 150,
+    "payments_made": 1,
+    "category": "Entretenimiento"
+  },
+  {
+    "name": "Librería",
+    "date": "2025-07-08",
+    "msi_term": 3,
+    "card": "Citibanamex",
+    "amount": 450,
+    "payments_made": 1,
+    "category": "Educación"
+  },
+  {
+    "name": "Curso en Línea",
+    "date": "2025-07-07",
+    "msi_term": 6,
+    "card": "BBVA",
+    "amount": 1800,
+    "payments_made": 2,
+    "category": "Educación"
+  },
+  {
+    "name": "Viaje en Taxi",
+    "date": "2025-07-07",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 120,
+    "payments_made": 1,
+    "category": "Transporte"
+  },
+  {
+    "name": "Cena fuera",
+    "date": "2025-07-06",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 700,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Boletos de Cine",
+    "date": "2025-07-06",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 200,
+    "payments_made": 1,
+    "category": "Entretenimiento"
+  },
+  {
+    "name": "Tienda de Ropa",
+    "date": "2025-07-05",
+    "msi_term": 3,
+    "card": "BBVA",
+    "amount": 1200,
+    "payments_made": 2,
+    "category": "Ropa"
+  },
+  {
+    "name": "Electrónica",
+    "date": "2025-07-05",
+    "msi_term": 12,
+    "card": "Citibanamex",
+    "amount": 8000,
+    "payments_made": 4,
+    "category": "Tecnología"
+  },
+  {
+    "name": "Farmacia",
+    "date": "2025-07-04",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 350,
+    "payments_made": 1,
+    "category": "Salud"
+  },
+  {
+    "name": "Tienda de Mascotas",
+    "date": "2025-07-04",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 220,
+    "payments_made": 1,
+    "category": "Mascotas"
+  },
+  {
+    "name": "Ferretería",
+    "date": "2025-07-03",
+    "msi_term": 6,
+    "card": "BBVA",
+    "amount": 2500,
+    "payments_made": 3,
+    "category": "Hogar"
+  },
+  {
+    "name": "Tienda de Abarrotes",
+    "date": "2025-07-03",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 900,
+    "payments_made": 1,
+    "category": "Despensa"
+  },
+  {
+    "name": "Plan de Celular",
+    "date": "2025-07-02",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 400,
+    "payments_made": 1,
+    "category": "Servicios"
+  },
+  {
+    "name": "Recibo de Agua",
+    "date": "2025-07-02",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 300,
+    "payments_made": 1,
+    "category": "Servicios"
+  },
+  {
+    "name": "Recibo de Luz",
+    "date": "2025-07-01",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 950,
+    "payments_made": 1,
+    "category": "Servicios"
+  },
+  {
+    "name": "Recibo de Internet",
+    "date": "2025-07-01",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 600,
+    "payments_made": 1,
+    "category": "Servicios"
+  },
+  {
+    "name": "Almuerzo",
+    "date": "2025-06-30",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 120,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Café en Grano",
+    "date": "2025-06-30",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 180,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Tienda de Regalos",
+    "date": "2025-06-29",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 350,
+    "payments_made": 1,
+    "category": "Regalos"
+  },
+  {
+    "name": "Panadería",
+    "date": "2025-06-29",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 90,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Viaje en Taxi",
+    "date": "2025-06-28",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 110,
+    "payments_made": 1,
+    "category": "Transporte"
+  },
+  {
+    "name": "Comida Rápida",
+    "date": "2025-06-28",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 150,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Servicio de Streaming",
+    "date": "2025-06-27",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 150,
+    "payments_made": 1,
+    "category": "Entretenimiento"
+  },
+  {
+    "name": "Compras en Línea",
+    "date": "2025-06-27",
+    "msi_term": 3,
+    "card": "Citibanamex",
+    "amount": 900,
+    "payments_made": 2,
+    "category": "Tecnología"
+  },
+  {
+    "name": "Farmacia",
+    "date": "2025-06-26",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 200,
+    "payments_made": 1,
+    "category": "Salud"
+  },
+  {
+    "name": "Librería",
+    "date": "2025-06-26",
+    "msi_term": 3,
+    "card": "Citibanamex",
+    "amount": 600,
+    "payments_made": 3,
+    "category": "Educación"
+  },
+  {
+    "name": "Electrónica",
+    "date": "2025-06-25",
+    "msi_term": 12,
+    "card": "BBVA",
+    "amount": 10000,
+    "payments_made": 8,
+    "category": "Tecnología"
+  },
+  {
+    "name": "Tienda de Ropa",
+    "date": "2025-06-25",
+    "msi_term": 3,
+    "card": "Citibanamex",
+    "amount": 1800,
+    "payments_made": 3,
+    "category": "Ropa"
+  },
+  {
+    "name": "Supermercado",
+    "date": "2025-06-24",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 2300,
+    "payments_made": 1,
+    "category": "Despensa"
+  },
+  {
+    "name": "Tienda de Mascotas",
+    "date": "2025-06-24",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 300,
+    "payments_made": 1,
+    "category": "Mascotas"
+  },
+  {
+    "name": "Ferretería",
+    "date": "2025-06-23",
+    "msi_term": 6,
+    "card": "BBVA",
+    "amount": 2100,
+    "payments_made": 6,
+    "category": "Hogar"
+  },
+  {
+    "name": "Almuerzo",
+    "date": "2025-06-23",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 130,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Cafetería",
+    "date": "2025-06-22",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 90,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Cena fuera",
+    "date": "2025-06-22",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 650,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Curso en Línea",
+    "date": "2025-06-21",
+    "msi_term": 6,
+    "card": "BBVA",
+    "amount": 2000,
+    "payments_made": 6,
+    "category": "Educación"
+  },
+  {
+    "name": "Boletos de Cine",
+    "date": "2025-06-21",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 220,
+    "payments_made": 1,
+    "category": "Entretenimiento"
+  },
+  {
+    "name": "Plan de Celular",
+    "date": "2025-06-20",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 400,
+    "payments_made": 1,
+    "category": "Servicios"
+  },
+  {
+    "name": "Recibo de Agua",
+    "date": "2025-06-20",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 310,
+    "payments_made": 1,
+    "category": "Servicios"
+  },
+  {
+    "name": "Recibo de Luz",
+    "date": "2025-06-19",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 980,
+    "payments_made": 1,
+    "category": "Servicios"
+  },
+  {
+    "name": "Recibo de Internet",
+    "date": "2025-06-19",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 620,
+    "payments_made": 1,
+    "category": "Servicios"
+  },
+  {
+    "name": "Tienda de Regalos",
+    "date": "2025-06-18",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 400,
+    "payments_made": 1,
+    "category": "Regalos"
+  },
+  {
+    "name": "Panadería",
+    "date": "2025-06-18",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 100,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Viaje en Taxi",
+    "date": "2025-06-17",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 115,
+    "payments_made": 1,
+    "category": "Transporte"
+  },
+  {
+    "name": "Comida Rápida",
+    "date": "2025-06-17",
+    "msi_term": 1,
+    "card": "Citibanamex",
+    "amount": 160,
+    "payments_made": 1,
+    "category": "Comida"
+  },
+  {
+    "name": "Servicio de Streaming",
+    "date": "2025-06-16",
+    "msi_term": 1,
+    "card": "BBVA",
+    "amount": 150,
+    "payments_made": 1,
+    "category": "Entretenimiento"
+  },
+  {
+    "name": "Compras en Línea",
+    "date": "2025-06-16",
+    "msi_term": 3,
+    "card": "Citibanamex",
+    "amount": 950,
+    "payments_made": 3,
+    "category": "Tecnología"
+  }
+]
