@@ -47,14 +47,26 @@ export default function App() {
         {tab === "settings" && <SettingsScreen />}
       </div>
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-gray-300 border-t flex justify-around py-2 backdrop-blur-md">
-        <button onClick={() => setTab("home")} className={tab === "home" ? "text-primary" : ""} aria-label="Inicio">
+      <nav className="fixed bottom-0 left-0 right-0 bg-primary/40 border-t border-border flex justify-around py-2 backdrop-blur-md">
+        <button
+          onClick={() => setTab("home")}
+          className={tab === "home" ? "text-primary-foreground" : "text-primary-foreground/60"}
+          aria-label="Inicio"
+        >
           <Home size={28} />
         </button>
-        <button onClick={() => setTab("metrics")} className={tab === "metrics" ? "text-primary" : ""} aria-label="Métricas">
+        <button
+          onClick={() => setTab("metrics")}
+          className={tab === "metrics" ? "text-primary-foreground" : "text-primary-foreground/60"}
+          aria-label="Métricas"
+        >
           <BarChart size={28} />
         </button>
-        <button onClick={() => setTab("settings")} className={tab === "settings" ? "text-primary" : ""} aria-label="Configuración">
+        <button
+          onClick={() => setTab("settings")}
+          className={tab === "settings" ? "text-primary-foreground" : "text-primary-foreground/60"}
+          aria-label="Configuración"
+        >
           <Settings size={28} />
         </button>
       </nav>
@@ -66,7 +78,7 @@ export default function App() {
         aria-hidden={!showAddModal}
       >
         <div
-          className={`bg-white w-full max-w-md rounded-t-lg p-4 transition-transform duration-300 ${
+          className={`bg-card w-full max-w-md rounded-t-lg p-4 transition-transform duration-300 ${
             showAddModal ? "translate-y-0" : "translate-y-full"
           }`}
         >

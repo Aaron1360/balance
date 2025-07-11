@@ -44,24 +44,28 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
   const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
   return (
-    <div className="p-4 pb-20">
+    <div className="p-4 pb-24 bg-background text-foreground">
       <header className="mb-4 flex items-center justify-end">
         <button
-          className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-2xl shadow"
+          className="text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow mt-3 ring-2 ring-accent/40 bg-card"
           onClick={onAdd}
           aria-label="Agregar compra"
         >
-          <Plus size={20} />
+          <Plus size={24} />
         </button>
       </header>
-      <section className="mb-8 mt-8 flex flex-col items-center">
-        <div className="text-muted-foreground mb-2">Saldo al corte</div>
-        <div className="text-5xl font-bold mb-4">${totalDebt.toFixed(2)}</div>
+      <section className="mb-10 mt-0 flex flex-col items-center">
+        <div className="text-muted-foreground font-semibold mb-2 text-xl">Saldo al corte</div>
+        <div className="relative my-4">
+          <span className="text-4xl font-extrabold text-primary/60 ring-2 ring-accent/30 rounded-xl px-4 py-2 bg-card/90">
+            -${totalDebt.toFixed(2)}
+          </span>
+        </div>
       </section>
       <section>
-        <h2 className="text-lg font-semibold mb-2">Historial de compras</h2>
+        <h2 className="text-md font-semibold mb-2 text-muted-foreground">Historial de compras</h2>
         {loading ? (
-          <div>Cargando...</div>
+          <div className="text-muted-foreground">Cargando...</div>
         ) : purchases.length === 0 ? (
           <div className="text-muted-foreground">No hay compras registradas.</div>
         ) : (
@@ -73,16 +77,32 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                 </div>
                 <ul className="flex flex-col gap-2">
                   {grouped[date].map((p) => (
-                    <li key={p.id} className="border rounded p-2 flex justify-between items-center">
+                    <li
+                      key={p.id}
+                      className={`border border-border rounded-lg p-3 flex justify-between items-center shadow-sm ${
+                        p.payments_made === p.msi_term ? "" : ""
+                      }`}
+                      style={
+                        p.payments_made === p.msi_term
+                          ? { backgroundColor: "var(--card-paid)" }
+                          : undefined
+                      }
+                    >
                       <div>
-                        <div className="font-medium">{p.name}</div>
+                        <div className="font-medium text-foreground">{p.name}</div>
                         <div className="text-xs text-muted-foreground">
                           {p.card} | {p.msi_term} MSI
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-mono">${p.amount.toFixed(2)}</div>
-                        <div className="text-xs">
+                        <div
+                          className={`font-mono ${
+                            p.payments_made === p.msi_term ? "text-primary" : "text-destructive"
+                          }`}
+                        >
+                          ${p.amount.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
                           Pagos: {p.payments_made}/{p.msi_term}
                         </div>
                       </div>
