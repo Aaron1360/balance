@@ -18,6 +18,7 @@ export default function App() {
     msi_term: "",
     card: "",
     amount: "",
+    category: "",
   });
 
   // Handle form input
@@ -34,8 +35,9 @@ export default function App() {
       msi_term: Number(form.msi_term),
       card: form.card,
       amount: Number(form.amount),
+      category: form.category,
     });
-    setForm({ name: "", date: "", msi_term: "", card: "", amount: "" });
+    setForm({ name: "", date: "", msi_term: "", card: "", amount: "", category: "" });
     setShowAddModal(false);
   };
 

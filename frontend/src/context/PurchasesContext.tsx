@@ -2,10 +2,14 @@ import React, { createContext, useState, useEffect } from "react";
 import type { Purchase } from "@/lib/types";
 
 const API_URL = "http://localhost:3001";
+const PAGE_SIZE = 10;
 
 export type PurchasesContextType = {
   purchases: Purchase[];
   totalDebt: number;
+  total: number;
+  page: number;
+  setPage: (page: number) => void;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -17,6 +21,8 @@ export const PurchasesContext = createContext<PurchasesContextType | undefined>(
 export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [totalDebt, setTotalDebt] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +34,11 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const debtData = await debtRes.json();
       setTotalDebt(debtData.total_outstanding || 0);
 
-      const purchasesRes = await fetch(`${API_URL}/purchases`);
+      const countRes = await fetch(`${API_URL}/purchases/count`);
+      const countData = await countRes.json();
+      setTotal(countData.count || 0);
+
+      const purchasesRes = await fetch(`${API_URL}/purchases?page=${page}&limit=${PAGE_SIZE}`);
       const purchasesData = await purchasesRes.json();
       setPurchases(Array.isArray(purchasesData) ? purchasesData : purchasesData.purchases || []);
     } catch {
@@ -40,7 +50,7 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page]);
 
   const refresh = fetchData;
 
@@ -70,7 +80,9 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   return (
-    <PurchasesContext.Provider value={{ purchases, totalDebt, loading, error, refresh, addPurchase }}>
+    <PurchasesContext.Provider value={{
+      purchases, totalDebt, total, page, setPage, loading, error, refresh, addPurchase
+    }}>
       {children}
     </PurchasesContext.Provider>
   );

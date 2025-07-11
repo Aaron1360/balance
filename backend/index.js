@@ -243,6 +243,13 @@ app.delete('/purchases', (req, res, next) => {
   }
 });
 
+app.get('/purchases/count', (req, res, next) => {
+  db.get('SELECT COUNT(*) as count FROM purchases', (err, row) => {
+    if (err) return next({ status: 500, message: err.message });
+    res.json({ count: row.count });
+  });
+});
+
 // Centralized error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);

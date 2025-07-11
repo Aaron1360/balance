@@ -6,6 +6,7 @@ type Purchase = {
   card: string;
   amount: number;
   payments_made: number;
+  category: string; 
 };
 
 export type { Purchase };
