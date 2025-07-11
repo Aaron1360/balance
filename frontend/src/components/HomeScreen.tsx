@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { usePurchases } from "@/hooks/usePurchases";
 import { Plus } from "lucide-react";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious, PaginationLink } from "@/components/ui/pagination";
+import { CheckCircle, Pencil, Trash2 } from "lucide-react";
 
 type HomeScreenProps = {
   onAdd: () => void;
@@ -18,6 +19,8 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
   const [category, setCategory] = useState("");
   const [state, setState] = useState(""); // "", "paid", "unpaid"
   const [showFilters, setShowFilters] = useState(false);
+  const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
+  const [editPurchase, setEditPurchase] = useState<Purchase | null>(null);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -185,12 +188,13 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                   {grouped[date].map((p) => (
                     <li
                       key={p.id}
-                      className={`border border-border rounded-lg p-3 flex justify-between items-center shadow-sm`}
+                      className={`border border-border rounded-lg p-3 flex justify-between items-center shadow-sm relative cursor-pointer`}
                       style={
                         p.payments_made === p.msi_term
                           ? { backgroundColor: "var(--card-paid)" }
                           : undefined
                       }
+                      onClick={() => setActiveMenuId(activeMenuId === p.id ? null : p.id)}
                     >
                       <div>
                         <div className="font-medium text-foreground">{p.name}</div>
@@ -209,6 +213,51 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                         <div className="text-xs text-muted-foreground">
                           Pagos: {p.payments_made}/{p.msi_term}
                         </div>
+                        {/* Action buttons: shown only when selected, organized in a row and smaller */}
+                        {activeMenuId === p.id && (
+                          <div className="flex flex-row gap-2 mt-2 justify-end">
+                            {p.payments_made < p.msi_term && (
+                              <button
+                                className="bg-primary/70 text-primary-foreground px-1 py-1 rounded flex items-center justify-center"
+                                style={{ width: 28, height: 28 }}
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  await fetch(`${API_URL}/purchases/${p.id}/payoff`, { method: "POST" });
+                                  refresh();
+                                  setActiveMenuId(null);
+                                }}
+                                aria-label="Pagar"
+                              >
+                                <CheckCircle size={16} />
+                              </button>
+                            )}
+                            <button
+                              className="bg-accent text-accent-foreground px-1 py-1 rounded flex items-center justify-center"
+                              style={{ width: 28, height: 28 }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditPurchase(p);
+                                setActiveMenuId(null);
+                              }}
+                              aria-label="Editar"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              className="bg-destructive text-destructive-foreground px-1 py-1 rounded flex items-center justify-center"
+                              style={{ width: 28, height: 28 }}
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                await fetch(`${API_URL}/purchases?id=${p.id}`, { method: "DELETE" });
+                                refresh();
+                                setActiveMenuId(null);
+                              }}
+                              aria-label="Eliminar"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </li>
                   ))}
