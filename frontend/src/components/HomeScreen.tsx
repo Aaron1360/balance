@@ -11,7 +11,7 @@ type HomeScreenProps = {
 const PAGE_SIZE = 10;
 
 export function HomeScreen({ onAdd }: HomeScreenProps) {
-  const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh, deletePurchase } = usePurchases();
+  const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh, deletePurchase, payOffPurchase} = usePurchases();
 
   // Filter state
   const [start, setStart] = useState("");
@@ -227,8 +227,7 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                               style={{ width: 28, height: 28 }}
                               onClick={async (e) => {
                                 e.stopPropagation();
-                                await fetch(`${API_URL}/purchases/${p.id}/payoff`, { method: "POST" });
-                                refresh();
+                                await payOffPurchase(p); 
                                 setActiveMenuId(null);
                               }}
                               aria-label="Pagar"
