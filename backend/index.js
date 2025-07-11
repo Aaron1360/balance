@@ -218,6 +218,31 @@ app.post('/purchases/:id/payoff', (req, res, next) => {
   });
 });
 
+// DELETE purchases by id or before a certain date
+app.delete('/purchases', (req, res, next) => {
+  const { id, before } = req.query;
+
+  if (!id && !before) {
+    return res.status(400).json({ error: "Provide 'id' or 'before' query parameter." });
+  }
+
+  if (id) {
+    db.run('DELETE FROM purchases WHERE id = ?', [id], function (err) {
+      if (err) {
+        return next({ status: 500, message: err.message });
+      }
+      return res.json({ success: true, deleted: this.changes });
+    });
+  } else if (before) {
+    db.run('DELETE FROM purchases WHERE date < ?', [before], function (err) {
+      if (err) {
+        return next({ status: 500, message: err.message });
+      }
+      return res.json({ success: true, deleted: this.changes });
+    });
+  }
+});
+
 // Centralized error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
