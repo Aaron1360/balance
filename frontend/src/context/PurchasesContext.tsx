@@ -1,12 +1,13 @@
 import React, { createContext, useState, useEffect } from "react";
 import type { Purchase } from "@/lib/types";
 
-const API_URL = "http://localhost:3001";
+const API_URL = "http://192.168.1.117:3001";
 const PAGE_SIZE = 10;
 
 export type PurchasesContextType = {
   purchases: Purchase[];
   totalDebt: number;
+  totalMonthlyPayment: number; // <-- Add this line
   total: number;
   page: number;
   setPage: (page: number) => void;
@@ -21,6 +22,7 @@ export const PurchasesContext = createContext<PurchasesContextType | undefined>(
 export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [totalDebt, setTotalDebt] = useState(0);
+  const [totalMonthlyPayment, setTotalMonthlyPayment] = useState(0); // <-- Add this line
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -51,9 +53,11 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setPurchases(Array.isArray(purchasesData) ? purchasesData : purchasesData.purchases || []);
       setFilters(newFilters);
 
+      // Fetch debt overview (totalDebt and totalMonthlyPayment)
       const debtRes = await fetch(`${API_URL}/debt-overview`);
       const debtData = await debtRes.json();
       setTotalDebt(debtData.total_outstanding || 0);
+      setTotalMonthlyPayment(debtData.total_monthly_payment || 0); // <-- Add this line
     } catch {
       setError("No se pudieron cargar los datos");
     } finally {
@@ -97,7 +101,7 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   return (
     <PurchasesContext.Provider value={{
-      purchases, totalDebt, total, page, setPage, loading, error, refresh, addPurchase
+      purchases, totalDebt, totalMonthlyPayment, total, page, setPage, loading, error, refresh, addPurchase
     }}>
       {children}
     </PurchasesContext.Provider>

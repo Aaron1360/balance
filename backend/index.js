@@ -6,7 +6,7 @@ const { body, validationResult } = require('express-validator');
 const cors = require('cors');
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173', 'http://192.168.1.117:5173'],
   credentials: true
 }));
 
@@ -127,10 +127,17 @@ app.get('/debt-overview', (req, res, next) => {
             const outstanding = payments_left > 0 ? payments_left * monthly_payment : 0;
             return { ...row, payments_left, monthly_payment, outstanding };
         });
+
         const total_outstanding = debtDetails.reduce((sum, p) => sum + p.outstanding, 0);
+
+        // Calculate total monthly payment for unpaid purchases
+        const total_monthly_payment = debtDetails
+            .filter(p => p.payments_left > 0)
+            .reduce((sum, p) => sum + p.monthly_payment, 0);
 
         res.json({
             total_outstanding,
+            total_monthly_payment,
             purchases: debtDetails
         });
     });

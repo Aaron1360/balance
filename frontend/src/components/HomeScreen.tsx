@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { usePurchases } from "@/hooks/usePurchases";
 import { Plus } from "lucide-react";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious, PaginationLink } from "@/components/ui/pagination";
@@ -10,7 +10,7 @@ type HomeScreenProps = {
 const PAGE_SIZE = 10;
 
 export function HomeScreen({ onAdd }: HomeScreenProps) {
-  const { purchases, total, loading, page, setPage, totalDebt, refresh } = usePurchases();
+  const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh } = usePurchases();
 
   // Filter state
   const [start, setStart] = useState("");
@@ -35,6 +35,24 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
   });
   const shownDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
+  const filterMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showFilters) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterMenuRef.current &&
+        !filterMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowFilters(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showFilters]);
+
   return (
     <div className="p-4 pb-32 bg-background text-foreground">
       <header className="mb-4 flex items-center justify-end">
@@ -50,7 +68,7 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
         <div className="text-muted-foreground font-semibold mb-2 text-xl">Saldo al corte</div>
         <div className="relative my-4">
           <span className="text-4xl font-extrabold text-primary/60 ring-2 ring-accent/30 rounded-xl px-4 py-2 bg-card/90">
-            {totalDebt > 0 ? "-" : ""}${totalDebt.toFixed(2)}
+            {totalMonthlyPayment > 0 ? "-" : ""}${totalMonthlyPayment.toFixed(2)}
           </span>
         </div>
       </section>
@@ -73,7 +91,10 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
             )}
           </button>
           {showFilters && (
-            <div className="absolute right-0 mt-2 z-50 bg-card border border-border rounded-lg shadow-lg p-4 w-64">
+            <div
+              ref={filterMenuRef}
+              className="absolute right-0 mt-2 z-50 bg-card border border-border rounded-lg shadow-lg p-4 w-64"
+            >
               <div className="flex flex-col gap-3">
                 <label className="text-xs text-muted-foreground">Fecha inicial:</label>
                 <input
