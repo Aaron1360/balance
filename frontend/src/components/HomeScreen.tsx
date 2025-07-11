@@ -11,7 +11,7 @@ type HomeScreenProps = {
 const PAGE_SIZE = 10;
 
 export function HomeScreen({ onAdd }: HomeScreenProps) {
-  const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh } = usePurchases();
+  const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh, deletePurchase } = usePurchases();
 
   // Filter state
   const [start, setStart] = useState("");
@@ -253,8 +253,7 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                             style={{ width: 28, height: 28 }}
                             onClick={async (e) => {
                               e.stopPropagation();
-                              await fetch(`${API_URL}/purchases?id=${p.id}`, { method: "DELETE" });
-                              refresh();
+                              await deletePurchase(p.id);
                               setActiveMenuId(null);
                             }}
                             aria-label="Eliminar"

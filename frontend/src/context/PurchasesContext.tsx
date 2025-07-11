@@ -15,6 +15,8 @@ export type PurchasesContextType = {
   error: string | null;
   refresh: (newFilters?: { start: string; end: string; category: string; state: string }) => Promise<void>;
   addPurchase: (purchase: Omit<Purchase, "id" | "payments_made">) => Promise<void>;
+  payOffPurchase: (p: Purchase) => Promise<void>;
+  deletePurchase: (id: number) => Promise<void>; // <-- Add this line
 };
 
 export const PurchasesContext = createContext<PurchasesContextType | undefined>(undefined);
@@ -99,9 +101,43 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const payOffPurchase = async (p: Purchase) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await fetch(`${API_URL}/purchases/${p.id}/payoff`, { method: "POST" });
+      await fetchData();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error al registrar compra");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deletePurchase = async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await fetch(`${API_URL}/purchases?id=${id}`, { method: "DELETE" });
+      await fetchData();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Error al eliminar compra");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <PurchasesContext.Provider value={{
-      purchases, totalDebt, totalMonthlyPayment, total, page, setPage, loading, error, refresh, addPurchase
+      purchases, totalDebt, totalMonthlyPayment, total, page, setPage, loading, error, refresh, addPurchase, payOffPurchase, deletePurchase
     }}>
       {children}
     </PurchasesContext.Provider>

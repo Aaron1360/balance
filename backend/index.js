@@ -27,17 +27,18 @@ app.post(
     body('date').isISO8601(),
     body('msi_term').isInt({ min: 1 }),
     body('card').isString().notEmpty(),
-    body('amount').isFloat({ min: 0.01 })
+    body('amount').isFloat({ min: 0.01 }),
+    body('category').optional().isString()
   ],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { name, date, msi_term, card, amount } = req.body;
+    const { name, date, msi_term, card, amount, category = "Sin categoria" } = req.body;
     db.run(
-      `INSERT INTO purchases (name, date, msi_term, card, amount) VALUES (?, ?, ?, ?, ?)`,
-      [name, date, msi_term, card, amount],
+      `INSERT INTO purchases (name, date, msi_term, card, amount, category) VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, date, msi_term, card, amount, category],
       function (err) {
         if (err) {
           return next({ status: 500, message: err.message });
@@ -102,6 +103,46 @@ app.patch(
     db.run(
       `UPDATE purchases SET payments_made = ? WHERE id = ?`,
       [payments_made, id],
+      function (err) {
+        if (err) {
+          return next({ status: 500, message: err.message });
+        }
+        if (this.changes === 0) {
+          return next({ status: 404, message: 'Purchase not found' });
+        }
+        res.json({ success: true });
+      }
+    );
+  }
+);
+
+app.patch(
+  '/purchases/:id',
+  [
+    body('name').optional().isString().notEmpty(),
+    body('date').optional().isISO8601(),
+    body('msi_term').optional().isInt({ min: 1 }),
+    body('card').optional().isString().notEmpty(),
+    body('amount').optional().isFloat({ min: 0.01 }),
+    body('category').optional().isString()
+  ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { id } = req.params;
+    const fields = req.body;
+    const updates = [];
+    const params = [];
+    Object.entries(fields).forEach(([key, value]) => {
+      updates.push(`${key} = ?`);
+      params.push(value);
+    });
+    params.push(id);
+    db.run(
+      `UPDATE purchases SET ${updates.join(", ")} WHERE id = ?`,
+      params,
       function (err) {
         if (err) {
           return next({ status: 500, message: err.message });
