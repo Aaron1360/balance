@@ -31,7 +31,6 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLoading(true);
     setError(null);
 
-    // Build query string for filters
     const params = new URLSearchParams();
     params.append("page", page.toString());
     params.append("limit", PAGE_SIZE.toString());
@@ -41,18 +40,20 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (newFilters.state) params.append("state", newFilters.state);
 
     try {
-      const debtRes = await fetch(`${API_URL}/debt-overview`);
-      const debtData = await debtRes.json();
-      setTotalDebt(debtData.total_outstanding || 0);
-
-      const countRes = await fetch(`${API_URL}/purchases/count`);
+      // Fetch filtered count
+      const countRes = await fetch(`${API_URL}/purchases/count?${params.toString()}`);
       const countData = await countRes.json();
       setTotal(countData.count || 0);
 
+      // Fetch filtered purchases
       const purchasesRes = await fetch(`${API_URL}/purchases?${params.toString()}`);
       const purchasesData = await purchasesRes.json();
       setPurchases(Array.isArray(purchasesData) ? purchasesData : purchasesData.purchases || []);
       setFilters(newFilters);
+
+      const debtRes = await fetch(`${API_URL}/debt-overview`);
+      const debtData = await debtRes.json();
+      setTotalDebt(debtData.total_outstanding || 0);
     } catch {
       setError("No se pudieron cargar los datos");
     } finally {

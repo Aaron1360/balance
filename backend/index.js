@@ -231,10 +231,36 @@ app.delete('/purchases', (req, res, next) => {
 });
 
 app.get('/purchases/count', (req, res, next) => {
-  db.get('SELECT COUNT(*) as count FROM purchases', (err, row) => {
-    if (err) return next({ status: 500, message: err.message });
-    res.json({ count: row.count });
-  });
+  const { start, end, category, state } = req.query;
+  const params = [];
+  let whereClause = "";
+
+  if (start) {
+    whereClause += (whereClause ? " AND " : " WHERE ") + "date >= ?";
+    params.push(start);
+  }
+  if (end) {
+    whereClause += (whereClause ? " AND " : " WHERE ") + "date <= ?";
+    params.push(end);
+  }
+  if (category) {
+    whereClause += (whereClause ? " AND " : " WHERE ") + "LOWER(category) = LOWER(?)";
+    params.push(category);
+  }
+  if (state === "paid") {
+    whereClause += (whereClause ? " AND " : " WHERE ") + "payments_made = msi_term";
+  } else if (state === "unpaid") {
+    whereClause += (whereClause ? " AND " : " WHERE ") + "payments_made < msi_term";
+  }
+
+  db.get(
+    `SELECT COUNT(*) as count FROM purchases ${whereClause}`,
+    params,
+    (err, row) => {
+      if (err) return next({ status: 500, message: err.message });
+      res.json({ count: row.count });
+    }
+  );
 });
 
 // Centralized error handler

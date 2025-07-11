@@ -58,10 +58,19 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
         <h2 className="text-md font-semibold mb-2 text-muted-foreground">Historial de compras</h2>
         <div className="relative">
           <button
-            className="bg-card text-foreground px-3 py-1 rounded shadow"
+            className={`px-3 py-1 rounded shadow border-2 relative ${
+              start || end || category || state
+                ? "border-primary/40"
+                : "border-border"
+            } bg-card text-foreground`}
             onClick={() => setShowFilters(!showFilters)}
           >
             Filtros
+            {(+!!start + +!!end + +!!category + +!!state) > 0 && (
+              <span className="absolute -top-2 -right-2 bg-primary/80 text-primary-foreground rounded-full px-2 py-0.5 text-xs font-bold">
+                {+!!start + +!!end + +!!category + +!!state}
+              </span>
+            )}
           </button>
           {showFilters && (
             <div className="absolute right-0 mt-2 z-50 bg-card border border-border rounded-lg shadow-lg p-4 w-64">
