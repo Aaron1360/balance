@@ -31,6 +31,11 @@ export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange
     initialValues?.date ? new Date(initialValues.date) : undefined
   );
 
+  // MSI state
+  const [isMsi, setIsMsi] = React.useState(
+    initialValues?.msi_term && Number(initialValues.msi_term) > 0 ? true : false
+  );
+
   // Form state
   const [form, setForm] = React.useState({
     name: initialValues?.name || "",
@@ -53,6 +58,7 @@ export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange
         category: initialValues.category || "",
       });
       setDate(initialValues.date ? new Date(initialValues.date) : undefined);
+      setIsMsi(initialValues.msi_term && Number(initialValues.msi_term) > 0 ? true : false);
     }
   }, [initialValues]);
 
@@ -66,20 +72,29 @@ export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name === "isMsi") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setIsMsi(checked);
+      setForm((prev) => ({
+        ...prev,
+        msi_term: checked ? prev.msi_term : ""
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
+  // Form completion logic
   const isFormComplete =
     form.name.trim() !== "" &&
     form.date !== "" &&
-    form.msi_term !== "" &&
-    Number(form.msi_term) > 0 &&
     form.card.trim() !== "" &&
     form.amount !== "" &&
-    Number(form.amount) > 0;
+    Number(form.amount) > 0 &&
+    (!isMsi || (form.msi_term !== "" && Number(form.msi_term) > 0));
 
   React.useEffect(() => {
     if (onFormStateChange) {
@@ -92,6 +107,7 @@ export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange
     if (onSubmit) {
       await onSubmit({
         ...form,
+        msi_term: isMsi ? form.msi_term : "0", // submit "0" for single payment
         category: form.category.trim() === "" ? "Sin categoria" : form.category,
       });
       setForm({
@@ -103,6 +119,7 @@ export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange
         category: "",
       });
       setDate(undefined);
+      setIsMsi(false);
     }
   };
 
@@ -137,16 +154,28 @@ export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange
           </PopoverContent>
         </Popover>
       </div>
-      <input
-        type="number"
-        name="msi_term"
-        value={form.msi_term}
-        onChange={handleChange}
-        min={1}
-        placeholder="Plazo MSI (meses)"
-        required
-        className="bg-background text-foreground px-2 py-1 rounded w-full border border-border"
-      />
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          name="isMsi"
+          checked={isMsi}
+          onChange={handleChange}
+          className="accent-primary"
+        />
+        <span>Compra a MSI</span>
+      </label>
+      {isMsi && (
+        <input
+          type="number"
+          name="msi_term"
+          value={form.msi_term}
+          onChange={handleChange}
+          min={1}
+          placeholder="Plazo MSI (meses)"
+          required={isMsi}
+          className="bg-background text-foreground px-2 py-1 rounded w-full border border-border"
+        />
+      )}
       <select
         name="card"
         value={form.card}
