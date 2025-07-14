@@ -15,6 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { PurchaseForm } from "@/components/PurchaseForm";
 import type { Purchase } from "@/lib/types";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ChevronDownIcon } from "lucide-react";
 
 type HomeScreenProps = {
   onAdd: () => void;
@@ -26,8 +29,10 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
   const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh, deletePurchase, payOffPurchase, editPurchase } = usePurchases();
 
   // Filter state
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
+  const [start, setStart] = useState<string>("");
+  const [end, setEnd] = useState<string>("");
+  const [startDateObj, setStartDateObj] = useState<Date | undefined>(undefined);
+  const [endDateObj, setEndDateObj] = useState<Date | undefined>(undefined);
   const [category, setCategory] = useState("");
   const [state, setState] = useState(""); // "", "paid", "unpaid"
   const [showFilters, setShowFilters] = useState(false);
@@ -70,6 +75,12 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showFilters]);
+  useEffect(() => {
+    setStart(startDateObj ? startDateObj.toISOString().slice(0, 10) : "");
+  }, [startDateObj]);
+  useEffect(() => {
+    setEnd(endDateObj ? endDateObj.toISOString().slice(0, 10) : "");
+  }, [endDateObj]);
 
   return (
     <div className="p-4 pb-32 bg-background text-foreground">
@@ -115,19 +126,43 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
             >
               <div className="flex flex-col gap-3">
                 <label className="text-xs text-muted-foreground">Fecha inicial:</label>
-                <input
-                  type="date"
-                  value={start}
-                  onChange={e => setStart(e.target.value)}
-                  className="bg-background text-foreground px-2 py-1 rounded"
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" type="button" className="w-full justify-between font-normal">
+                      {startDateObj ? startDateObj.toLocaleDateString() : "Selecciona fecha inicial"}
+                      <ChevronDownIcon className="ml-2 h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={startDateObj}
+                      captionLayout="dropdown"
+                      onSelect={(d) => {
+                        setStartDateObj(d || undefined);
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
                 <label className="text-xs text-muted-foreground">Fecha final:</label>
-                <input
-                  type="date"
-                  value={end}
-                  onChange={e => setEnd(e.target.value)}
-                  className="bg-background text-foreground px-2 py-1 rounded"
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" type="button" className="w-full justify-between font-normal">
+                      {endDateObj ? endDateObj.toLocaleDateString() : "Selecciona fecha final"}
+                      <ChevronDownIcon className="ml-2 h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={endDateObj}
+                      captionLayout="dropdown"
+                      onSelect={(d) => {
+                        setEndDateObj(d || undefined);
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
                 <label className="text-xs text-muted-foreground">Categoría:</label>
                 <select
                   value={category}
