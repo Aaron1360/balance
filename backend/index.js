@@ -197,17 +197,17 @@ app.get('/debt-overview', (req, res, next) => {
 
         const total_outstanding = debtDetails.reduce((sum, p) => sum + p.outstanding, 0);
 
-        // Calculate total monthly payment for unpaid MSI purchases
+        // Calculate total monthly payment for MSI and single-payment purchases
         const now = new Date();
         const currentMonth = now.getMonth() + 1; // JS months are 0-based
         const currentYear = now.getFullYear();
         const total_monthly_payment =
-            // Sum monthly payments for unpaid MSI purchases
+            // Sum monthly payments for MSI purchases with payments left
             debtDetails.filter(p => p.msi_term > 0 && p.payments_left > 0)
                 .reduce((sum, p) => sum + p.monthly_payment, 0)
             // Add total value of single-payment purchases made in the current month
-            + debtDetails.filter(p => p.msi_term === 0 && (() => {
-                const d = new Date(p.date);
+            + debtDetails.filter(p => (p.msi_term === 0 || p.msi_term === null) && (() => {
+                const d = new Date(p.date + 'T00:00:00');
                 return d.getMonth() + 1 === currentMonth && d.getFullYear() === currentYear;
             })())
                 .reduce((sum, p) => sum + p.amount, 0);
