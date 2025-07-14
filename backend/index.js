@@ -25,7 +25,7 @@ app.post(
   [
     body('name').isString().notEmpty(),
     body('date').isISO8601(),
-    body('msi_term').optional().isInt({ min: 0 }), // allow 0 for single payment
+    body('msi_term').optional().isInt({ min: 0 }), // allow optional and 0 for single payment
     body('card').isString().notEmpty(),
     body('amount').isFloat({ min: 0.01 }),
     body('category').optional().isString(),
@@ -36,9 +36,10 @@ app.post(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    let { name, date, msi_term = 1, card, amount, category = "Sin categoria", paid = false } = req.body;
-    // Force paid=1 for single-payment purchases
-    if (msi_term === 0 || msi_term === 1) {
+    let { name, date, msi_term, card, amount, category = "Sin categoria", paid = false } = req.body;
+    // If msi_term is not provided, treat as single payment
+    if (typeof msi_term === 'undefined' || msi_term === null || msi_term === 0) {
+      msi_term = null;
       paid = true;
     }
     db.run(
@@ -135,7 +136,7 @@ app.patch(
   [
     body('name').optional().isString().notEmpty(),
     body('date').optional().isISO8601(),
-    body('msi_term').optional().isInt({ min: 0 }), // allow 0 for single payment
+    body('msi_term').optional().isInt({ min: 0 }), // allow optional and 0 for single payment
     body('card').optional().isString().notEmpty(),
     body('amount').optional().isFloat({ min: 0.01 }),
     body('category').optional().isString(),
@@ -150,10 +151,9 @@ app.patch(
     const fields = req.body;
     const updates = [];
     const params = [];
-    // If msi_term is being updated to 0 or 1, force paid=1
-    let forcePaid = false;
-    if (fields.hasOwnProperty('msi_term') && (fields.msi_term === 0 || fields.msi_term === 1)) {
-      forcePaid = true;
+    // If msi_term is being updated to undefined, null, or 0, treat as single payment
+    if (fields.hasOwnProperty('msi_term') && (fields.msi_term === undefined || fields.msi_term === null || fields.msi_term === 0)) {
+      fields.msi_term = null;
       fields.paid = true;
     }
     Object.entries(fields).forEach(([key, value]) => {

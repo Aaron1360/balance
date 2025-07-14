@@ -8,7 +8,7 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       date TEXT NOT NULL,
-      msi_term INTEGER DEFAULT 1,
+      msi_term INTEGER, -- optional, can be NULL for single payments
       card TEXT NOT NULL,
       amount REAL NOT NULL,
       payments_made INTEGER DEFAULT 0,
@@ -16,11 +16,11 @@ db.serialize(() => {
       paid INTEGER DEFAULT 0 -- 0: not paid, 1: paid
     )
   `);
-  // Trigger: always set paid=1 for single-payment purchases (msi_term=0 or msi_term=1)
+  // Triggers for single-payment purchases: set paid=1 for msi_term=0 or NULL
   db.run(`CREATE TRIGGER IF NOT EXISTS set_paid_single_payment_insert
     AFTER INSERT ON purchases
     FOR EACH ROW
-    WHEN NEW.msi_term = 0 OR NEW.msi_term = 1
+    WHEN NEW.msi_term IS NULL OR NEW.msi_term = 0
     BEGIN
       UPDATE purchases SET paid = 1 WHERE id = NEW.id;
     END;
@@ -28,7 +28,7 @@ db.serialize(() => {
   db.run(`CREATE TRIGGER IF NOT EXISTS set_paid_single_payment_update
     AFTER UPDATE OF msi_term ON purchases
     FOR EACH ROW
-    WHEN NEW.msi_term = 0 OR NEW.msi_term = 1
+    WHEN NEW.msi_term IS NULL OR NEW.msi_term = 0
     BEGIN
       UPDATE purchases SET paid = 1 WHERE id = NEW.id;
     END;
@@ -36,9 +36,7 @@ db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS profile (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT DEFAULT '',
-      currency TEXT DEFAULT 'MXN',
-      budget REAL DEFAULT 0
+      name TEXT DEFAULT ''
     )
   `);
   db.run(`
@@ -49,7 +47,7 @@ db.serialize(() => {
     )
   `);
   // Insert default profile if not exists
-  db.run(`INSERT OR IGNORE INTO profile (id, name, currency, budget) VALUES (1, '', 'MXN', 0)`);
+  db.run(`INSERT OR IGNORE INTO profile (id, name) VALUES (1, '')`);
 });
 
 module.exports = db;
