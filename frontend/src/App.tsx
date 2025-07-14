@@ -54,7 +54,7 @@ export default function App() {
         {tab === "settings" && <SettingsScreen />}
       </div>
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-primary/40 border-t border-border flex justify-around py-2 backdrop-blur-md">
+      <nav className="fixed bottom-0 left-0 right-0 bg-secondary border-t border-border flex justify-around py-2 shadow-lg z-50">
         <button
           onClick={() => setTab("home")}
           className={tab === "home" ? "text-primary-foreground" : "text-primary-foreground/60"}
