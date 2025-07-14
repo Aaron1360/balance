@@ -49,16 +49,17 @@ export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange
   // Update form state if initialValues change
   React.useEffect(() => {
     if (initialValues) {
-      setForm({
+      setForm((prev) => ({
+        ...prev,
         name: initialValues.name || "",
         date: initialValues.date || "",
-        msi_term: initialValues.msi_term || "",
         card: initialValues.card || "",
         amount: initialValues.amount || "",
         category: initialValues.category || "",
-      });
+        // Only set msi_term if user is not currently editing it
+        msi_term: prev.msi_term === "" ? initialValues.msi_term || "" : prev.msi_term,
+      }));
       setDate(initialValues.date ? new Date(initialValues.date) : undefined);
-      setIsMsi(initialValues.msi_term && Number(initialValues.msi_term) > 0 ? true : false);
     }
   }, [initialValues]);
 

@@ -140,10 +140,19 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLoading(true);
     setError(null);
     try {
+      // If changing from MSI to single payment, set payments_made to 1 and msi_term to 0
+      let patchData = { ...updates };
+      if (
+        ('msi_term' in patchData) &&
+        (patchData.msi_term === 0 || patchData.msi_term === null || patchData.msi_term === undefined)
+      ) {
+        patchData.payments_made = 1;
+        patchData.msi_term = 0;
+      }
       await fetch(`${API_URL}/purchases/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates),
+        body: JSON.stringify(patchData),
       });
       await fetchData();
     } catch {

@@ -240,9 +240,9 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                       key={p.id}
                       className={`border border-border rounded-lg p-3 flex justify-between items-center shadow-sm relative cursor-pointer overflow-hidden transition-all duration-300`}
                       style={{
-                        backgroundColor: p.payments_made === p.msi_term ? "var(--card-paid)" : undefined,
-                        minHeight: activeMenuId === p.id ? 90 : 60, // grows when active
-                        height: activeMenuId === p.id ? 90 : 60,    // grows when active
+                        backgroundColor: p.payments_made === (p.msi_term || 0) ? "var(--card-paid)" : undefined,
+                        minHeight: activeMenuId === p.id ? 90 : 60,
+                        height: activeMenuId === p.id ? 90 : 60,
                       }}
                       onClick={() => setActiveMenuId(activeMenuId === p.id ? null : p.id)}
                     >
@@ -250,20 +250,20 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                       <div className="absolute top-3 left-3 z-20">
                         <div className="font-medium text-foreground">{p.name}</div>
                         <div className="text-xs text-muted-foreground">
-                          {p.card} | {p.msi_term} MSI | {p.category}
+                          {p.card} | {p.msi_term && p.msi_term > 0 ? `${p.msi_term} MSI` : "Pago único"} | {p.category}
                         </div>
                       </div>
                       {/* Card right content */}
                       <div className="text-right mt-auto ml-auto">
                         <div
                           className={`font-mono ${
-                            p.payments_made === p.msi_term ? "text-primary" : "text-destructive"
+                            p.payments_made === (p.msi_term || 0) ? "text-primary" : "text-destructive"
                           }`}
                         >
                           ${p.amount.toFixed(2)}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          Pagos: {p.payments_made}/{p.msi_term}
+                          Pagos: {p.msi_term && p.msi_term > 0 ? `${p.payments_made}/${p.msi_term}` : `${p.payments_made}/1`}
                         </div>
                         {/* Action buttons: shown only when selected, organized in a row and smaller */}
                         <div
@@ -271,7 +271,7 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                             activeMenuId === p.id ? "opacity-100" : "opacity-0 pointer-events-none"
                           }`}
                         >
-                          {p.payments_made < p.msi_term && (
+                          {p.msi_term && p.msi_term > 0 && p.payments_made < p.msi_term && (
                             <button
                               className="bg-primary/70 text-primary-foreground px-1 py-1 rounded flex items-center justify-center"
                               style={{ width: 28, height: 28 }}
