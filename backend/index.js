@@ -25,20 +25,25 @@ app.post(
   [
     body('name').isString().notEmpty(),
     body('date').isISO8601(),
-    body('msi_term').isInt({ min: 1 }),
+    body('msi_term').optional().isInt({ min: 0 }), // allow 0 for single payment
     body('card').isString().notEmpty(),
     body('amount').isFloat({ min: 0.01 }),
-    body('category').optional().isString()
+    body('category').optional().isString(),
+    body('paid').optional().isBoolean()
   ],
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const { name, date, msi_term, card, amount, category = "Sin categoria" } = req.body;
+    let { name, date, msi_term = 1, card, amount, category = "Sin categoria", paid = false } = req.body;
+    // Force paid=1 for single-payment purchases
+    if (msi_term === 0 || msi_term === 1) {
+      paid = true;
+    }
     db.run(
-      `INSERT INTO purchases (name, date, msi_term, card, amount, category) VALUES (?, ?, ?, ?, ?, ?)`,
-      [name, date, msi_term, card, amount, category],
+      `INSERT INTO purchases (name, date, msi_term, card, amount, category, paid) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [name, date, msi_term, card, amount, category, paid ? 1 : 0],
       function (err) {
         if (err) {
           return next({ status: 500, message: err.message });
@@ -91,7 +96,8 @@ app.patch(
   [
     body('payments_made')
       .isInt({ min: 0 })
-      .withMessage('payments_made must be an integer greater than or equal to 0')
+      .withMessage('payments_made must be an integer greater than or equal to 0'),
+    body('paid').optional().isBoolean()
   ],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -99,10 +105,18 @@ app.patch(
       return res.status(400).json({ errors: errors.array() });
     }
     const { id } = req.params;
-    const { payments_made } = req.body;
+    const { payments_made, paid } = req.body;
+    let query = `UPDATE purchases SET payments_made = ?`;
+    let params = [payments_made];
+    if (typeof paid !== 'undefined') {
+      query += ', paid = ?';
+      params.push(paid ? 1 : 0);
+    }
+    query += ' WHERE id = ?';
+    params.push(id);
     db.run(
-      `UPDATE purchases SET payments_made = ? WHERE id = ?`,
-      [payments_made, id],
+      query,
+      params,
       function (err) {
         if (err) {
           return next({ status: 500, message: err.message });
@@ -121,10 +135,11 @@ app.patch(
   [
     body('name').optional().isString().notEmpty(),
     body('date').optional().isISO8601(),
-    body('msi_term').optional().isInt({ min: 1 }),
+    body('msi_term').optional().isInt({ min: 0 }), // allow 0 for single payment
     body('card').optional().isString().notEmpty(),
     body('amount').optional().isFloat({ min: 0.01 }),
-    body('category').optional().isString()
+    body('category').optional().isString(),
+    body('paid').optional().isBoolean()
   ],
   (req, res, next) => {
     const errors = validationResult(req);
@@ -135,9 +150,20 @@ app.patch(
     const fields = req.body;
     const updates = [];
     const params = [];
+    // If msi_term is being updated to 0 or 1, force paid=1
+    let forcePaid = false;
+    if (fields.hasOwnProperty('msi_term') && (fields.msi_term === 0 || fields.msi_term === 1)) {
+      forcePaid = true;
+      fields.paid = true;
+    }
     Object.entries(fields).forEach(([key, value]) => {
-      updates.push(`${key} = ?`);
-      params.push(value);
+      if (key === 'paid') {
+        updates.push(`${key} = ?`);
+        params.push(value ? 1 : 0);
+      } else {
+        updates.push(`${key} = ?`);
+        params.push(value);
+      }
     });
     params.push(id);
     db.run(
@@ -163,18 +189,28 @@ app.get('/debt-overview', (req, res, next) => {
         }
         // Calculate total debt and payments made
         const debtDetails = rows.map(row => {
-            const payments_left = row.msi_term - row.payments_made;
-            const monthly_payment = row.amount / row.msi_term;
+            const payments_left = row.msi_term > 0 ? row.msi_term - row.payments_made : 0;
+            const monthly_payment = row.msi_term > 0 ? row.amount / row.msi_term : 0;
             const outstanding = payments_left > 0 ? payments_left * monthly_payment : 0;
             return { ...row, payments_left, monthly_payment, outstanding };
         });
 
         const total_outstanding = debtDetails.reduce((sum, p) => sum + p.outstanding, 0);
 
-        // Calculate total monthly payment for unpaid purchases
-        const total_monthly_payment = debtDetails
-            .filter(p => p.payments_left > 0)
-            .reduce((sum, p) => sum + p.monthly_payment, 0);
+        // Calculate total monthly payment for unpaid MSI purchases
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1; // JS months are 0-based
+        const currentYear = now.getFullYear();
+        const total_monthly_payment =
+            // Sum monthly payments for unpaid MSI purchases
+            debtDetails.filter(p => p.msi_term > 0 && p.payments_left > 0)
+                .reduce((sum, p) => sum + p.monthly_payment, 0)
+            // Add total value of single-payment purchases made in the current month
+            + debtDetails.filter(p => p.msi_term === 0 && (() => {
+                const d = new Date(p.date);
+                return d.getMonth() + 1 === currentMonth && d.getFullYear() === currentYear;
+            })())
+                .reduce((sum, p) => sum + p.amount, 0);
 
         res.json({
             total_outstanding,
@@ -309,6 +345,57 @@ app.get('/purchases/count', (req, res, next) => {
       res.json({ count: row.count });
     }
   );
+});
+
+// Profile endpoints
+app.get('/profile', (req, res, next) => {
+  db.get('SELECT * FROM profile WHERE id = 1', [], (err, row) => {
+    if (err) return next({ status: 500, message: err.message });
+    res.json(row);
+  });
+});
+
+app.put('/profile', (req, res, next) => {
+  const { name, currency, budget } = req.body;
+  db.run(
+    'UPDATE profile SET name = ?, currency = ?, budget = ? WHERE id = 1',
+    [name || '', currency || 'MXN', budget || 0],
+    function (err) {
+      if (err) return next({ status: 500, message: err.message });
+      res.json({ success: true });
+    }
+  );
+});
+
+// Cards endpoints
+app.get('/cards', (req, res, next) => {
+  db.all('SELECT * FROM cards', [], (err, rows) => {
+    if (err) return next({ status: 500, message: err.message });
+    res.json(rows);
+  });
+});
+
+app.post('/cards', (req, res, next) => {
+  const { brand, payment_date } = req.body;
+  if (!brand || !payment_date) {
+    return res.status(400).json({ error: 'brand and payment_date are required' });
+  }
+  db.run(
+    'INSERT INTO cards (brand, payment_date) VALUES (?, ?)',
+    [brand, payment_date],
+    function (err) {
+      if (err) return next({ status: 500, message: err.message });
+      res.json({ id: this.lastID });
+    }
+  );
+});
+
+app.delete('/cards/:id', (req, res, next) => {
+  const { id } = req.params;
+  db.run('DELETE FROM cards WHERE id = ?', [id], function (err) {
+    if (err) return next({ status: 500, message: err.message });
+    res.json({ success: true, deleted: this.changes });
+  });
 });
 
 // Centralized error handler
