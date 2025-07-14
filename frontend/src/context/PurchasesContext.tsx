@@ -7,7 +7,7 @@ const PAGE_SIZE = 10;
 export type PurchasesContextType = {
   purchases: Purchase[];
   totalDebt: number;
-  totalMonthlyPayment: number; // <-- Add this line
+  totalMonthlyPayment: number;
   total: number;
   page: number;
   setPage: (page: number) => void;
@@ -16,7 +16,8 @@ export type PurchasesContextType = {
   refresh: (newFilters?: { start: string; end: string; category: string; state: string }) => Promise<void>;
   addPurchase: (purchase: Omit<Purchase, "id" | "payments_made">) => Promise<void>;
   payOffPurchase: (p: Purchase) => Promise<void>;
-  deletePurchase: (id: number) => Promise<void>; // <-- Add this line
+  deletePurchase: (id: number) => Promise<void>;
+  editPurchase: (id: number, updates: Partial<Purchase>) => Promise<void>; // <-- Added
 };
 
 export const PurchasesContext = createContext<PurchasesContextType | undefined>(undefined);
@@ -135,9 +136,26 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const editPurchase = async (id: number, updates: Partial<Purchase>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await fetch(`${API_URL}/purchases/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      await fetchData();
+    } catch {
+      setError("Error al editar compra");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <PurchasesContext.Provider value={{
-      purchases, totalDebt, totalMonthlyPayment, total, page, setPage, loading, error, refresh, addPurchase, payOffPurchase, deletePurchase
+      purchases, totalDebt, totalMonthlyPayment, total, page, setPage, loading, error, refresh, addPurchase, payOffPurchase, deletePurchase, editPurchase
     }}>
       {children}
     </PurchasesContext.Provider>

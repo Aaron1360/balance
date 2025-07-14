@@ -3,6 +3,18 @@ import { usePurchases } from "@/hooks/usePurchases";
 import { Plus } from "lucide-react";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious, PaginationLink } from "@/components/ui/pagination";
 import { CheckCircle, Pencil, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { PurchaseForm } from "@/components/PurchaseForm";
+import type { Purchase } from "@/lib/types";
 
 type HomeScreenProps = {
   onAdd: () => void;
@@ -11,7 +23,7 @@ type HomeScreenProps = {
 const PAGE_SIZE = 10;
 
 export function HomeScreen({ onAdd }: HomeScreenProps) {
-  const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh, deletePurchase, payOffPurchase} = usePurchases();
+  const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh, deletePurchase, payOffPurchase, editPurchase } = usePurchases();
 
   // Filter state
   const [start, setStart] = useState("");
@@ -20,7 +32,10 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
   const [state, setState] = useState(""); // "", "paid", "unpaid"
   const [showFilters, setShowFilters] = useState(false);
   const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
-  const [editPurchase, setEditPurchase] = useState<Purchase | null>(null);
+  const [editPurchaseData, setEditPurchase] = useState<Purchase | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isFormComplete, setIsFormComplete] = useState(false); // For submit button
+  const [error, setError] = useState<string | null>(null);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -241,6 +256,7 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditPurchase(p);
+                              setShowEditModal(true);
                               setActiveMenuId(null);
                             }}
                             aria-label="Editar"
@@ -298,6 +314,51 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
           </div>
         )}
       </section>
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar compra</DialogTitle>
+            <DialogDescription>
+              Modifica los datos y guarda los cambios.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            {editPurchaseData && (
+              <PurchaseForm
+                error={error}
+                initialValues={{
+                  ...editPurchaseData,
+                  msi_term: String(editPurchaseData.msi_term),
+                  amount: String(editPurchaseData.amount),
+                }}
+                onSubmit={async (values) => {
+                  await editPurchase(editPurchaseData.id, {
+                    ...values,
+                    msi_term: Number(values.msi_term),
+                    amount: Number(values.amount),
+                  });
+                  setShowEditModal(false);
+                  setEditPurchase(null);
+                }}
+                onFormStateChange={({ isFormComplete }) => setIsFormComplete(isFormComplete)}
+              />
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <Button
+              type="submit"
+              form="purchase-form"
+              disabled={loading || !isFormComplete}
+              className="bg-primary/50"
+            >
+              {loading ? "Guardando..." : "Guardar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
