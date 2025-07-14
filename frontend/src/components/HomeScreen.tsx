@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { usePurchases } from "@/hooks/usePurchases";
 import { Plus } from "lucide-react";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious, PaginationLink } from "@/components/ui/pagination";
-import { CheckCircle, Pencil, Trash2 } from "lucide-react";
+import { CheckCircle, Pencil, Trash2, X } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -271,20 +271,30 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                             activeMenuId === p.id ? "opacity-100" : "opacity-0 pointer-events-none"
                           }`}
                         >
-                          {p.msi_term && p.msi_term > 0 && p.payments_made < p.msi_term && (
-                            <button
-                              className="bg-primary/70 text-primary-foreground px-1 py-1 rounded flex items-center justify-center"
-                              style={{ width: 28, height: 28 }}
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                await payOffPurchase(p); 
-                                setActiveMenuId(null);
-                              }}
-                              aria-label="Pagar"
-                            >
-                              <CheckCircle size={16} />
-                            </button>
-                          )}
+                          {/* Always show toggle button for paid and unpaid purchases */}
+                          <button
+                            className={
+                              p.payments_made === (p.msi_term || 0)
+                                ? "bg-destructive text-destructive-foreground px-1 py-1 rounded flex items-center justify-center"
+                                : "bg-primary/70 text-primary-foreground px-1 py-1 rounded flex items-center justify-center"
+                            }
+                            style={{ width: 28, height: 28 }}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              // Toggle paid state
+                              const isPaid = p.payments_made === (p.msi_term || 0);
+                              await editPurchase(p.id, {
+                                payments_made: isPaid ? 0 : (p.msi_term && p.msi_term > 0 ? p.msi_term : 1),
+                                paid: !isPaid
+                              });
+                              setActiveMenuId(null);
+                            }}
+                            aria-label={p.payments_made === (p.msi_term || 0) ? "Marcar como pendiente" : "Marcar como pagado"}
+                          >
+                            {p.payments_made === (p.msi_term || 0)
+                              ? <X size={16} />
+                              : <CheckCircle size={16} />}
+                          </button>
                           <button
                             className="bg-accent text-accent-foreground px-1 py-1 rounded flex items-center justify-center"
                             style={{ width: 28, height: 28 }}
