@@ -27,6 +27,15 @@ export function SettingsScreen() {
   const [newCardPaymentDate, setNewCardPaymentDate] = useState(1);
   const [addCardError, setAddCardError] = useState<string | null>(null);
 
+  // Edit card dialog state
+  const [editCardOpen, setEditCardOpen] = useState(false);
+  const [editCard, setEditCard] = useState<CardType | null>(null);
+  const [editCardBrand, setEditCardBrand] = useState("");
+  const [editCardPaymentDate, setEditCardPaymentDate] = useState(1);
+  const [editCardError, setEditCardError] = useState<string | null>(null);
+  const [editCardLoading, setEditCardLoading] = useState(false);
+  const [deleteCardConfirmOpen, setDeleteCardConfirmOpen] = useState(false);
+
   // Card type for TypeScript
   interface CardType {
     id: number;
@@ -120,6 +129,63 @@ export function SettingsScreen() {
       setCards(Array.isArray(cardsData) ? cardsData : []);
     } catch (err: any) {
       setAddCardError(err.message || "Error al agregar tarjeta");
+    }
+  };
+
+  // Open edit card dialog
+  const openEditCardDialog = (card: CardType) => {
+    setEditCard(card);
+    setEditCardBrand(card.brand);
+    setEditCardPaymentDate(card.payment_date);
+    setEditCardError(null);
+    setEditCardOpen(true);
+  };
+
+  // Edit card handler
+  const handleEditCard = async () => {
+    if (!editCard) return;
+    setEditCardError(null);
+    if (!editCardBrand.trim() || !editCardPaymentDate || editCardPaymentDate < 1 || editCardPaymentDate > 31) {
+      setEditCardError("Marca y fecha de pago requeridas");
+      return;
+    }
+    setEditCardLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/cards/${editCard.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand: editCardBrand, payment_date: editCardPaymentDate }),
+      });
+      if (!res.ok) throw new Error("Error al editar tarjeta");
+      // Refresh cards
+      const cardsRes = await fetch(`${API_URL}/cards`);
+      const cardsData = await cardsRes.json();
+      setCards(Array.isArray(cardsData) ? cardsData : []);
+      setEditCardOpen(false);
+    } catch (err: any) {
+      setEditCardError(err.message || "Error al editar tarjeta");
+    } finally {
+      setEditCardLoading(false);
+    }
+  };
+
+  // Delete card handler with confirmation
+  const handleDeleteCard = async () => {
+    if (!editCard) return;
+    setEditCardLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/cards/${editCard.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Error al eliminar tarjeta");
+      // Refresh cards
+      const cardsRes = await fetch(`${API_URL}/cards`);
+      const cardsData = await cardsRes.json();
+      setCards(Array.isArray(cardsData) ? cardsData : []);
+      setEditCardOpen(false);
+      setDeleteCardConfirmOpen(false);
+    } catch (err: any) {
+      setEditCardError(err.message || "Error al eliminar tarjeta");
+    } finally {
+      setEditCardLoading(false);
     }
   };
 
@@ -223,7 +289,11 @@ export function SettingsScreen() {
             ) : (
               <div className="flex flex-col gap-4">
                 {cards.map(card => (
-                  <ShadCard key={card.id} className="w-[320px] h-[200px] rounded-xl shadow-md bg-gradient-to-br from-blue-400 to-blue-700 text-white flex flex-col justify-between p-6 mx-auto">
+                  <ShadCard
+                    key={card.id}
+                    className="w-[320px] h-[200px] rounded-xl shadow-md bg-gradient-to-br from-blue-400 to-blue-700 text-white flex flex-col justify-between p-6 mx-auto cursor-pointer transition hover:scale-[1.02]"
+                    onClick={() => openEditCardDialog(card)}
+                  >
                     <div className="font-semibold text-lg tracking-wider">{card.brand}</div>
                     <div className="flex items-end justify-between w-full">
                       <div className="text-xs uppercase tracking-widest">Pago: día</div>
@@ -310,6 +380,48 @@ export function SettingsScreen() {
           </Dialog>
         </div>
       )}
+      {/* Edit Card Dialog */}
+      <Dialog open={editCardOpen} onOpenChange={setEditCardOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar tarjeta</DialogTitle>
+            <DialogDescription>Edita o elimina esta tarjeta de crédito.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <label className="font-medium">Marca
+              <Input value={editCardBrand} onChange={e => setEditCardBrand(e.target.value)} placeholder="Ej: BBVA, Santander" />
+            </label>
+            <label className="font-medium">Fecha de pago (día del mes)
+              <Input type="number" min={1} max={31} value={editCardPaymentDate} onChange={e => setEditCardPaymentDate(Number(e.target.value))} />
+            </label>
+            {editCardError && <div className="text-red-500 text-sm">{editCardError}</div>}
+            <div className="flex gap-2">
+              <Button onClick={handleEditCard} disabled={editCardLoading || !editCardBrand.trim() || !editCardPaymentDate || editCardPaymentDate < 1 || editCardPaymentDate > 31}>
+                {editCardLoading ? "Guardando..." : "Guardar cambios"}
+              </Button>
+              <Dialog open={deleteCardConfirmOpen} onOpenChange={setDeleteCardConfirmOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="destructive" disabled={editCardLoading}>
+                    {editCardLoading ? "Eliminando..." : "Eliminar"}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>¿Eliminar tarjeta?</DialogTitle>
+                    <DialogDescription>Esta acción eliminará la tarjeta permanentemente.</DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-4">
+                    <div>¿Estás seguro de que deseas eliminar esta tarjeta? Esta acción no se puede deshacer.</div>
+                    <Button onClick={handleDeleteCard} variant="destructive" disabled={editCardLoading}>
+                      {editCardLoading ? "Eliminando..." : "Confirmar eliminación"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
       {/* Add credit card management and other settings here if needed */}
     </div>
   );

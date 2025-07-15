@@ -430,6 +430,22 @@ app.post('/cards', (req, res, next) => {
   );
 });
 
+app.patch('/cards/:id', (req, res, next) => {
+  const { id } = req.params;
+  const { brand, payment_date } = req.body;
+  if (!brand || !payment_date) {
+    return res.status(400).json({ error: 'brand and payment_date are required' });
+  }
+  db.run(
+    'UPDATE cards SET brand = ?, payment_date = ? WHERE id = ?',
+    [brand, payment_date, id],
+    function (err) {
+      if (err) return next({ status: 500, message: err.message });
+      res.json({ success: true, updated: this.changes });
+    }
+  );
+});
+
 app.delete('/cards/:id', (req, res, next) => {
   const { id } = req.params;
   db.run('DELETE FROM cards WHERE id = ?', [id], function (err) {
