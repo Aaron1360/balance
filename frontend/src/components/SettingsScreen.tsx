@@ -308,7 +308,7 @@ export function SettingsScreen() {
             <Dialog open={addCardOpen} onOpenChange={setAddCardOpen}>
               <DialogTrigger asChild>
                 <ShadCard
-                  className="w-[320px] h-[200px] rounded-xl shadow-md border-dashed border-2 border-secondary-foreground flex flex-col items-center justify-center text-secondary-foreground cursor-pointer transition hover:bg-accent/10 mx-auto"
+                  className="w-[320px] h-[200px] rounded-xl shadow-md border-dashed border-2 border-secondary-foreground flex flex-col items-center justify-center text-secondary-foreground cursor-pointer transition hover:scale-[1.02] mx-auto"
                   tabIndex={0}
                   role="button"
                   aria-label="Agregar tarjeta"
