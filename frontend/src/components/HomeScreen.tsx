@@ -30,7 +30,7 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
   const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh, deletePurchase, payOffPurchase, editPurchase } = usePurchases();
   const purchasesCtx = useContext(PurchasesContext);
   if (!purchasesCtx) throw new Error("HomeScreen must be used within PurchasesProvider");
-  const { cards } = purchasesCtx;
+  const { cards, categories } = purchasesCtx;
 
   // Filter state
   const [start, setStart] = useState<string>("");
@@ -177,18 +177,9 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                   className="bg-background text-foreground px-2 py-1 rounded"
                 >
                   <option value="">Todas</option>
-                  <option value="Comida">Comida</option>
-                  <option value="Despensa">Despensa</option>
-                  <option value="Tecnología">Tecnología</option>
-                  <option value="Servicios">Servicios</option>
-                  <option value="Entretenimiento">Entretenimiento</option>
-                  <option value="Salud">Salud</option>
-                  <option value="Mascotas">Mascotas</option>
-                  <option value="Ropa">Ropa</option>
-                  <option value="Regalos">Regalos</option>
-                  <option value="Hogar">Hogar</option>
-                  <option value="Educación">Educación</option>
-                  <option value="Transporte">Transporte</option>
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
                 </select>
                 <label className="text-xs text-muted-foreground">Estado:</label>
                 <select
@@ -383,7 +374,8 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                   msi_term: String(editPurchaseData.msi_term),
                   amount: String(editPurchaseData.amount),
                 }}
-                cards={cards} // Pass only registered cards
+                cards={cards}
+                categories={categories}
                 onSubmit={async (values) => {
                   await editPurchase(editPurchaseData.id, {
                     ...values,
@@ -430,6 +422,7 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                 category: ""
               }}
               cards={cards}
+              categories={categories}
               onSubmit={async (values) => {
                 await purchasesCtx.addPurchase({
                   ...values,

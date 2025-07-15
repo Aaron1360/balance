@@ -4,7 +4,7 @@ import type { Purchase } from "@/lib/types";
 export const API_URL = "http://192.168.1.117:3001";
 const PAGE_SIZE = 10;
 
-export type Profile = { id?: number; username: string; avatar: string } | null;
+export type Profile = { id?: number; username: string; avatar: string; categories?: string[] } | null;
 
 export type CardType = {
   id: number;
@@ -40,6 +40,13 @@ export type PurchasesContextType = {
   addCard: (brand: string, payment_date: number) => Promise<void>;
   editCard: (id: number, brand: string, payment_date: number) => Promise<void>;
   deleteCard: (id: number) => Promise<void>;
+  // Category management
+  categories: string[];
+  categoriesLoading: boolean;
+  refreshCategories: () => Promise<void>;
+  addCategory: (name: string) => Promise<void>;
+  editCategory: (oldName: string, newName: string) => Promise<void>;
+  deleteCategory: (name: string) => Promise<void>;
 };
 
 export const PurchasesContext = createContext<PurchasesContextType | undefined>(undefined);
@@ -60,6 +67,9 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Cards state
   const [cards, setCards] = useState<CardType[]>([]);
   const [cardsLoading, setCardsLoading] = useState(false);
+  // Categories state
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   const fetchData = async (newFilters = filters) => {
     setLoading(true);
@@ -191,6 +201,65 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  // --- Category CRUD ---
+  const refreshCategories = async () => {
+    setCategoriesLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/profile`);
+      const data = await res.json();
+      setCategories(Array.isArray(data.categories) ? data.categories : []);
+    } catch {
+      setCategories([]);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
+  const addCategory = async (name: string) => {
+    setCategoriesLoading(true);
+    try {
+      const newCategories = [...categories, name];
+      await fetch(`${API_URL}/profile`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categories: newCategories }),
+      });
+      await refreshCategories();
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
+  const editCategory = async (oldName: string, newName: string) => {
+    setCategoriesLoading(true);
+    try {
+      const newCategories = categories.map(cat => cat === oldName ? newName : cat);
+      await fetch(`${API_URL}/profile`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categories: newCategories }),
+      });
+      await refreshCategories();
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
+  const deleteCategory = async (name: string) => {
+    setCategoriesLoading(true);
+    try {
+      const newCategories = categories.filter(cat => cat !== name);
+      await fetch(`${API_URL}/profile`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categories: newCategories }),
+      });
+      await refreshCategories();
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
+
   // Profile management
   const fetchProfile = async () => {
     setProfileLoading(true);
@@ -199,9 +268,11 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const res = await fetch(`${API_URL}/profile`);
       if (!res.ok) throw new Error("No profile");
       const data = await res.json();
-      setProfile({ id: data.id, username: data.username || "", avatar: data.avatar || "" });
+      setProfile({ id: data.id, username: data.username || "", avatar: data.avatar || "", categories: Array.isArray(data.categories) ? data.categories : [] });
+      setCategories(Array.isArray(data.categories) ? data.categories : []);
     } catch {
       setProfile(null);
+      setCategories([]);
     } finally {
       setProfileLoading(false);
     }
@@ -296,6 +367,7 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => {
     fetchProfile();
     refreshCards();
+    refreshCategories();
   }, []);
 
   return (
@@ -303,6 +375,7 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       purchases, totalDebt, totalMonthlyPayment, total, page, setPage, loading, error, refresh, addPurchase, payOffPurchase, deletePurchase, editPurchase,
       profile, profileLoading, profileError, fetchProfile, saveProfile, deleteProfile,
       cards, cardsLoading, refreshCards, addCard, editCard, deleteCard,
+      categories, categoriesLoading, refreshCategories, addCategory, editCategory, deleteCategory,
     }}>
       {children}
     </PurchasesContext.Provider>

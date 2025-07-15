@@ -14,7 +14,8 @@ type PurchaseFormProps = {
     amount: string;
     category: string;
   };
-  cards?: { brand: string }[]; // Add cards prop
+  cards?: { brand: string }[];
+  categories?: string[];
   onSubmit?: (values: {
     name: string;
     date: string;
@@ -26,7 +27,7 @@ type PurchaseFormProps = {
   onFormStateChange?: (state: { isFormComplete: boolean }) => void;
 };
 
-export function PurchaseForm({ error, initialValues, cards = [], onSubmit, onFormStateChange }: PurchaseFormProps) {
+export function PurchaseForm({ error, initialValues, cards = [], categories = [], onSubmit, onFormStateChange }: PurchaseFormProps) {
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(
     initialValues?.date ? new Date(initialValues.date) : undefined
@@ -212,18 +213,9 @@ export function PurchaseForm({ error, initialValues, cards = [], onSubmit, onFor
         className="bg-background text-foreground px-2 py-1 rounded w-full border border-border"
       >
         <option value="">Selecciona una categoría</option>
-        <option value="Comida">Comida</option>
-        <option value="Despensa">Despensa</option>
-        <option value="Tecnología">Tecnología</option>
-        <option value="Servicios">Servicios</option>
-        <option value="Entretenimiento">Entretenimiento</option>
-        <option value="Salud">Salud</option>
-        <option value="Mascotas">Mascotas</option>
-        <option value="Ropa">Ropa</option>
-        <option value="Regalos">Regalos</option>
-        <option value="Hogar">Hogar</option>
-        <option value="Educación">Educación</option>
-        <option value="Transporte">Transporte</option>
+        {categories.map(cat => (
+          <option key={cat} value={cat}>{cat}</option>
+        ))}
       </select>
       {error && <div className="text-red-500">{error}</div>}
     </form>

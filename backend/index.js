@@ -351,21 +351,37 @@ app.get('/purchases/count', (req, res, next) => {
 app.get('/profile', (req, res, next) => {
   db.get('SELECT * FROM profile WHERE id = 1', [], (err, row) => {
     if (err) return next({ status: 500, message: err.message });
+    // Parse categories before sending
+    if (row && row.categories) {
+      try {
+        row.categories = JSON.parse(row.categories);
+      } catch {
+        row.categories = [];
+      }
+    }
     res.json(row);
   });
 });
 
 app.put('/profile', (req, res, next) => {
-  const { username, avatar } = req.body;
+  const { username, avatar, categories } = req.body;
   db.run(
-    `INSERT INTO profile (id, username, avatar)
-     VALUES (1, ?, ?)
-     ON CONFLICT(id) DO UPDATE SET username=excluded.username, avatar=excluded.avatar`,
-    [username || '', avatar || null],
+    `INSERT INTO profile (id, username, avatar, categories)
+     VALUES (1, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET username=excluded.username, avatar=excluded.avatar, categories=excluded.categories`,
+    [username || '', avatar || null, JSON.stringify(categories || [])],
     function (err) {
       if (err) return next({ status: 500, message: err.message });
       db.get('SELECT * FROM profile WHERE id = 1', [], (err2, row) => {
         if (err2) return next({ status: 500, message: err2.message });
+        // Parse categories before sending
+        if (row && row.categories) {
+          try {
+            row.categories = JSON.parse(row.categories);
+          } catch {
+            row.categories = [];
+          }
+        }
         res.json(row);
       });
     }
@@ -374,7 +390,7 @@ app.put('/profile', (req, res, next) => {
 
 // Edit profile (PUT already exists)
 app.patch('/profile', (req, res, next) => {
-  const { username, avatar } = req.body;
+  const { username, avatar, categories } = req.body;
   const updates = [];
   const params = [];
   if (typeof username !== 'undefined') {
@@ -385,6 +401,10 @@ app.patch('/profile', (req, res, next) => {
     updates.push('avatar = ?');
     params.push(avatar);
   }
+  if (Array.isArray(categories)) {
+    updates.push('categories = ?');
+    params.push(JSON.stringify(categories));
+  }
   if (updates.length === 0) {
     return res.status(400).json({ error: 'No fields to update' });
   }
@@ -394,7 +414,18 @@ app.patch('/profile', (req, res, next) => {
     params,
     function (err) {
       if (err) return next({ status: 500, message: err.message });
-      res.json({ success: true });
+      db.get('SELECT * FROM profile WHERE id = 1', [], (err2, row) => {
+        if (err2) return next({ status: 500, message: err2.message });
+        // Parse categories before sending
+        if (row && row.categories) {
+          try {
+            row.categories = JSON.parse(row.categories);
+          } catch {
+            row.categories = [];
+          }
+        }
+        res.json(row);
+      });
     }
   );
 });

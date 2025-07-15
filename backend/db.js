@@ -37,7 +37,8 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS profile (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT DEFAULT '',
-      avatar TEXT DEFAULT NULL
+      avatar TEXT DEFAULT NULL,
+      categories TEXT DEFAULT '[]' -- stores JSON array of category strings
     )
   `);
   db.run(`
@@ -48,7 +49,7 @@ db.serialize(() => {
     )
   `);
   // Insert default profile if not exists
-  db.run(`INSERT OR IGNORE INTO profile (id, username, avatar) VALUES (1, '', NULL)`);
+  db.run(`INSERT OR IGNORE INTO profile (id, username, avatar, categories) VALUES (1, '', NULL, '[]')`);
 });
 
 module.exports = db;

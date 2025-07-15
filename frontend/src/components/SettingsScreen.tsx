@@ -11,7 +11,8 @@ export function SettingsScreen() {
   const ctx = useContext(PurchasesContext);
   if (!ctx) throw new Error("SettingsScreen must be used within PurchasesProvider");
   const {
-    profile, profileLoading, profileError, saveProfile, deleteProfile, fetchProfile, refreshCards, cards: contextCards
+    profile, profileLoading, profileError, saveProfile, deleteProfile, fetchProfile, refreshCards, cards: contextCards,
+    categories, categoriesLoading, refreshCategories, addCategory, editCategory: updateCategory, deleteCategory
   } = ctx;
 
   const [editOpen, setEditOpen] = useState(false);
@@ -33,6 +34,16 @@ export function SettingsScreen() {
   const [editCardError, setEditCardError] = useState<string | null>(null);
   const [editCardLoading, setEditCardLoading] = useState(false);
   const [deleteCardConfirmOpen, setDeleteCardConfirmOpen] = useState(false);
+
+  // --- Custom Categories State ---
+  const [addCategoryOpen, setAddCategoryOpen] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [addCategoryError, setAddCategoryError] = useState<string | null>(null);
+  const [editCategoryOpen, setEditCategoryOpen] = useState(false);
+  const [editCategory, setEditCategory] = useState<string | null>(null);
+  const [editCategoryValue, setEditCategoryValue] = useState("");
+  const [editCategoryError, setEditCategoryError] = useState<string | null>(null);
+  const [deleteCategoryConfirmOpen, setDeleteCategoryConfirmOpen] = useState(false);
 
   // Card type for TypeScript
   interface CardType {
@@ -158,6 +169,58 @@ export function SettingsScreen() {
       setEditCardError(err instanceof Error ? err.message : "Error al eliminar tarjeta");
     } finally {
       setEditCardLoading(false);
+    }
+  };
+
+  // --- Custom Categories CRUD ---
+  const handleAddCategory = async () => {
+    setAddCategoryError(null);
+    if (!newCategory.trim()) {
+      setAddCategoryError("Nombre de categoría requerido");
+      return;
+    }
+    try {
+      await addCategory(newCategory.trim());
+      setNewCategory("");
+      setAddCategoryOpen(false);
+      await refreshCategories();
+    } catch (err) {
+      setAddCategoryError(err instanceof Error ? err.message : "Error al agregar categoría");
+    }
+  };
+
+  const openEditCategoryDialog = (category: string) => {
+    setEditCategory(category);
+    setEditCategoryValue(category);
+    setEditCategoryError(null);
+    setEditCategoryOpen(true);
+  };
+
+  const handleEditCategory = async () => {
+    if (!editCategory) return;
+    setEditCategoryError(null);
+    if (!editCategoryValue.trim()) {
+      setEditCategoryError("Nombre de categoría requerido");
+      return;
+    }
+    try {
+      await updateCategory(editCategory, editCategoryValue.trim());
+      setEditCategoryOpen(false);
+      await refreshCategories();
+    } catch (err) {
+      setEditCategoryError(err instanceof Error ? err.message : "Error al editar categoría");
+    }
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!editCategory) return;
+    try {
+      await deleteCategory(editCategory);
+      setEditCategoryOpen(false);
+      setDeleteCategoryConfirmOpen(false);
+      await refreshCategories();
+    } catch (err) {
+      setEditCategoryError(err instanceof Error ? err.message : "Error al eliminar categoría");
     }
   };
 
@@ -315,6 +378,138 @@ export function SettingsScreen() {
               </DialogContent>
             </Dialog>
           </div>
+          {/* Custom Categories Section */}
+          <div className="mb-6">
+            <h2 className="font-semibold text-lg mb-2">Tus categorías personalizadas</h2>
+            {categoriesLoading ? (
+              <div className="text-gray-400 text-sm">Cargando categorías...</div>
+            ) : categories.length === 0 ? (
+              <div className="text-gray-400 text-sm">No tienes categorías registradas.</div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {categories.map(category => (
+                  <ShadCard
+                    key={category}
+                    className="w-[320px] rounded-xl shadow bg-gradient-to-br from-green-400 to-green-700 text-white flex flex-row justify-between items-center p-4 mx-auto cursor-pointer transition hover:scale-[1.02]"
+                    onClick={() => openEditCategoryDialog(category)}
+                  >
+                    <div className="font-semibold text-lg tracking-wider">{category}</div>
+                  </ShadCard>
+                ))}
+              </div>
+            )}
+            <div className="flex justify-center mt-4">
+              <Dialog open={addCategoryOpen} onOpenChange={setAddCategoryOpen}>
+                <DialogTrigger asChild>
+                  <ShadCard
+                    className="w-[320px] rounded-xl shadow-md border-dashed border-2 border-secondary-foreground flex flex-col items-center justify-center text-secondary-foreground cursor-pointer transition hover:scale-[1.02] mx-auto"
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Agregar categoría"
+                  >
+                    <Plus className="w-8 h-8 mb-2" />
+                    <span className="font-semibold text-lg">Agregar categoría</span>
+                  </ShadCard>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Agregar categoría</DialogTitle>
+                    <DialogDescription>Registra una nueva categoría personalizada.</DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-4">
+                    <label className="font-medium">Nombre
+                      <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="Ej: Viajes, Inversiones" />
+                    </label>
+                    {addCategoryError && <div className="text-red-500 text-sm">{addCategoryError}</div>}
+                    <Button onClick={handleAddCategory} disabled={!newCategory.trim() || categoriesLoading}>
+                      {categoriesLoading ? "Guardando..." : "Agregar"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+          {/* Edit Card Dialog */}
+          <Dialog open={editCardOpen} onOpenChange={setEditCardOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar tarjeta</DialogTitle>
+                <DialogDescription>Edita o elimina esta tarjeta de crédito.</DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4">
+                <label className="font-medium">Marca
+                  <Input value={editCardBrand} onChange={e => setEditCardBrand(e.target.value)} placeholder="Ej: BBVA, Santander" />
+                </label>
+                <label className="font-medium">Fecha de pago (día del mes)
+                  <Input type="number" min={1} max={31} value={editCardPaymentDate} onChange={e => setEditCardPaymentDate(Number(e.target.value))} />
+                </label>
+                {editCardError && <div className="text-red-500 text-sm">{editCardError}</div>}
+                <div className="flex gap-2">
+                  <Button onClick={handleEditCard} disabled={editCardLoading || !editCardBrand.trim() || !editCardPaymentDate || editCardPaymentDate < 1 || editCardPaymentDate > 31}>
+                    {editCardLoading ? "Guardando..." : "Guardar cambios"}
+                  </Button>
+                  <Dialog open={deleteCardConfirmOpen} onOpenChange={setDeleteCardConfirmOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="destructive" disabled={editCardLoading}>
+                        {editCardLoading ? "Eliminando..." : "Eliminar"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>¿Eliminar tarjeta?</DialogTitle>
+                        <DialogDescription>Esta acción eliminará la tarjeta permanentemente.</DialogDescription>
+                      </DialogHeader>
+                      <div className="flex flex-col gap-4">
+                        <div>¿Estás seguro de que deseas eliminar esta tarjeta? Esta acción no se puede deshacer.</div>
+                        <Button onClick={handleDeleteCard} variant="destructive" disabled={editCardLoading}>
+                          {editCardLoading ? "Eliminando..." : "Confirmar eliminación"}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          {/* Edit Category Dialog */}
+          <Dialog open={editCategoryOpen} onOpenChange={setEditCategoryOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar categoría</DialogTitle>
+                <DialogDescription>Edita o elimina esta categoría personalizada.</DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4">
+                <label className="font-medium">Nombre
+                  <Input value={editCategoryValue} onChange={e => setEditCategoryValue(e.target.value)} placeholder="Ej: Viajes, Inversiones" />
+                </label>
+                {editCategoryError && <div className="text-red-500 text-sm">{editCategoryError}</div>}
+                <div className="flex gap-2">
+                  <Button onClick={handleEditCategory} disabled={!editCategoryValue.trim() || categoriesLoading}>
+                    {categoriesLoading ? "Guardando..." : "Guardar cambios"}
+                  </Button>
+                  <Dialog open={deleteCategoryConfirmOpen} onOpenChange={setDeleteCategoryConfirmOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="destructive" disabled={categoriesLoading}>
+                        Eliminar
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>¿Eliminar categoría?</DialogTitle>
+                        <DialogDescription>Esta acción eliminará la categoría permanentemente.</DialogDescription>
+                      </DialogHeader>
+                      <div className="flex flex-col gap-4">
+                        <div>¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.</div>
+                        <Button onClick={handleDeleteCategory} variant="destructive" disabled={categoriesLoading}>
+                          {categoriesLoading ? "Eliminando..." : "Confirmar eliminación"}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </>
       ) : (
         <div className="mb-6">
@@ -349,48 +544,6 @@ export function SettingsScreen() {
           </Dialog>
         </div>
       )}
-      {/* Edit Card Dialog */}
-      <Dialog open={editCardOpen} onOpenChange={setEditCardOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar tarjeta</DialogTitle>
-            <DialogDescription>Edita o elimina esta tarjeta de crédito.</DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-4">
-            <label className="font-medium">Marca
-              <Input value={editCardBrand} onChange={e => setEditCardBrand(e.target.value)} placeholder="Ej: BBVA, Santander" />
-            </label>
-            <label className="font-medium">Fecha de pago (día del mes)
-              <Input type="number" min={1} max={31} value={editCardPaymentDate} onChange={e => setEditCardPaymentDate(Number(e.target.value))} />
-            </label>
-            {editCardError && <div className="text-red-500 text-sm">{editCardError}</div>}
-            <div className="flex gap-2">
-              <Button onClick={handleEditCard} disabled={editCardLoading || !editCardBrand.trim() || !editCardPaymentDate || editCardPaymentDate < 1 || editCardPaymentDate > 31}>
-                {editCardLoading ? "Guardando..." : "Guardar cambios"}
-              </Button>
-              <Dialog open={deleteCardConfirmOpen} onOpenChange={setDeleteCardConfirmOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="destructive" disabled={editCardLoading}>
-                    {editCardLoading ? "Eliminando..." : "Eliminar"}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>¿Eliminar tarjeta?</DialogTitle>
-                    <DialogDescription>Esta acción eliminará la tarjeta permanentemente.</DialogDescription>
-                  </DialogHeader>
-                  <div className="flex flex-col gap-4">
-                    <div>¿Estás seguro de que deseas eliminar esta tarjeta? Esta acción no se puede deshacer.</div>
-                    <Button onClick={handleDeleteCard} variant="destructive" disabled={editCardLoading}>
-                      {editCardLoading ? "Eliminando..." : "Confirmar eliminación"}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
       {/* Add credit card management and other settings here if needed */}
     </div>
   );
