@@ -430,11 +430,20 @@ app.patch('/profile', (req, res, next) => {
   );
 });
 
-// Delete profile
+// Delete profile and all related data
 app.delete('/profile', (req, res, next) => {
-  db.run('DELETE FROM profile WHERE id = 1', [], function (err) {
-    if (err) return next({ status: 500, message: err.message });
-    res.json({ success: true, deleted: this.changes });
+  db.serialize(() => {
+    db.run('DELETE FROM profile WHERE id = 1', [], function (err) {
+      if (err) return next({ status: 500, message: err.message });
+      // Delete all cards and purchases
+      db.run('DELETE FROM cards', [], function (err2) {
+        if (err2) return next({ status: 500, message: err2.message });
+        db.run('DELETE FROM purchases', [], function (err3) {
+          if (err3) return next({ status: 500, message: err3.message });
+          res.json({ success: true, deleted: this.changes });
+        });
+      });
+    });
   });
 });
 

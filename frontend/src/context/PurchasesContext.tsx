@@ -298,13 +298,26 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  // Clear all app state after profile deletion
+  const clearAllState = () => {
+    setProfile(null);
+    setCards([]);
+    setPurchases([]);
+    setCategories([]);
+    setTotalDebt(0);
+    setTotalMonthlyPayment(0);
+    setTotal(0);
+    setPage(1);
+    setError(null);
+  };
+
   const deleteProfile = async () => {
     setProfileLoading(true);
     setProfileError(null);
     try {
       const res = await fetch(`${API_URL}/profile`, { method: "DELETE" });
       if (!res.ok) throw new Error("Error al eliminar perfil");
-      setProfile(null);
+      clearAllState();
     } catch (err: any) {
       setProfileError(err.message || "Error al eliminar perfil");
     } finally {
