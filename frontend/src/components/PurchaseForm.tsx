@@ -14,6 +14,7 @@ type PurchaseFormProps = {
     amount: string;
     category: string;
   };
+  cards?: { brand: string }[]; // Add cards prop
   onSubmit?: (values: {
     name: string;
     date: string;
@@ -25,7 +26,7 @@ type PurchaseFormProps = {
   onFormStateChange?: (state: { isFormComplete: boolean }) => void;
 };
 
-export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange }: PurchaseFormProps) {
+export function PurchaseForm({ error, initialValues, cards = [], onSubmit, onFormStateChange }: PurchaseFormProps) {
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(
     initialValues?.date ? new Date(initialValues.date) : undefined
@@ -46,33 +47,37 @@ export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange
     category: initialValues?.category || "",
   });
 
-  // Update form state if initialValues change
+  // Update form state if initialValues change (only on mount or when values actually change)
+  const initialValuesRef = React.useRef(initialValues);
   React.useEffect(() => {
-    if (initialValues) {
-      setForm((prev) => ({
-        ...prev,
-        name: initialValues.name || "",
-        date: initialValues.date || "",
-        card: initialValues.card || "",
-        amount: initialValues.amount || "",
-        category: initialValues.category || "",
-        // Only set msi_term if user is not currently editing it
-        msi_term: prev.msi_term === "" ? initialValues.msi_term || "" : prev.msi_term,
-      }));
-      setDate(initialValues.date ? new Date(initialValues.date) : undefined);
+    // Only update if initialValues actually changed
+    if (JSON.stringify(initialValuesRef.current) !== JSON.stringify(initialValues)) {
+      setForm({
+        name: initialValues?.name || "",
+        date: initialValues?.date || "",
+        msi_term: initialValues?.msi_term || "",
+        card: initialValues?.card || "",
+        amount: initialValues?.amount || "",
+        category: initialValues?.category || "",
+      });
+      setDate(initialValues?.date ? new Date(initialValues.date) : undefined);
+      setIsMsi(initialValues?.msi_term && Number(initialValues.msi_term) > 0 ? true : false);
+      initialValuesRef.current = initialValues;
     }
   }, [initialValues]);
 
   // Sync form.date with calendar date
   React.useEffect(() => {
-    setForm((prev) => ({
-      ...prev,
-      date: date ? date.toISOString().slice(0, 10) : "",
-    }));
+    if (date) {
+      setForm((prev) => ({
+        ...prev,
+        date: date.toISOString().slice(0, 10),
+      }));
+    }
   }, [date]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     if (name === "isMsi") {
       const checked = (e.target as HTMLInputElement).checked;
       setIsMsi(checked);
@@ -83,7 +88,7 @@ export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange
     } else {
       setForm((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: type === "number" ? String(value) : value,
       }));
     }
   };
@@ -185,11 +190,9 @@ export function PurchaseForm({ error, initialValues, onSubmit, onFormStateChange
         className="bg-background text-foreground px-2 py-1 rounded w-full border border-border"
       >
         <option value="">Selecciona una tarjeta</option>
-        <option value="BBVA">BBVA</option>
-        <option value="Citibanamex">Citibanamex</option>
-        <option value="HSBC">HSBC</option>
-        <option value="MercadoPago">MercadoPago</option>
-        <option value="Banco Azteca">Banco Azteca</option>
+        {cards.map(card => (
+          <option key={card.brand} value={card.brand}>{card.brand}</option>
+        ))}
       </select>
       <input
         type="number"

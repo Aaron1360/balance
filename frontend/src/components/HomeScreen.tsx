@@ -43,6 +43,7 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
   const [activeMenuId, setActiveMenuId] = useState<number | null>(null);
   const [editPurchaseData, setEditPurchase] = useState<Purchase | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [isFormComplete, setIsFormComplete] = useState(false); // For submit button
   const [error, setError] = useState<string | null>(null);
 
@@ -91,7 +92,7 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
       <header className="mb-4 flex items-center justify-end">
         <button
           className="text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow mt-3 ring-2 ring-accent/40 bg-card disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={onAdd}
+          onClick={() => setShowAddModal(true)}
           aria-label="Agregar compra"
           disabled={cards.length === 0}
           title={cards.length === 0 ? "Registra una tarjeta de crédito para agregar compras" : undefined}
@@ -395,6 +396,50 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                 onFormStateChange={({ isFormComplete }) => setIsFormComplete(isFormComplete)}
               />
             )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <Button
+              type="submit"
+              form="purchase-form"
+              disabled={loading || !isFormComplete}
+              className="bg-primary/50"
+            >
+              {loading ? "Guardando..." : "Guardar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Agregar compra</DialogTitle>
+            <DialogDescription>Registra una nueva compra.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <PurchaseForm
+              error={error}
+              initialValues={{
+                name: "",
+                date: "",
+                msi_term: "",
+                card: "",
+                amount: "",
+                category: ""
+              }}
+              cards={cards}
+              onSubmit={async (values) => {
+                await purchasesCtx.addPurchase({
+                  ...values,
+                  msi_term: Number(values.msi_term),
+                  amount: Number(values.amount),
+                });
+                setShowAddModal(false);
+              }}
+              onFormStateChange={({ isFormComplete }) => setIsFormComplete(isFormComplete)}
+            />
           </div>
           <DialogFooter>
             <DialogClose asChild>
