@@ -356,15 +356,50 @@ app.get('/profile', (req, res, next) => {
 });
 
 app.put('/profile', (req, res, next) => {
-  const { name, currency, budget } = req.body;
+  const { username, avatar } = req.body;
   db.run(
-    'UPDATE profile SET name = ?, currency = ?, budget = ? WHERE id = 1',
-    [name || '', currency || 'MXN', budget || 0],
+    'UPDATE profile SET username = ?, avatar = ? WHERE id = 1',
+    [username || '', avatar || null],
     function (err) {
       if (err) return next({ status: 500, message: err.message });
       res.json({ success: true });
     }
   );
+});
+
+// Edit profile (PUT already exists)
+app.patch('/profile', (req, res, next) => {
+  const { username, avatar } = req.body;
+  const updates = [];
+  const params = [];
+  if (typeof username !== 'undefined') {
+    updates.push('username = ?');
+    params.push(username);
+  }
+  if (typeof avatar !== 'undefined') {
+    updates.push('avatar = ?');
+    params.push(avatar);
+  }
+  if (updates.length === 0) {
+    return res.status(400).json({ error: 'No fields to update' });
+  }
+  params.push(1); // id = 1
+  db.run(
+    `UPDATE profile SET ${updates.join(', ')} WHERE id = ?`,
+    params,
+    function (err) {
+      if (err) return next({ status: 500, message: err.message });
+      res.json({ success: true });
+    }
+  );
+});
+
+// Delete profile
+app.delete('/profile', (req, res, next) => {
+  db.run('DELETE FROM profile WHERE id = 1', [], function (err) {
+    if (err) return next({ status: 500, message: err.message });
+    res.json({ success: true, deleted: this.changes });
+  });
 });
 
 // Cards endpoints

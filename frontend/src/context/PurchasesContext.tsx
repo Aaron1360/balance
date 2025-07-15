@@ -1,8 +1,10 @@
 import React, { createContext, useState, useEffect } from "react";
 import type { Purchase } from "@/lib/types";
 
-const API_URL = "http://192.168.1.117:3001";
+export const API_URL = "http://192.168.1.117:3001";
 const PAGE_SIZE = 10;
+
+export type Profile = { id?: number; name: string; avatar: string } | null;
 
 export type PurchasesContextType = {
   purchases: Purchase[];
@@ -17,7 +19,14 @@ export type PurchasesContextType = {
   addPurchase: (purchase: Omit<Purchase, "id" | "payments_made">) => Promise<void>;
   payOffPurchase: (p: Purchase) => Promise<void>;
   deletePurchase: (id: number) => Promise<void>;
-  editPurchase: (id: number, updates: Partial<Purchase>) => Promise<void>; // <-- Added
+  editPurchase: (id: number, updates: Partial<Purchase>) => Promise<void>;
+  // Profile management
+  profile: Profile;
+  profileLoading: boolean;
+  profileError: string | null;
+  fetchProfile: () => Promise<void>;
+  saveProfile: (name: string, avatar: string, isEdit: boolean) => Promise<void>;
+  deleteProfile: () => Promise<void>;
 };
 
 export const PurchasesContext = createContext<PurchasesContextType | undefined>(undefined);
@@ -25,12 +34,16 @@ export const PurchasesContext = createContext<PurchasesContextType | undefined>(
 export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [totalDebt, setTotalDebt] = useState(0);
-  const [totalMonthlyPayment, setTotalMonthlyPayment] = useState(0); // <-- Add this line
+  const [totalMonthlyPayment, setTotalMonthlyPayment] = useState(0);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({ start: "", end: "", category: "", state: "" });
+  // Profile state
+  const [profile, setProfile] = useState<Profile>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
   const fetchData = async (newFilters = filters) => {
     setLoading(true);
@@ -60,7 +73,7 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const debtRes = await fetch(`${API_URL}/debt-overview`);
       const debtData = await debtRes.json();
       setTotalDebt(debtData.total_outstanding || 0);
-      setTotalMonthlyPayment(debtData.total_monthly_payment || 0); // <-- Add this line
+      setTotalMonthlyPayment(debtData.total_monthly_payment || 0);
     } catch {
       setError("No se pudieron cargar los datos");
     } finally {
@@ -162,9 +175,65 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  // Profile management
+  const fetchProfile = async () => {
+    setProfileLoading(true);
+    setProfileError(null);
+    try {
+      const res = await fetch(`${API_URL}/profile`);
+      if (!res.ok) throw new Error("No profile");
+      const data = await res.json();
+      setProfile({ id: data.id, name: data.name || "", avatar: data.avatar || "" });
+    } catch {
+      setProfile(null);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const saveProfile = async (name: string, avatar: string, isEdit: boolean) => {
+    setProfileLoading(true);
+    setProfileError(null);
+    try {
+      const method = isEdit ? "PATCH" : "PUT";
+      const res = await fetch(`${API_URL}/profile`, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, avatar }),
+      });
+      if (!res.ok) throw new Error("Error al guardar perfil");
+      const data = await res.json();
+      setProfile({ id: data.id, name: data.name, avatar: data.avatar });
+    } catch (err: any) {
+      setProfileError(err.message || "Error al guardar perfil");
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const deleteProfile = async () => {
+    setProfileLoading(true);
+    setProfileError(null);
+    try {
+      const res = await fetch(`${API_URL}/profile`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Error al eliminar perfil");
+      setProfile(null);
+    } catch (err: any) {
+      setProfileError(err.message || "Error al eliminar perfil");
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  // Fetch profile on mount
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
   return (
     <PurchasesContext.Provider value={{
-      purchases, totalDebt, totalMonthlyPayment, total, page, setPage, loading, error, refresh, addPurchase, payOffPurchase, deletePurchase, editPurchase
+      purchases, totalDebt, totalMonthlyPayment, total, page, setPage, loading, error, refresh, addPurchase, payOffPurchase, deletePurchase, editPurchase,
+      profile, profileLoading, profileError, fetchProfile, saveProfile, deleteProfile
     }}>
       {children}
     </PurchasesContext.Provider>
