@@ -6,6 +6,12 @@ const PAGE_SIZE = 10;
 
 export type Profile = { id?: number; username: string; avatar: string } | null;
 
+export type CardType = {
+  id: number;
+  brand: string;
+  payment_date: number;
+};
+
 export type PurchasesContextType = {
   purchases: Purchase[];
   totalDebt: number;
@@ -27,6 +33,13 @@ export type PurchasesContextType = {
   fetchProfile: () => Promise<void>;
   saveProfile: (username: string, avatar: string, isEdit: boolean) => Promise<void>;
   deleteProfile: () => Promise<void>;
+  // Card management
+  cards: CardType[];
+  cardsLoading: boolean;
+  refreshCards: () => Promise<void>;
+  addCard: (brand: string, payment_date: number) => Promise<void>;
+  editCard: (id: number, brand: string, payment_date: number) => Promise<void>;
+  deleteCard: (id: number) => Promise<void>;
 };
 
 export const PurchasesContext = createContext<PurchasesContextType | undefined>(undefined);
@@ -44,6 +57,9 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [profile, setProfile] = useState<Profile>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
+  // Cards state
+  const [cards, setCards] = useState<CardType[]>([]);
+  const [cardsLoading, setCardsLoading] = useState(false);
 
   const fetchData = async (newFilters = filters) => {
     setLoading(true);
@@ -225,15 +241,68 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  // Fetch profile on mount
+  // Cards management
+  const refreshCards = async () => {
+    setCardsLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/cards`);
+      const data = await res.json();
+      setCards(Array.isArray(data) ? data : []);
+    } catch {
+      setCards([]);
+    } finally {
+      setCardsLoading(false);
+    }
+  };
+
+  const addCard = async (brand: string, payment_date: number) => {
+    setCardsLoading(true);
+    try {
+      await fetch(`${API_URL}/cards`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand, payment_date }),
+      });
+      await refreshCards();
+    } finally {
+      setCardsLoading(false);
+    }
+  };
+
+  const editCard = async (id: number, brand: string, payment_date: number) => {
+    setCardsLoading(true);
+    try {
+      await fetch(`${API_URL}/cards/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand, payment_date }),
+      });
+      await refreshCards();
+    } finally {
+      setCardsLoading(false);
+    }
+  };
+
+  const deleteCard = async (id: number) => {
+    setCardsLoading(true);
+    try {
+      await fetch(`${API_URL}/cards/${id}`, { method: "DELETE" });
+      await refreshCards();
+    } finally {
+      setCardsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
+    refreshCards();
   }, []);
 
   return (
     <PurchasesContext.Provider value={{
       purchases, totalDebt, totalMonthlyPayment, total, page, setPage, loading, error, refresh, addPurchase, payOffPurchase, deletePurchase, editPurchase,
-      profile, profileLoading, profileError, fetchProfile, saveProfile, deleteProfile
+      profile, profileLoading, profileError, fetchProfile, saveProfile, deleteProfile,
+      cards, cardsLoading, refreshCards, addCard, editCard, deleteCard,
     }}>
       {children}
     </PurchasesContext.Provider>

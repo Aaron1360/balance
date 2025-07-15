@@ -11,7 +11,7 @@ export function SettingsScreen() {
   const ctx = useContext(PurchasesContext);
   if (!ctx) throw new Error("SettingsScreen must be used within PurchasesProvider");
   const {
-    profile, profileLoading, profileError, saveProfile, deleteProfile, fetchProfile
+    profile, profileLoading, profileError, saveProfile, deleteProfile, fetchProfile, refreshCards, cards: contextCards
   } = ctx;
 
   const [editOpen, setEditOpen] = useState(false);
@@ -20,8 +20,6 @@ export function SettingsScreen() {
   const [avatarEditOpen, setAvatarEditOpen] = useState(false);
   const [newAvatar, setNewAvatar] = useState<string | null>(null);
   const [showButtons, setShowButtons] = useState(false);
-  const [cards, setCards] = useState<CardType[]>([]);
-  const [cardsLoading, setCardsLoading] = useState(false);
   const [addCardOpen, setAddCardOpen] = useState(false);
   const [newCardBrand, setNewCardBrand] = useState("");
   const [newCardPaymentDate, setNewCardPaymentDate] = useState(1);
@@ -47,23 +45,6 @@ export function SettingsScreen() {
   useEffect(() => {
     setUsername(profile?.username || "");
   }, [profile]);
-
-  // Fetch cards on mount
-  useEffect(() => {
-    const fetchCards = async () => {
-      setCardsLoading(true);
-      try {
-        const res = await fetch(`${API_URL}/cards`);
-        const data = await res.json();
-        setCards(Array.isArray(data) ? data : []);
-      } catch {
-        setCards([]);
-      } finally {
-        setCardsLoading(false);
-      }
-    };
-    fetchCards();
-  }, []);
 
   // Save profile (create or edit)
   const handleSave = async () => {
@@ -123,12 +104,9 @@ export function SettingsScreen() {
       setNewCardBrand("");
       setNewCardPaymentDate(1);
       setAddCardOpen(false);
-      // Refresh cards
-      const cardsRes = await fetch(`${API_URL}/cards`);
-      const cardsData = await cardsRes.json();
-      setCards(Array.isArray(cardsData) ? cardsData : []);
-    } catch (err: any) {
-      setAddCardError(err.message || "Error al agregar tarjeta");
+      await refreshCards(); // Refresh global cards state
+    } catch (err) {
+      setAddCardError(err instanceof Error ? err.message : "Error al agregar tarjeta");
     }
   };
 
@@ -157,13 +135,10 @@ export function SettingsScreen() {
         body: JSON.stringify({ brand: editCardBrand, payment_date: editCardPaymentDate }),
       });
       if (!res.ok) throw new Error("Error al editar tarjeta");
-      // Refresh cards
-      const cardsRes = await fetch(`${API_URL}/cards`);
-      const cardsData = await cardsRes.json();
-      setCards(Array.isArray(cardsData) ? cardsData : []);
+      await refreshCards(); // Refresh global cards state
       setEditCardOpen(false);
-    } catch (err: any) {
-      setEditCardError(err.message || "Error al editar tarjeta");
+    } catch (err) {
+      setEditCardError(err instanceof Error ? err.message : "Error al editar tarjeta");
     } finally {
       setEditCardLoading(false);
     }
@@ -176,14 +151,11 @@ export function SettingsScreen() {
     try {
       const res = await fetch(`${API_URL}/cards/${editCard.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Error al eliminar tarjeta");
-      // Refresh cards
-      const cardsRes = await fetch(`${API_URL}/cards`);
-      const cardsData = await cardsRes.json();
-      setCards(Array.isArray(cardsData) ? cardsData : []);
+      await refreshCards(); // Refresh global cards state
       setEditCardOpen(false);
       setDeleteCardConfirmOpen(false);
-    } catch (err: any) {
-      setEditCardError(err.message || "Error al eliminar tarjeta");
+    } catch (err) {
+      setEditCardError(err instanceof Error ? err.message : "Error al eliminar tarjeta");
     } finally {
       setEditCardLoading(false);
     }
@@ -282,13 +254,11 @@ export function SettingsScreen() {
           </ShadCard>
           <div className="mb-6">
             <h2 className="font-semibold text-lg mb-2">Tus tarjetas</h2>
-            {cardsLoading ? (
-              <div className="text-gray-500 text-sm">Cargando tarjetas...</div>
-            ) : cards.length === 0 ? (
+            {contextCards.length === 0 ? (
               <div className="text-gray-400 text-sm">No tienes tarjetas registradas.</div>
             ) : (
               <div className="flex flex-col gap-4">
-                {cards.map(card => (
+                {contextCards.map(card => (
                   <ShadCard
                     key={card.id}
                     className="w-[320px] h-[200px] rounded-xl shadow-md bg-gradient-to-br from-blue-400 to-blue-700 text-white flex flex-col justify-between p-6 mx-auto cursor-pointer transition hover:scale-[1.02]"
@@ -333,14 +303,13 @@ export function SettingsScreen() {
                   <Button
                     onClick={handleAddCard}
                     disabled={
-                      cardsLoading ||
                       !newCardBrand.trim() ||
                       !newCardPaymentDate ||
                       newCardPaymentDate < 1 ||
                       newCardPaymentDate > 31
                     }
                   >
-                    {cardsLoading ? "Guardando..." : "Agregar"}
+                    {profileLoading ? "Guardando..." : "Agregar"}
                   </Button>
                 </div>
               </DialogContent>

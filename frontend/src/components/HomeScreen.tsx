@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { usePurchases } from "@/hooks/usePurchases";
 import { Plus } from "lucide-react";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious, PaginationLink } from "@/components/ui/pagination";
@@ -18,6 +18,7 @@ import type { Purchase } from "@/lib/types";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronDownIcon } from "lucide-react";
+import { PurchasesContext } from "@/context/PurchasesContext";
 
 type HomeScreenProps = {
   onAdd: () => void;
@@ -27,6 +28,9 @@ const PAGE_SIZE = 10;
 
 export function HomeScreen({ onAdd }: HomeScreenProps) {
   const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh, deletePurchase, payOffPurchase, editPurchase } = usePurchases();
+  const purchasesCtx = useContext(PurchasesContext);
+  if (!purchasesCtx) throw new Error("HomeScreen must be used within PurchasesProvider");
+  const { cards } = purchasesCtx;
 
   // Filter state
   const [start, setStart] = useState<string>("");
@@ -86,9 +90,11 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
     <div className="p-4 pb-32 bg-background text-foreground">
       <header className="mb-4 flex items-center justify-end">
         <button
-          className="text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow mt-3 ring-2 ring-accent/40 bg-card"
+          className="text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow mt-3 ring-2 ring-accent/40 bg-card disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={onAdd}
           aria-label="Agregar compra"
+          disabled={cards.length === 0}
+          title={cards.length === 0 ? "Registra una tarjeta de crédito para agregar compras" : undefined}
         >
           <Plus size={24} />
         </button>
@@ -376,6 +382,7 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
                   msi_term: String(editPurchaseData.msi_term),
                   amount: String(editPurchaseData.amount),
                 }}
+                cards={cards} // Pass only registered cards
                 onSubmit={async (values) => {
                   await editPurchase(editPurchaseData.id, {
                     ...values,
