@@ -14,21 +14,36 @@ export function SettingsScreen() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [username, setUsername] = useState("");
-  const [avatar, setAvatar] = useState<string | null>(null); // allow null for 'not changed'
+  const [avatarEditOpen, setAvatarEditOpen] = useState(false);
+  const [newAvatar, setNewAvatar] = useState<string | null>(null);
 
   // Sync local state with context profile
   useEffect(() => {
     setUsername(profile?.username || "");
-    setAvatar(null); // always reset avatar to null on profile change
   }, [profile]);
 
   // Save profile (create or edit)
   const handleSave = async () => {
-    const avatarToSave = avatar === null ? "" : avatar;
-    await saveProfile(username, avatarToSave, !!profile);
+    await saveProfile(username, profile?.avatar || "", true);
     await fetchProfile(); // refresh profile from backend after save
     setEditOpen(false);
-    setAvatar(null); // reset avatar state after save
+  };
+
+  // Save only username
+  const handleSaveUsername = async () => {
+    await saveProfile(username, profile?.avatar || "", true);
+    await fetchProfile();
+    setEditOpen(false);
+  };
+
+  // Save only avatar
+  const handleSaveAvatar = async () => {
+    if (newAvatar) {
+      await saveProfile(profile?.username || "", newAvatar, true);
+      await fetchProfile();
+    }
+    setAvatarEditOpen(false);
+    setNewAvatar(null);
   };
 
   // Delete profile
@@ -43,7 +58,7 @@ export function SettingsScreen() {
     if (!file) return;
     const reader = new FileReader();
     reader.onloadend = () => {
-      setAvatar(reader.result as string);
+      setNewAvatar(reader.result as string);
     };
     reader.readAsDataURL(file);
   };
@@ -56,34 +71,48 @@ export function SettingsScreen() {
       {profileError && <div className="mb-4 text-sm text-red-500">{profileError}</div>}
       {profile ? (
         <div className="flex items-center gap-4 mb-6">
-          {(avatar ?? profile.avatar) ? (
-            <img src={avatar ?? profile.avatar} alt="avatar" className="w-16 h-16 rounded-full object-cover border" />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">Sin avatar</div>
-          )}
+          <Dialog open={avatarEditOpen} onOpenChange={setAvatarEditOpen}>
+            <DialogTrigger asChild>
+              {(profile.avatar ? (
+                <img
+                  src={profile.avatar}
+                  alt="avatar"
+                  className="w-16 h-16 rounded-full object-cover border cursor-pointer hover:opacity-80"
+                  title="Cambiar avatar"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 cursor-pointer hover:opacity-80" title="Agregar avatar">Sin avatar</div>
+              ))}
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Cambiar avatar</DialogTitle>
+                <DialogDescription>Selecciona una nueva imagen de avatar.</DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-4">
+                <Input type="file" accept="image/*" onChange={handleAvatarChange} />
+                {newAvatar && <img src={newAvatar} alt="preview" className="w-16 h-16 rounded-full mt-2 object-cover border" />}
+                <Button onClick={handleSaveAvatar} disabled={!newAvatar || profileLoading}>{profileLoading ? "Guardando..." : "Guardar avatar"}</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           <div>
             <div className="font-semibold text-lg">{profile.username || "Sin nombre"}</div>
             <div className="flex gap-2 mt-2">
               <Dialog open={editOpen} onOpenChange={setEditOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>Editar perfil</Button>
+                  <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>Editar nombre</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Editar perfil</DialogTitle>
-                    <DialogDescription>
-                      Cambia tu nombre de usuario y avatar aquí.
-                    </DialogDescription>
+                    <DialogTitle>Editar nombre de usuario</DialogTitle>
+                    <DialogDescription>Cambia tu nombre de usuario aquí.</DialogDescription>
                   </DialogHeader>
                   <div className="flex flex-col gap-4">
                     <label className="font-medium">Nombre de usuario
                       <Input value={username} onChange={e => setUsername(e.target.value)} placeholder="Tu nombre de usuario" />
                     </label>
-                    <label className="font-medium">Avatar
-                      <Input type="file" accept="image/*" onChange={handleAvatarChange} />
-                      {(avatar ?? profile.avatar) && <img src={avatar ?? profile.avatar} alt="preview" className="w-16 h-16 rounded-full mt-2 object-cover border" />}
-                    </label>
-                    <Button onClick={handleSave} disabled={profileLoading}>{profileLoading ? "Guardando..." : "Guardar"}</Button>
+                    <Button onClick={handleSaveUsername} disabled={profileLoading}>{profileLoading ? "Guardando..." : "Guardar"}</Button>
                   </div>
                 </DialogContent>
               </Dialog>
@@ -127,9 +156,14 @@ export function SettingsScreen() {
                 </label>
                 <label className="font-medium">Avatar
                   <Input type="file" accept="image/*" onChange={handleAvatarChange} />
-                  {(avatar ?? undefined) && <img src={avatar!} alt="preview" className="w-16 h-16 rounded-full mt-2 object-cover border" />}
+                  {newAvatar && <img src={newAvatar} alt="preview" className="w-16 h-16 rounded-full mt-2 object-cover border" />}
                 </label>
-                <Button onClick={handleSave} disabled={profileLoading}>{profileLoading ? "Guardando..." : "Crear"}</Button>
+                <Button onClick={async () => {
+                  await saveProfile(username, newAvatar || "", false);
+                  await fetchProfile();
+                  setEditOpen(false);
+                  setNewAvatar(null);
+                }} disabled={profileLoading}>{profileLoading ? "Guardando..." : "Crear"}</Button>
               </div>
             </DialogContent>
           </Dialog>
