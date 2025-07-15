@@ -260,7 +260,18 @@ export function SettingsScreen() {
                     <Input type="number" min={1} max={31} value={newCardPaymentDate} onChange={e => setNewCardPaymentDate(Number(e.target.value))} />
                   </label>
                   {addCardError && <div className="text-red-500 text-sm">{addCardError}</div>}
-                  <Button onClick={handleAddCard} disabled={cardsLoading}>{cardsLoading ? "Guardando..." : "Agregar"}</Button>
+                  <Button
+                    onClick={handleAddCard}
+                    disabled={
+                      cardsLoading ||
+                      !newCardBrand.trim() ||
+                      !newCardPaymentDate ||
+                      newCardPaymentDate < 1 ||
+                      newCardPaymentDate > 31
+                    }
+                  >
+                    {cardsLoading ? "Guardando..." : "Agregar"}
+                  </Button>
                 </div>
               </DialogContent>
             </Dialog>
