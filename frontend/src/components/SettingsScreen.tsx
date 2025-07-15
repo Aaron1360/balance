@@ -124,7 +124,7 @@ export function SettingsScreen() {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
+    <div className="p-4 max-w-md mx-auto mb-10">
       <h1 className="text-2xl font-bold mb-4">Configuración</h1>
       <div className="text-muted-foreground mb-6">Aquí podrás editar tu perfil y preferencias de pago.</div>
       {profileLoading && <div className="mb-4 text-sm text-gray-500">Cargando...</div>}
@@ -180,7 +180,7 @@ export function SettingsScreen() {
                 >
                   <Dialog open={editOpen} onOpenChange={setEditOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" onClick={e => { e.stopPropagation(); setEditOpen(true); }}>Editar nombre</Button>
+                      <Button variant="outline" size="sm" className="hover:bg-secondary-foreground/80" onClick={e => { e.stopPropagation(); setEditOpen(true); }}>Editar nombre</Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
@@ -221,11 +221,14 @@ export function SettingsScreen() {
             ) : cards.length === 0 ? (
               <div className="text-gray-400 text-sm">No tienes tarjetas registradas.</div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-4">
                 {cards.map(card => (
-                  <ShadCard key={card.id} className="p-3 flex items-center gap-4">
-                    <div className="font-medium">{card.brand}</div>
-                    <div className="text-sm text-gray-500 ml-auto">Pago: día {card.payment_date}</div>
+                  <ShadCard key={card.id} className="w-[320px] h-[200px] rounded-xl shadow-md bg-gradient-to-br from-blue-400 to-blue-700 text-white flex flex-col justify-between p-6 mx-auto">
+                    <div className="font-semibold text-lg tracking-wider">{card.brand}</div>
+                    <div className="flex items-end justify-between w-full">
+                      <div className="text-xs uppercase tracking-widest">Pago: día</div>
+                      <div className="text-2xl font-bold">{card.payment_date}</div>
+                    </div>
                   </ShadCard>
                 ))}
               </div>
@@ -234,14 +237,15 @@ export function SettingsScreen() {
           <div className="flex justify-center mb-6">
             <Dialog open={addCardOpen} onOpenChange={setAddCardOpen}>
               <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  onClick={() => setAddCardOpen(true)}
+                <ShadCard
+                  className="w-[320px] h-[200px] rounded-xl shadow-md border-dashed border-2 border-secondary-foreground flex flex-col items-center justify-center text-secondary-foreground cursor-pointer transition hover:bg-accent/10 mx-auto"
+                  tabIndex={0}
+                  role="button"
+                  aria-label="Agregar tarjeta"
                 >
-                  <Plus className="w-4 h-4" />
-                  Agregar tarjeta
-                </Button>
+                  <Plus className="w-8 h-8 mb-2" />
+                  <span className="font-semibold text-lg">Agregar tarjeta</span>
+                </ShadCard>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
