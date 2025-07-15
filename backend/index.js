@@ -358,11 +358,16 @@ app.get('/profile', (req, res, next) => {
 app.put('/profile', (req, res, next) => {
   const { username, avatar } = req.body;
   db.run(
-    'UPDATE profile SET username = ?, avatar = ? WHERE id = 1',
+    `INSERT INTO profile (id, username, avatar)
+     VALUES (1, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET username=excluded.username, avatar=excluded.avatar`,
     [username || '', avatar || null],
     function (err) {
       if (err) return next({ status: 500, message: err.message });
-      res.json({ success: true });
+      db.get('SELECT * FROM profile WHERE id = 1', [], (err2, row) => {
+        if (err2) return next({ status: 500, message: err2.message });
+        res.json(row);
+      });
     }
   );
 });

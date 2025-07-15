@@ -4,7 +4,7 @@ import type { Purchase } from "@/lib/types";
 export const API_URL = "http://192.168.1.117:3001";
 const PAGE_SIZE = 10;
 
-export type Profile = { id?: number; name: string; avatar: string } | null;
+export type Profile = { id?: number; username: string; avatar: string } | null;
 
 export type PurchasesContextType = {
   purchases: Purchase[];
@@ -25,7 +25,7 @@ export type PurchasesContextType = {
   profileLoading: boolean;
   profileError: string | null;
   fetchProfile: () => Promise<void>;
-  saveProfile: (name: string, avatar: string, isEdit: boolean) => Promise<void>;
+  saveProfile: (username: string, avatar: string, isEdit: boolean) => Promise<void>;
   deleteProfile: () => Promise<void>;
 };
 
@@ -183,7 +183,7 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const res = await fetch(`${API_URL}/profile`);
       if (!res.ok) throw new Error("No profile");
       const data = await res.json();
-      setProfile({ id: data.id, name: data.name || "", avatar: data.avatar || "" });
+      setProfile({ id: data.id, username: data.username || "", avatar: data.avatar || "" });
     } catch {
       setProfile(null);
     } finally {
@@ -191,7 +191,7 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const saveProfile = async (name: string, avatar: string, isEdit: boolean) => {
+  const saveProfile = async (username: string, avatar: string, isEdit: boolean) => {
     setProfileLoading(true);
     setProfileError(null);
     try {
@@ -199,11 +199,11 @@ export const PurchasesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const res = await fetch(`${API_URL}/profile`, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, avatar }),
+        body: JSON.stringify({ username, avatar }),
       });
       if (!res.ok) throw new Error("Error al guardar perfil");
       const data = await res.json();
-      setProfile({ id: data.id, name: data.name, avatar: data.avatar });
+      setProfile({ id: data.id, username: data.username, avatar: data.avatar });
     } catch (err: any) {
       setProfileError(err.message || "Error al guardar perfil");
     } finally {
