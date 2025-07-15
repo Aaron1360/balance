@@ -2,9 +2,10 @@ import { useEffect, useState, useContext } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { PurchasesContext } from "@/context/PurchasesContext";
-import { Card, CardContent } from "@/components/ui/card";
+import { PurchasesContext, API_URL } from "@/context/PurchasesContext";
+import { Card as ShadCard, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils"; // shadcn utility for className merging, if available
+import { Plus } from "lucide-react";
 
 export function SettingsScreen() {
   const ctx = useContext(PurchasesContext);
@@ -19,11 +20,41 @@ export function SettingsScreen() {
   const [avatarEditOpen, setAvatarEditOpen] = useState(false);
   const [newAvatar, setNewAvatar] = useState<string | null>(null);
   const [showButtons, setShowButtons] = useState(false);
+  const [cards, setCards] = useState<CardType[]>([]);
+  const [cardsLoading, setCardsLoading] = useState(false);
+  const [addCardOpen, setAddCardOpen] = useState(false);
+  const [newCardBrand, setNewCardBrand] = useState("");
+  const [newCardPaymentDate, setNewCardPaymentDate] = useState(1);
+  const [addCardError, setAddCardError] = useState<string | null>(null);
+
+  // Card type for TypeScript
+  interface CardType {
+    id: number;
+    brand: string;
+    payment_date: number;
+  }
 
   // Sync local state with context profile
   useEffect(() => {
     setUsername(profile?.username || "");
   }, [profile]);
+
+  // Fetch cards on mount
+  useEffect(() => {
+    const fetchCards = async () => {
+      setCardsLoading(true);
+      try {
+        const res = await fetch(`${API_URL}/cards`);
+        const data = await res.json();
+        setCards(Array.isArray(data) ? data : []);
+      } catch {
+        setCards([]);
+      } finally {
+        setCardsLoading(false);
+      }
+    };
+    fetchCards();
+  }, []);
 
   // Save profile (create or edit)
   const handleSave = async () => {
@@ -66,6 +97,32 @@ export function SettingsScreen() {
     reader.readAsDataURL(file);
   };
 
+  // Add card handler
+  const handleAddCard = async () => {
+    setAddCardError(null);
+    if (!newCardBrand.trim() || !newCardPaymentDate) {
+      setAddCardError("Marca y fecha de pago requeridas");
+      return;
+    }
+    try {
+      const res = await fetch(`${API_URL}/cards`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brand: newCardBrand, payment_date: newCardPaymentDate }),
+      });
+      if (!res.ok) throw new Error("Error al agregar tarjeta");
+      setNewCardBrand("");
+      setNewCardPaymentDate(1);
+      setAddCardOpen(false);
+      // Refresh cards
+      const cardsRes = await fetch(`${API_URL}/cards`);
+      const cardsData = await cardsRes.json();
+      setCards(Array.isArray(cardsData) ? cardsData : []);
+    } catch (err: any) {
+      setAddCardError(err.message || "Error al agregar tarjeta");
+    }
+  };
+
   return (
     <div className="p-4 max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-4">Configuración</h1>
@@ -73,89 +130,138 @@ export function SettingsScreen() {
       {profileLoading && <div className="mb-4 text-sm text-gray-500">Cargando...</div>}
       {profileError && <div className="mb-4 text-sm text-red-500">{profileError}</div>}
       {profile ? (
-        <Card className="mb-6">
-          <CardContent
-            className="flex flex-col sm:flex-row items-center gap-4 p-4 overflow-x-auto cursor-pointer hover:opacity-80"
-            onClick={() => setShowButtons((prev) => !prev)}
-            tabIndex={0}
-            role="button"
-            aria-pressed={showButtons}
-          >
-            <Dialog open={avatarEditOpen} onOpenChange={setAvatarEditOpen}>
-              <DialogTrigger asChild>
-                {(profile.avatar ? (
-                  <img
-                    src={profile.avatar}
-                    alt="avatar"
-                    className="w-20 h-20 rounded-full object-cover border cursor-pointer"
-                    title="Cambiar avatar"
-                  />
-                ) : (
-                  <div
-                    className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 cursor-pointer hover:opacity-80 flex-shrink-0 text-center text-sm leading-tight"
-                    title="Agregar avatar"
-                  >
-                    <span className="w-full">Sin avatar</span>
+        <>
+          <ShadCard className="mb-6">
+            <CardContent
+              className="flex flex-col sm:flex-row items-center gap-4 p-4 overflow-x-auto cursor-pointer hover:opacity-80"
+              onClick={() => setShowButtons((prev) => !prev)}
+              tabIndex={0}
+              role="button"
+              aria-pressed={showButtons}
+            >
+              <Dialog open={avatarEditOpen} onOpenChange={setAvatarEditOpen}>
+                <DialogTrigger asChild>
+                  {(profile.avatar ? (
+                    <img
+                      src={profile.avatar}
+                      alt="avatar"
+                      className="w-20 h-20 rounded-full object-cover border cursor-pointer"
+                      title="Cambiar avatar"
+                    />
+                  ) : (
+                    <div
+                      className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 cursor-pointer hover:opacity-80 flex-shrink-0 text-center text-sm leading-tight"
+                      title="Agregar avatar"
+                    >
+                      <span className="w-full">Sin avatar</span>
+                    </div>
+                  ))}
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Cambiar avatar</DialogTitle>
+                    <DialogDescription>Selecciona una nueva imagen de avatar.</DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-4">
+                    <Input type="file" accept="image/*" onChange={handleAvatarChange} />
+                    {newAvatar && <img src={newAvatar} alt="preview" className="w-20 h-20 rounded-full mt-2 object-cover border" />}
+                    <Button onClick={handleSaveAvatar} disabled={!newAvatar || profileLoading}>{profileLoading ? "Guardando..." : "Guardar avatar"}</Button>
                   </div>
+                </DialogContent>
+              </Dialog>
+              <div className="flex-1 w-full min-w-0">
+                <div className="font-semibold text-lg break-words text-center sm:text-left">{profile.username || "Sin nombre"}</div>
+                <div
+                  className={cn(
+                    "flex flex-col sm:flex-row gap-2 mt-2 justify-center sm:justify-start transition-all duration-300 overflow-hidden",
+                    showButtons ? "max-h-40 opacity-100" : "max-h-0 opacity-0 pointer-events-none"
+                  )}
+                  aria-hidden={!showButtons}
+                >
+                  <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" onClick={e => { e.stopPropagation(); setEditOpen(true); }}>Editar nombre</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Editar nombre de usuario</DialogTitle>
+                        <DialogDescription>Cambia tu nombre de usuario aquí.</DialogDescription>
+                      </DialogHeader>
+                      <div className="flex flex-col gap-4">
+                        <label className="font-medium">Nombre de usuario
+                          <Input value={username} onChange={e => setUsername(e.target.value)} placeholder="Tu nombre de usuario" />
+                        </label>
+                        <Button onClick={handleSaveUsername} disabled={profileLoading}>{profileLoading ? "Guardando..." : "Guardar"}</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="destructive" size="sm" onClick={e => { e.stopPropagation(); setDeleteOpen(true); }}>Eliminar perfil</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>¿Eliminar perfil?</DialogTitle>
+                        <DialogDescription>Esta acción eliminará tu perfil permanentemente.</DialogDescription>
+                      </DialogHeader>
+                      <div className="flex flex-col gap-4">
+                        <div>¿Estás seguro de que deseas eliminar tu perfil? Esta acción no se puede deshacer.</div>
+                        <Button onClick={handleDelete} variant="destructive" disabled={profileLoading}>{profileLoading ? "Eliminando..." : "Eliminar"}</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </CardContent>
+          </ShadCard>
+          <div className="mb-6">
+            <h2 className="font-semibold text-lg mb-2">Tus tarjetas</h2>
+            {cardsLoading ? (
+              <div className="text-gray-500 text-sm">Cargando tarjetas...</div>
+            ) : cards.length === 0 ? (
+              <div className="text-gray-400 text-sm">No tienes tarjetas registradas.</div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {cards.map(card => (
+                  <ShadCard key={card.id} className="p-3 flex items-center gap-4">
+                    <div className="font-medium">{card.brand}</div>
+                    <div className="text-sm text-gray-500 ml-auto">Pago: día {card.payment_date}</div>
+                  </ShadCard>
                 ))}
+              </div>
+            )}
+          </div>
+          <div className="flex justify-center mb-6">
+            <Dialog open={addCardOpen} onOpenChange={setAddCardOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={() => setAddCardOpen(true)}
+                >
+                  <Plus className="w-4 h-4" />
+                  Agregar tarjeta
+                </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Cambiar avatar</DialogTitle>
-                  <DialogDescription>Selecciona una nueva imagen de avatar.</DialogDescription>
+                  <DialogTitle>Agregar tarjeta</DialogTitle>
+                  <DialogDescription>Registra una nueva tarjeta de crédito.</DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col gap-4">
-                  <Input type="file" accept="image/*" onChange={handleAvatarChange} />
-                  {newAvatar && <img src={newAvatar} alt="preview" className="w-20 h-20 rounded-full mt-2 object-cover border" />}
-                  <Button onClick={handleSaveAvatar} disabled={!newAvatar || profileLoading}>{profileLoading ? "Guardando..." : "Guardar avatar"}</Button>
+                  <label className="font-medium">Marca
+                    <Input value={newCardBrand} onChange={e => setNewCardBrand(e.target.value)} placeholder="Ej: BBVA, Santander" />
+                  </label>
+                  <label className="font-medium">Fecha de pago (día del mes)
+                    <Input type="number" min={1} max={31} value={newCardPaymentDate} onChange={e => setNewCardPaymentDate(Number(e.target.value))} />
+                  </label>
+                  {addCardError && <div className="text-red-500 text-sm">{addCardError}</div>}
+                  <Button onClick={handleAddCard} disabled={cardsLoading}>{cardsLoading ? "Guardando..." : "Agregar"}</Button>
                 </div>
               </DialogContent>
             </Dialog>
-            <div className="flex-1 w-full min-w-0">
-              <div className="font-semibold text-lg break-words text-center sm:text-left">{profile.username || "Sin nombre"}</div>
-              <div
-                className={cn(
-                  "flex flex-col sm:flex-row gap-2 mt-2 justify-center sm:justify-start transition-all duration-300 overflow-hidden",
-                  showButtons ? "max-h-40 opacity-100" : "max-h-0 opacity-0 pointer-events-none"
-                )}
-                aria-hidden={!showButtons}
-              >
-                <Dialog open={editOpen} onOpenChange={setEditOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" onClick={e => { e.stopPropagation(); setEditOpen(true); }}>Editar nombre</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Editar nombre de usuario</DialogTitle>
-                      <DialogDescription>Cambia tu nombre de usuario aquí.</DialogDescription>
-                    </DialogHeader>
-                    <div className="flex flex-col gap-4">
-                      <label className="font-medium">Nombre de usuario
-                        <Input value={username} onChange={e => setUsername(e.target.value)} placeholder="Tu nombre de usuario" />
-                      </label>
-                      <Button onClick={handleSaveUsername} disabled={profileLoading}>{profileLoading ? "Guardando..." : "Guardar"}</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="destructive" size="sm" onClick={e => { e.stopPropagation(); setDeleteOpen(true); }}>Eliminar perfil</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>¿Eliminar perfil?</DialogTitle>
-                      <DialogDescription>Esta acción eliminará tu perfil permanentemente.</DialogDescription>
-                    </DialogHeader>
-                    <div className="flex flex-col gap-4">
-                      <div>¿Estás seguro de que deseas eliminar tu perfil? Esta acción no se puede deshacer.</div>
-                      <Button onClick={handleDelete} variant="destructive" disabled={profileLoading}>{profileLoading ? "Eliminando..." : "Eliminar"}</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </>
       ) : (
         <div className="mb-6">
           <div className="mb-2 text-gray-500">No tienes perfil creado.</div>
