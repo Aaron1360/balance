@@ -1,5 +1,5 @@
 const sqlite3 = require("sqlite3").verbose();
-const db = new sqlite3.Database("balance.db");
+const db = new sqlite3.Database("/data/balance.db");
 
 // Drop the purchases table if it exists and create a new one with the category column
 db.serialize(() => {
