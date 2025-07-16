@@ -1,12 +1,23 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
-const port = 3001;
 const db = require('./db');
 const { body, validationResult } = require('express-validator');
 const cors = require('cors');
 
+const port = process.env.PORT || 3001;
+const host = process.env.HOST || '0.0.0.0';
+const corsOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : [
+  'http://localhost',
+  'http://frontend',
+  'http://localhost:80',
+  'http://frontend:80',
+  'http://localhost:5173',
+  'http://frontend:5173'
+];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://192.168.1.117:5173'],
+  origin: corsOrigins,
   credentials: true
 }));
 
@@ -16,8 +27,8 @@ app.get('/', (req, res) => {
     res.send('Backend is running!');
 });
 
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Server listening at http://localhost:${port}`);
+app.listen(port, host, () => {
+  console.log(`Server listening at http://${host}:${port}`);
 });
 
 app.post(

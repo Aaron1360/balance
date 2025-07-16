@@ -83,7 +83,7 @@ export function MetricsScreen() {
             <YAxis stroke="#888" />
             <Tooltip />
             <Bar dataKey="value" fill="#6366f1">
-              {perCategory.map((entry, idx) => (
+              {perCategory.map((_, idx) => (
                 <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
               ))}
             </Bar>
@@ -103,7 +103,7 @@ export function MetricsScreen() {
               outerRadius={100}
               label
             >
-              {perCard.map((entry, idx) => (
+              {perCard.map((_, idx) => (
                 <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
               ))}
             </Pie>

@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import type { Purchase } from "@/lib/types";
 
-export const API_URL = "http://192.168.1.117:3001";
+export const API_URL = import.meta.env.VITE_API_URL; //"http://192.168.1.117:3001";
 const PAGE_SIZE = 10;
 
 export type Profile = { id?: number; username: string; avatar: string; categories?: string[] } | null;

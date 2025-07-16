@@ -46,9 +46,7 @@ export default function App() {
     <div className="flex flex-col min-h-svh bg-background">
       <div className="flex-1">
         {tab === "home" && (
-          <HomeScreen
-            onAdd={() => setShowAddModal(true)}
-          />
+          <HomeScreen />
         )}
         {tab === "metrics" && <MetricsScreen />}
         {tab === "settings" && <SettingsScreen />}

@@ -57,13 +57,6 @@ export function SettingsScreen() {
     setUsername(profile?.username || "");
   }, [profile]);
 
-  // Save profile (create or edit)
-  const handleSave = async () => {
-    await saveProfile(username, profile?.avatar || "", true);
-    await fetchProfile(); // refresh profile from backend after save
-    setEditOpen(false);
-  };
-
   // Save only username
   const handleSaveUsername = async () => {
     await saveProfile(username, profile?.avatar || "", true);

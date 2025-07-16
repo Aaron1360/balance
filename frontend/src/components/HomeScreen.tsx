@@ -20,14 +20,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ChevronDownIcon } from "lucide-react";
 import { PurchasesContext } from "@/context/PurchasesContext";
 
-type HomeScreenProps = {
-  onAdd: () => void;
-};
-
 const PAGE_SIZE = 10;
 
-export function HomeScreen({ onAdd }: HomeScreenProps) {
-  const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh, deletePurchase, payOffPurchase, editPurchase } = usePurchases();
+export function HomeScreen() {
+  const { purchases, total, loading, page, setPage, totalMonthlyPayment, refresh, deletePurchase, editPurchase } = usePurchases();
   const purchasesCtx = useContext(PurchasesContext);
   if (!purchasesCtx) throw new Error("HomeScreen must be used within PurchasesProvider");
   const { cards, categories } = purchasesCtx;
@@ -45,7 +41,6 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [isFormComplete, setIsFormComplete] = useState(false); // For submit button
-  const [error, setError] = useState<string | null>(null);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -368,7 +363,6 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
           <div className="grid gap-4">
             {editPurchaseData && (
               <PurchaseForm
-                error={error}
                 initialValues={{
                   ...editPurchaseData,
                   msi_term: String(editPurchaseData.msi_term),
@@ -412,7 +406,6 @@ export function HomeScreen({ onAdd }: HomeScreenProps) {
           </DialogHeader>
           <div className="grid gap-4">
             <PurchaseForm
-              error={error}
               initialValues={{
                 name: "",
                 date: "",
